@@ -55,6 +55,7 @@ function DiscoverPageInner() {
   const searchParams = useSearchParams();
   const addingToTripId = searchParams?.get("addTo") ?? null;
   const addingTripTitle = searchParams?.get("title") ?? null;
+  const initialQuery = searchParams?.get("q") ?? "";
   const initialBounds = useMemo(
     () => parseBboxParam(searchParams?.get("bbox") ?? null),
     [searchParams],
@@ -314,7 +315,7 @@ function DiscoverPageInner() {
 
         <div className="grid gap-md lg:grid-cols-[360px_1fr]">
           <div className="order-2 space-y-md lg:order-1">
-            <SearchBox selected={selected} onSelect={handleSelect} />
+            <SearchBox selected={selected} onSelect={handleSelect} initialQuery={initialQuery} />
 
             <FilterPanel
               active={activeFilters}
