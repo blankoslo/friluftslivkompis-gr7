@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import { connectToDatabase } from "@/lib/db/mongoose";
 import {
   Trip,
+  type IExpense,
   type IParticipant,
   type IPackingItem,
   type ITripCabin,
@@ -19,6 +20,11 @@ import { CabinRouteEditor } from "@/components/route/cabin-route-editor";
 import type { CabinPoint } from "@/lib/route";
 import { randomQuip } from "@/lib/lars-monsen/quips";
 import { ParticipantsLive } from "@/components/trips/participants-live";
+import {
+  ExpensesPanel,
+  type ExpensesPanelExpense,
+  type ExpensesPanelParticipant,
+} from "@/components/expenses/expenses-panel";
 
 const DEMO_CABINS: CabinPoint[] = [
   { name: "Gjendesheim", lat: 61.4945, lon: 8.8108 },
@@ -48,11 +54,15 @@ interface TripView {
   startDate?: string;
   endDate?: string;
   participants: Array<{
+    id: string;
     name: string;
     status: IParticipant["status"];
+    days?: number[];
   }>;
   packingList: PackingItem[];
   cabins: CabinPoint[];
+  expenses: ExpensesPanelExpense[];
+  totalDays: number | null;
   isDemo: boolean;
 }
 
@@ -69,6 +79,8 @@ async function loadTrip(id: string): Promise<TripView | null> {
       participants: [],
       packingList: [],
       cabins: DEMO_CABINS,
+      expenses: [],
+      totalDays: DEMO_CABINS.length - 1,
       isDemo: true,
     };
   }
@@ -83,11 +95,18 @@ async function loadTrip(id: string): Promise<TripView | null> {
     inviteToken: string;
     startDate?: Date;
     endDate?: Date;
-    participants: IParticipant[];
+    participants: (IParticipant & { _id: mongoose.Types.ObjectId })[];
     packingList?: IPackingItem[];
     cabins?: ITripCabin[];
+    expenses?: IExpense[];
   } | null>();
   if (!doc) return null;
+  const cabins = (doc.cabins ?? []).map((c) => ({
+    utId: c.utId,
+    name: c.name,
+    lat: c.lat,
+    lon: c.lon,
+  }));
   return {
     _id: doc._id.toString(),
     title: doc.title,
@@ -96,22 +115,42 @@ async function loadTrip(id: string): Promise<TripView | null> {
     startDate: doc.startDate?.toISOString(),
     endDate: doc.endDate?.toISOString(),
     participants: (doc.participants ?? []).map((p) => ({
+      id: p._id.toString(),
       name: p.name,
       status: p.status,
+      days: p.days,
     })),
     packingList: (doc.packingList ?? []).map((item) => ({
       name: item.name,
       packed: item.packed ?? false,
       isAiSuggested: item.isAiSuggested ?? false,
     })),
-    cabins: (doc.cabins ?? []).map((c) => ({
-      utId: c.utId,
-      name: c.name,
-      lat: c.lat,
-      lon: c.lon,
+    cabins,
+    expenses: (doc.expenses ?? []).map((e) => ({
+      id: (e._id ?? "").toString(),
+      description: e.description,
+      amount: e.amount,
+      paidBy: e.paidBy.toString(),
+      splitAmong: (e.splitAmong ?? []).map((s) => s.toString()),
+      dayNumber: e.dayNumber ?? null,
+      createdAt: e.createdAt?.toISOString(),
     })),
+    totalDays: computeTotalDays(doc.startDate, doc.endDate, cabins.length),
     isDemo: false,
   };
+}
+
+function computeTotalDays(
+  start: Date | undefined,
+  end: Date | undefined,
+  cabinCount: number,
+): number | null {
+  if (start && end) {
+    const diff = Math.round((end.getTime() - start.getTime()) / 86400000) + 1;
+    if (diff > 0) return diff;
+  }
+  if (cabinCount >= 2) return cabinCount - 1;
+  return null;
 }
 
 async function TimelineSection({
@@ -232,12 +271,14 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
           )}
           {!trip.isDemo && (
             <Section label="Utgifter" badge="R1" accent="flame">
-              <p
-                className="text-text-primary text-lg leading-snug"
-                style={{ fontFamily: "var(--font-handwriting)" }}
-              >
-                {randomQuip("expenses")}
-              </p>
+              <ExpensesPanel
+                tripId={trip._id}
+                initialParticipants={trip.participants.map<ExpensesPanelParticipant>(
+                  (p) => ({ id: p.id, name: p.name, days: p.days }),
+                )}
+                initialExpenses={trip.expenses}
+                totalDays={trip.totalDays}
+              />
             </Section>
           )}
         </div>

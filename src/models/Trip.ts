@@ -41,10 +41,13 @@ export interface IPackingItem {
 }
 
 export interface IExpense {
+  _id?: mongoose.Types.ObjectId;
   description: string;
   amount: number;
   paidBy: mongoose.Types.ObjectId;
   splitAmong: mongoose.Types.ObjectId[];
+  dayNumber?: number;
+  createdAt?: Date;
 }
 
 export interface ITrip {
@@ -108,12 +111,16 @@ const packingItemSchema = new Schema<IPackingItem>({
   isAiSuggested: { type: Boolean, default: false },
 });
 
-const expenseSchema = new Schema<IExpense>({
-  description: { type: String, required: true },
-  amount: { type: Number, required: true },
-  paidBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
-  splitAmong: [{ type: Schema.Types.ObjectId, ref: "User" }],
-});
+const expenseSchema = new Schema<IExpense>(
+  {
+    description: { type: String, required: true },
+    amount: { type: Number, required: true },
+    paidBy: { type: Schema.Types.ObjectId, required: true },
+    splitAmong: [{ type: Schema.Types.ObjectId }],
+    dayNumber: { type: Number },
+  },
+  { timestamps: { createdAt: true, updatedAt: false } },
+);
 
 const tripSchema = new Schema<ITrip>(
   {
