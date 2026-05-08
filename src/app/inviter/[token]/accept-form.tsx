@@ -8,9 +8,9 @@ export function AcceptForm({ token }: { token: string }) {
   const [name, setName] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<"accepted" | "declined" | null>(null);
+  const [success, setSuccess] = useState<"accepted" | "declined" | "pending" | null>(null);
 
-  async function submit(status: "accepted" | "declined") {
+  async function submit(status: "accepted" | "declined" | "pending") {
     if (submitting) return;
     if (!name.trim()) {
       setError("Skriv inn navnet ditt først");
@@ -57,6 +57,16 @@ export function AcceptForm({ token }: { token: string }) {
       </p>
     );
   }
+  if (success === "pending") {
+    return (
+      <p
+        className="text-2xl text-midnight-sun"
+        style={{ fontFamily: "var(--font-handwriting)", fontWeight: 700 }}
+      >
+        Greit, {name.trim()}! Vi noterer at du er usikker — meld deg på når du vet mer.
+      </p>
+    );
+  }
 
   return (
     <form
@@ -93,15 +103,23 @@ export function AcceptForm({ token }: { token: string }) {
         <button
           type="submit"
           disabled={submitting || !name.trim()}
-          className="inline-flex h-11 items-center justify-center rounded-md bg-flame-primary px-lg text-body font-bold text-white transition-colors hover:bg-flame-hover active:bg-flame-pressed disabled:opacity-50 disabled:cursor-not-allowed"
+          className="inline-flex h-11 items-center justify-center rounded-md bg-flame-primary px-lg text-body font-bold text-white transition-colors hover:bg-flame-hover active:bg-flame-pressed disabled:opacity-50 disabled:cursor-not-allowed shadow-[3px_3px_0_var(--brand-flame-pressed)] hover:translate-y-[1px] hover:shadow-[2px_2px_0_var(--brand-flame-pressed)]"
         >
-          {submitting ? "Sender..." : "Bli med"}
+          {submitting ? "Sender..." : "Jeg er med!"}
+        </button>
+        <button
+          type="button"
+          onClick={() => submit("pending")}
+          disabled={submitting || !name.trim()}
+          className="inline-flex h-11 items-center justify-center rounded-pill border-2 border-midnight-sun bg-bg px-lg text-body font-bold text-midnight-sun shadow-[2px_2px_0_var(--accent-midnight-sun)] hover:translate-y-[1px] hover:shadow-[1px_1px_0_var(--accent-midnight-sun)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Vet ikke ennå
         </button>
         <button
           type="button"
           onClick={() => submit("declined")}
           disabled={submitting || !name.trim()}
-          className="inline-flex h-11 items-center justify-center rounded-pill border-2 border-flame-pressed bg-bg px-lg text-body font-bold text-flame-pressed shadow-[2px_2px_0_var(--brand-flame-pressed)] hover:translate-y-[1px] transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
+          className="inline-flex h-11 items-center justify-center rounded-pill border-2 border-flame-pressed bg-bg px-lg text-body font-bold text-flame-pressed shadow-[2px_2px_0_var(--brand-flame-pressed)] hover:translate-y-[1px] hover:shadow-[1px_1px_0_var(--brand-flame-pressed)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Kan ikke
         </button>
