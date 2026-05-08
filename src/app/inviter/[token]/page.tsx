@@ -58,7 +58,7 @@ export default async function InvitePage({ params }: InvitePageProps) {
         }}
       />
 
-      <div className="relative max-w-2xl mx-auto px-md py-xl sm:px-lg sm:py-2xl">
+      <div className="relative max-w-[42rem] mx-auto px-md py-xl sm:px-lg sm:py-2xl">
         <p
           className="text-small font-bold uppercase tracking-label opacity-90 mb-xs"
           style={{ fontFamily: "var(--font-stamp)" }}

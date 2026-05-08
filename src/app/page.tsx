@@ -122,7 +122,7 @@ export default async function HomePage() {
         }}
       />
 
-      <div className="relative max-w-2xl mx-auto px-md py-xl sm:px-lg sm:py-2xl">
+      <div className="relative max-w-[42rem] mx-auto px-md py-xl sm:px-lg sm:py-2xl">
         <header className="flex justify-between items-start mb-lg">
           <div>
             <p className="text-sm opacity-90">

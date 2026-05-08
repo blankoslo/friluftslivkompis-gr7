@@ -139,7 +139,7 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
   return (
     <main className="bg-bg min-h-screen">
       <div className="max-w-4xl mx-auto px-md py-lg sm:px-lg sm:py-xl">
-        <header className="bg-flame-pressed text-white rounded-lg border-4 border-flame-pressed shadow-[6px_6px_0_var(--brand-flame-pressed)] overflow-hidden mb-xl relative">
+        <header className="bg-flame-pressed text-white rounded-lg border-4 border-flame-pressed shadow-[6px_6px_0_var(--brand-flame-pressed)] mb-xl relative">
           {trip.isDemo && (
             <span
               className="absolute -top-3 right-md bg-midnight-sun text-text-primary text-xs font-bold px-sm py-1 rounded border-2 border-text-primary uppercase tracking-label z-10"
