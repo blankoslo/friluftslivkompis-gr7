@@ -16,51 +16,33 @@ type Props = {
   selected: SearchResult | null;
   onSelect: (r: SearchResult) => void;
   initialQuery?: string;
+  initialResults?: SearchResult[] | null;
 };
 
-export function SearchBox({ selected, onSelect, initialQuery }: Props) {
+export function SearchBox({ selected, onSelect, initialQuery, initialResults }: Props) {
   const [query, setQuery] = useState(initialQuery ?? "");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [open, setOpen] = useState(() => (initialQuery ?? "").trim().length >= MIN_CHARS);
+  const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
   const [stale, setStale] = useState(false);
   const [snapshotAt, setSnapshotAt] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const skipNextFetch = useRef(!!initialQuery && (initialQuery ?? "").trim().length >= MIN_CHARS);
 
   const trimmed = query.trim();
   const hasQuery = trimmed.length >= MIN_CHARS;
 
-  // Fire immediately on mount when arriving with a pre-filled query
+  // Show initial results passed in from the page when they arrive
   useEffect(() => {
-    const q = (initialQuery ?? "").trim();
-    if (q.length < MIN_CHARS) return;
-    const controller = new AbortController();
-    setLoading(true);
+    if (!initialResults) return;
+    setResults(initialResults);
     setOpen(true);
-    fetch(`/api/search?q=${encodeURIComponent(q)}&limit=15`, { signal: controller.signal })
-      .then((r) => r.json())
-      .then((data: SearchResponse) => {
-        setResults(data.results);
-        setStale(data.stale === true);
-        setSnapshotAt(data.snapshotAt ?? null);
-        setActive(0);
-      })
-      .catch((err) => { if (err.name !== "AbortError") setResults([]); })
-      .finally(() => setLoading(false));
-    return () => controller.abort();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [initialResults]);
 
-  // Debounced fetch for subsequent user input
+  // Debounced fetch for user input
   useEffect(() => {
     if (!hasQuery) return;
-    if (skipNextFetch.current) {
-      skipNextFetch.current = false;
-      return;
-    }
 
     const controller = new AbortController();
     const timer = window.setTimeout(async () => {

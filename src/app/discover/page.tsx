@@ -10,7 +10,7 @@ import { FilterPanel } from "@/components/discover/filter-panel";
 import { TripList } from "@/components/discover/trip-list";
 import { MonsenToast } from "@/components/lars-monsen/monsen-toast";
 import { randomQuip } from "@/lib/lars-monsen/quips";
-import type { SearchResult } from "@/lib/search/types";
+import type { SearchResult, SearchResponse } from "@/lib/search/types";
 import type { TripNearItem } from "@/lib/ut";
 import {
   CATEGORY_LABEL,
@@ -71,8 +71,18 @@ function DiscoverPageInner() {
   const [minAge, setMinAge] = useState<AgeFilter>(null);
   const [monsenQuip, setMonsenQuip] = useState<{ id: number; text: string } | null>(null);
   const [heroQuip] = useState(() => randomQuip("discoverHero"));
+  const [initialResults, setInitialResults] = useState<SearchResult[] | null>(null);
   const viewportRef = useRef<Viewport | null>(null);
   const fetchAbortRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    if (!initialQuery) return;
+    fetch(`/api/search?q=${encodeURIComponent(initialQuery)}&limit=15`)
+      .then((r) => r.json())
+      .then((data: SearchResponse) => setInitialResults(data.results ?? []))
+      .catch(() => setInitialResults([]));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSelect = useCallback((r: SearchResult) => {
     setSelected(r);
@@ -315,7 +325,7 @@ function DiscoverPageInner() {
 
         <div className="grid gap-md lg:grid-cols-[360px_1fr]">
           <div className="order-2 space-y-md lg:order-1">
-            <SearchBox selected={selected} onSelect={handleSelect} initialQuery={initialQuery} />
+            <SearchBox selected={selected} onSelect={handleSelect} initialQuery={initialQuery} initialResults={initialResults} />
 
             <FilterPanel
               active={activeFilters}
