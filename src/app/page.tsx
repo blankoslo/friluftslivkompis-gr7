@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { connectToDatabase } from "@/lib/db/mongoose";
+import { pickQuips } from "@/lib/lars-monsen/quips";
 import { Trip, type ITrip } from "@/models/Trip";
 
 type LatestTrip = {
@@ -60,6 +61,7 @@ export default async function HomePage() {
   const badge = trip
     ? tripStatusBadge(trip.participants)
     : { label: "Demo", tone: "wait" as const };
+  const [quote] = pickQuips("homeWisdom", 1);
   return (
     <main className="bg-flame-primary text-white relative overflow-hidden min-h-screen">
       <div
@@ -72,21 +74,64 @@ export default async function HomePage() {
 
       <div className="relative max-w-[42rem] mx-auto px-md sm:px-lg">
 
-        {/* Illustration left-aligned, half the content width */}
-        <div className="flex items-center justify-start" style={{ height: "38vh" }}>
+        {/* Illustration + speech bubble */}
+        <div className="flex items-end gap-md" style={{ height: "38vh" }}>
           <Image
             src="/lars-monsen-illustration.png"
             alt="Lars Monsen"
             width={280}
             height={280}
-            className="object-contain drop-shadow-xl"
-            style={{ width: "50%", height: "100%", objectFit: "contain", objectPosition: "left bottom" }}
+            className="object-contain drop-shadow-xl shrink-0"
+            style={{ width: "45%", height: "100%", objectFit: "contain", objectPosition: "left bottom" }}
             priority
           />
+          <div className="relative flex-1 mb-2xl" style={{ transform: "rotate(-3deg)" }}>
+            <div
+              className="relative bg-white px-xl py-lg"
+              style={{
+                borderRadius: "50% 50% 50% 50% / 40% 40% 40% 40%",
+                border: "5px solid var(--brand-flame-pressed)",
+                boxShadow: "6px 6px 0 var(--brand-flame-pressed)",
+              }}
+            >
+              <p
+                className="text-flame-pressed font-bold leading-snug text-center"
+                style={{ fontFamily: "var(--font-handwriting)", fontSize: "20px" }}
+              >
+                {quote}
+              </p>
+              {/* Tail border layer */}
+              <span
+                className="absolute"
+                style={{
+                  bottom: "28px",
+                  left: "-38px",
+                  width: 0,
+                  height: 0,
+                  borderTop: "14px solid transparent",
+                  borderBottom: "14px solid transparent",
+                  borderRight: "38px solid var(--brand-flame-pressed)",
+                }}
+              />
+              {/* Tail fill layer */}
+              <span
+                className="absolute"
+                style={{
+                  bottom: "31px",
+                  left: "-28px",
+                  width: 0,
+                  height: 0,
+                  borderTop: "11px solid transparent",
+                  borderBottom: "11px solid transparent",
+                  borderRight: "28px solid white",
+                }}
+              />
+            </div>
+          </div>
         </div>
 
         {/* Title + search */}
-        <div className="flex flex-col items-center text-center pb-xl">
+        <div className="flex flex-col items-center text-center pb-xl pt-lg">
           <h1
             className="font-heading font-bold leading-[0.95] mb-lg"
             style={{ fontSize: "clamp(40px, 9vw, 64px)" }}
@@ -139,13 +184,13 @@ export default async function HomePage() {
         </div>
 
         {/* Lars Monsen button */}
-        <div className="flex mb-xl">
+        <div className="flex justify-center mb-xl">
           <Link
             href="/lars-foreslar"
-            className="inline-flex items-center justify-center px-md py-sm bg-bg text-flame-pressed border-2 border-flame-pressed rounded-pill font-bold shadow-[2px_2px_0_var(--brand-flame-pressed)] hover:translate-y-[1px] transition-transform"
-            style={{ fontFamily: "var(--font-handwriting)", fontSize: "16px" }}
+            className="inline-flex items-center justify-center px-md py-sm bg-forest text-white rounded-pill font-bold shadow-[3px_3px_8px_rgba(0,0,0,0.3)] hover:scale-105 hover:-translate-y-1 hover:shadow-[3px_6px_16px_rgba(0,0,0,0.4)] transition-all duration-200"
+            style={{ fontSize: "16px" }}
           >
-            Lars Monsen foreslår
+            La Monsen foreslå
           </Link>
         </div>
 
