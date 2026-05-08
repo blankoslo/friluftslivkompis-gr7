@@ -36,14 +36,25 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
   }
 
   const lowered = name.toLowerCase();
+  const days: number[] | undefined = Array.isArray(body.days)
+    ? Array.from(
+        new Set(
+          (body.days as unknown[])
+            .filter((d): d is number => typeof d === "number" && d >= 1)
+            .map((d) => Math.round(d)),
+        ),
+      ).sort((a, b) => a - b)
+    : undefined;
+
   const existing = trip.participants.find(
     (p: { name: string }) => p.name.trim().toLowerCase() === lowered
   );
   if (existing) {
     existing.status = status;
     if (email) existing.email = email;
+    if (days !== undefined) existing.days = days;
   } else {
-    trip.participants.push({ name, email, status });
+    trip.participants.push({ name, email, status, days });
   }
 
   await trip.save();

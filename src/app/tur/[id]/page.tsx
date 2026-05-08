@@ -21,6 +21,7 @@ import { CabinAvailability } from "@/components/route/cabin-availability";
 import type { CabinPoint } from "@/lib/route";
 import { randomQuip } from "@/lib/lars-monsen/quips";
 import { ParticipantsLive } from "@/components/trips/participants-live";
+import { DayInviteLinks } from "@/components/trips/day-invite-links";
 import {
   ExpensesPanel,
   type ExpensesPanelExpense,
@@ -216,6 +217,12 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
           {!trip.isDemo && (
             <Section label="Inviter deltakere" badge="G1" accent="forest">
               <InviteLink token={trip.inviteToken} />
+            </Section>
+          )}
+
+          {!trip.isDemo && trip.cabins.length >= 2 && (
+            <Section label="Inviter til én dag" badge="G9" accent="forest">
+              <DayInviteLinks inviteToken={trip.inviteToken} cabins={trip.cabins} />
             </Section>
           )}
 
