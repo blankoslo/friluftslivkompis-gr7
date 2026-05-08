@@ -300,12 +300,23 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
             </span>
           )}
           <div className="p-lg flex flex-col gap-sm">
-            <p
-              className="text-sm opacity-90 uppercase tracking-label"
-              style={{ fontFamily: "var(--font-stamp)" }}
-            >
-              {[trip.area, dateRange].filter(Boolean).join(" - ") || "Klar for planlegging"}
-            </p>
+            <div className="flex items-start justify-between gap-md">
+              <p
+                className="text-sm opacity-90 uppercase tracking-label"
+                style={{ fontFamily: "var(--font-stamp)" }}
+              >
+                {[trip.area, dateRange].filter(Boolean).join(" - ") || "Klar for planlegging"}
+              </p>
+              {!trip.isDemo && (
+                <Link
+                  href={`/tur/${trip._id}/rediger`}
+                  className="shrink-0 text-xs font-bold opacity-80 hover:opacity-100 border border-white/40 hover:border-white rounded px-sm py-1 transition-all"
+                  style={{ fontFamily: "var(--font-stamp)" }}
+                >
+                  Rediger
+                </Link>
+              )}
+            </div>
             <h1 className="font-heading text-3xl sm:text-4xl font-black leading-tight">
               {trip.title}
             </h1>
