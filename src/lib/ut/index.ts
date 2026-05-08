@@ -50,3 +50,8 @@ export {
   type CabinAvailabilityResult,
   type CabinAvailabilityStatus,
 } from "./availability";
+export {
+  pickCabinsNear,
+  pickCabinsFromUtTrip,
+  type AutoCabinPick,
+} from "./auto-cabins";

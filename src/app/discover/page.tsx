@@ -190,7 +190,11 @@ function DiscoverPageInner() {
   );
 
   const handleCreateTrip = useCallback(
-    async (name: string, area?: string) => {
+    async (
+      name: string,
+      area?: string,
+      anchor?: { lat?: number; lon?: number; utTripId?: number },
+    ) => {
       const res = await fetch("/api/trips", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -198,6 +202,26 @@ function DiscoverPageInner() {
       });
       if (!res.ok) return;
       const trip = await res.json();
+
+      if (
+        anchor &&
+        (anchor.utTripId !== undefined ||
+          (anchor.lat !== undefined && anchor.lon !== undefined))
+      ) {
+        try {
+          await fetch(`/api/trips/${trip._id}/cabins/auto`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              lat: anchor.lat,
+              lon: anchor.lon,
+              utTripId: anchor.utTripId,
+              count: 3,
+            }),
+          });
+        } catch {}
+      }
+
       router.push(`/tur/${trip._id}`);
     },
     [router],
@@ -324,7 +348,13 @@ function DiscoverPageInner() {
                 activeId={activeTripId}
                 minAge={minAge}
                 onSelect={handleTripSelect}
-                onCreateTrip={(t) => handleCreateTrip(t.name)}
+                onCreateTrip={(t) =>
+                  handleCreateTrip(t.name, undefined, {
+                    utTripId: t.id,
+                    lat: t.lat,
+                    lon: t.lon,
+                  })
+                }
                 emptySuggestion={
                   showEmptyHint && removalSuggestion
                     ? CATEGORY_LABEL[removalSuggestion]
@@ -341,7 +371,21 @@ function DiscoverPageInner() {
                 selected={selected}
                 addingMode={Boolean(addingToTripId)}
                 addingTitle={addingTripTitle}
-                onCreateTrip={() => handleCreateTrip(selected.name, selected.municipality ?? undefined)}
+                onCreateTrip={() => {
+                  const utTripId =
+                    selected.kind === "trip" && selected.id.startsWith("ut:trip:")
+                      ? Number(selected.id.slice("ut:trip:".length))
+                      : undefined;
+                  handleCreateTrip(
+                    selected.name,
+                    selected.municipality ?? undefined,
+                    {
+                      lat: selected.lat,
+                      lon: selected.lon,
+                      utTripId: Number.isFinite(utTripId) ? utTripId : undefined,
+                    },
+                  );
+                }}
                 onAddToTrip={() =>
                   handleAddCabinToTrip({
                     name: selected.name,

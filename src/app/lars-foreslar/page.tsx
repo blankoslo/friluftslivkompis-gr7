@@ -56,6 +56,19 @@ export default function LarsForeslarPage() {
         throw new Error(data.error ?? "Kunne ikke opprette tur");
       }
       const trip = await res.json();
+
+      try {
+        await fetch(`/api/trips/${trip._id}/cabins/auto`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            lat: FEMUNDSMARKA_LOCATION.lat,
+            lon: FEMUNDSMARKA_LOCATION.lng,
+            count: 3,
+          }),
+        });
+      } catch {}
+
       try {
         sessionStorage.setItem(
           "monsenToast",
