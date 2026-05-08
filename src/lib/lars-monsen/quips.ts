@@ -48,7 +48,8 @@ export type QuipCategory =
   | "etaShare"
   | "logEmpty"
   | "listSaved"
-  | "listShare";
+  | "listShare"
+  | "weatherOutOfHorizon";
 
 const QUIPS: Record<QuipCategory, string[]> = {
   tripSelect: [
@@ -177,6 +178,13 @@ const QUIPS: Record<QuipCategory, string[]> = {
     "Frost? Da blir myra bærbar.",
     "Kald luft renser hodet. Pust dypt.",
     "Ulltrøye, kompis. Bomull er for sofa.",
+  ],
+  weatherOutOfHorizon: [
+    "For langt fram. Yr ser ni dager, jeg ser sesongen.",
+    "Prognosen er ikke født enda. Pakk for normalt norsk vær.",
+    "Vær så langt fram er gjetning. Stol heller på månedssnittet.",
+    "Lars planlegger ikke vær. Lars kler seg etter måneden.",
+    "Yr rekker ikke så langt. Jeg gjør det. Pakk ulltrøye uansett.",
   ],
   cabinFull: [
     "Hytta er full. Slå opp lavvo, det er gratis utsikt.",

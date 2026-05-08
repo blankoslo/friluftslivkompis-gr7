@@ -33,6 +33,45 @@ function formatDate(iso: string): string {
   });
 }
 
+function formatShortDate(iso: string): string {
+  const d = new Date(iso + "T00:00:00Z");
+  return d.toLocaleDateString("no-NB", { day: "numeric", month: "long" });
+}
+
+const FORECAST_HORIZON_DAYS = 9;
+
+function daysUntil(iso: string): number {
+  const target = new Date(iso + "T00:00:00Z").getTime();
+  const today = new Date(new Date().toISOString().slice(0, 10) + "T00:00:00Z").getTime();
+  return Math.round((target - today) / (24 * 3600 * 1000));
+}
+
+function addDaysISO(iso: string, days: number): string {
+  const d = new Date(iso + "T00:00:00Z");
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
+const SEASON_HINT: Record<number, string> = {
+  1: "Januar i fjellet: -15 til -5°C, mye snø, korte dagslys. Vinterutstyr.",
+  2: "Februar: -12 til -3°C, stabil snø, sol kommer tilbake. Solbriller + ulltrøye.",
+  3: "Mars: -8 til 2°C, perfekt skiføre, lange dager. Vindjakke + solbeskyttelse.",
+  4: "April: -3 til 7°C, vekslende, råttent isføre. Skred-fare i sør.",
+  5: "Mai: 2 til 12°C, snøsmelting, mye vann i elver. Vannfaste støvler + mygg.",
+  6: "Juni: 5 til 15°C, kjølige netter, mye lys, mygg starter. Skift + mygmiddel.",
+  7: "Juli: 8 til 18°C, varmest, mye nedbør, mygg + knott. Kortbukse + ulltrøye.",
+  8: "August: 6 til 16°C, bær-sesong, kortere kvelder. Regnjakke + ulltrøye.",
+  9: "September: 2 til 10°C, høstfarger, første nattefrost. Lue + varme sokker.",
+  10: "Oktober: -3 til 6°C, snø i fjellet, mørke kvelder. Vintersko + hodelykt.",
+  11: "November: -8 til 1°C, ustabil snø, mørketid starter. Full vinterpakking.",
+  12: "Desember: -12 til -3°C, mørketid, snø. Vinterutstyr + termos.",
+};
+
+function seasonHint(iso: string): string {
+  const month = Number(iso.slice(5, 7));
+  return SEASON_HINT[month] ?? "Pakk for vekslende norsk vær.";
+}
+
 function StatBlock({
   label,
   value,
@@ -70,8 +109,44 @@ export function TimelineSummary({ timeline }: { timeline: TripTimeline }) {
   );
 }
 
-function WeatherBlock({ weather }: { weather: DailyWeather | null }) {
+function WeatherBlock({
+  weather,
+  date,
+}: {
+  weather: DailyWeather | null;
+  date: string | null;
+}) {
   if (!weather) {
+    if (date) {
+      const days = daysUntil(date);
+      if (days > FORECAST_HORIZON_DAYS) {
+        const horizonDate = addDaysISO(date, -FORECAST_HORIZON_DAYS);
+        return (
+          <div className="flex flex-col gap-sm">
+            <div className="flex items-center gap-sm">
+              <span
+                className="inline-flex w-fit text-xs font-bold px-sm py-1 rounded-pill uppercase tracking-label bg-fjord text-white"
+                style={{ fontFamily: "var(--font-stamp)" }}
+              >
+                Sesong-snitt
+              </span>
+              <span className="text-small text-text-muted">
+                Prognose tilgjengelig fra {formatShortDate(horizonDate)}
+              </span>
+            </div>
+            <span className="text-body text-text-primary leading-snug">
+              {seasonHint(date)}
+            </span>
+            <span
+              className="text-base text-text-muted leading-snug"
+              style={{ fontFamily: "var(--font-handwriting)" }}
+            >
+              {randomQuip("weatherOutOfHorizon")}
+            </span>
+          </div>
+        );
+      }
+    }
     return (
       <div
         className="flex items-center gap-sm text-text-muted text-base"
@@ -178,7 +253,7 @@ export function TimelineDayCard({
             </span>
           )}
         </div>
-        <WeatherBlock weather={weather} />
+        <WeatherBlock weather={weather} date={date} />
       </div>
     </article>
   );

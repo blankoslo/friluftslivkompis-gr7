@@ -273,6 +273,15 @@ function buildPopupHtml(
       if (w.precipMm > 0) {
         body += `<div style="font-size:11px;color:#666;">${w.precipMm.toFixed(1)} mm nedbør</div>`;
       }
+    } else if (dayFrom.date) {
+      const target = new Date(dayFrom.date + "T00:00:00Z").getTime();
+      const today = new Date(new Date().toISOString().slice(0, 10) + "T00:00:00Z").getTime();
+      const days = Math.round((target - today) / (24 * 3600 * 1000));
+      if (days > 9) {
+        body += `<div style="margin-top:4px;font-size:11px;color:#3D6475;">Sesong-snitt - prognose kommer ~9 dager før</div>`;
+      } else {
+        body += `<div style="margin-top:4px;font-size:11px;color:#999;">Værvarsel mangler</div>`;
+      }
     } else {
       body += `<div style="margin-top:4px;font-size:11px;color:#999;">Værvarsel mangler</div>`;
     }
