@@ -19,7 +19,7 @@ import { randomQuip } from "@/lib/lars-monsen/quips";
 import { InviteMapLoader } from "./invite-map-loader";
 import { ShareButton } from "./share-button";
 import { ReviewsSection } from "@/components/social/reviews-section";
-import { absoluteUrl, getSiteUrl } from "@/lib/site";
+import { getSiteUrl } from "@/lib/site";
 
 interface InvitePageProps {
   params: Promise<{ token: string }>;
@@ -30,30 +30,74 @@ export async function generateMetadata({
 }: InvitePageProps): Promise<Metadata> {
   const { token } = await params;
   const trip = await loadByToken(token);
-  if (!trip) return { title: "Tur ikke funnet" };
+  if (!trip) {
+    const fallbackImg = "/api/og/trip/missing";
+    return {
+      metadataBase: new URL(getSiteUrl()),
+      title: "Turen finnes ikke - På tur med Monsen",
+      description:
+        "Denne turlenka eksisterer ikke lenger. Planlegg din egen fjelltur med Lars Monsen som turfølge - hytter, vær, rute og pakkeliste på ett sted.",
+      openGraph: {
+        type: "website",
+        siteName: "På tur med Monsen",
+        title: "Turen finnes ikke - På tur med Monsen",
+        description:
+          "Denne turlenka eksisterer ikke lenger. Planlegg din egen fjelltur med Lars Monsen som turfølge.",
+        images: [{ url: fallbackImg, width: 1200, height: 630 }],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: "Turen finnes ikke - På tur med Monsen",
+        description:
+          "Denne turlenka eksisterer ikke lenger. Lag din egen fjelltur.",
+        images: [fallbackImg],
+      },
+    };
+  }
   const dateRange = formatDateRange(trip.startDate, trip.endDate);
-  const description =
-    [trip.area, dateRange, `${trip.cabins.length} hytter`]
-      .filter(Boolean)
-      .join(" · ") || "Du er invitert på fjelltur.";
-  const url = absoluteUrl(`/inviter/${token}`);
-  const ogImage = absoluteUrl(`/api/og/trip/${token}`);
+  const days = computeDays(trip.startDate, trip.endDate, trip.cabins.length);
+  const km = totalKm(trip.cabins);
+  const accepted = trip.participants.filter(
+    (p) => p.status === "accepted",
+  ).length;
+
+  const titleParts = [trip.title];
+  if (trip.area) titleParts.push(trip.area);
+  if (dateRange) titleParts.push(dateRange);
+  const fullTitle = `${titleParts.join(" · ")} | På tur med Monsen`;
+
+  const descParts: string[] = [`Du er invitert på ${trip.title}.`];
+  if (trip.area) descParts.push(`Område: ${trip.area}.`);
+  if (dateRange) descParts.push(`Når: ${dateRange}.`);
+  if (days > 0) descParts.push(`${days} ${days === 1 ? "dag" : "dager"}.`);
+  if (trip.cabins.length > 0) {
+    descParts.push(
+      `${trip.cabins.length} ${trip.cabins.length === 1 ? "hytte" : "hytter"}.`,
+    );
+  }
+  if (km > 0) descParts.push(`${km.toFixed(km < 10 ? 1 : 0)} km.`);
+  if (accepted > 0) descParts.push(`${accepted} har sagt ja.`);
+  descParts.push("Bli med på tur, da!");
+  const description = descParts.join(" ");
+
+  const ogImage = `/api/og/trip/${token}`;
   return {
     metadataBase: new URL(getSiteUrl()),
-    title: `${trip.title} - Du er invitert`,
+    title: fullTitle,
     description,
+    alternates: { canonical: `/inviter/${token}` },
     openGraph: {
       type: "article",
-      url,
+      url: `/inviter/${token}`,
       siteName: "På tur med Monsen",
-      title: trip.title,
+      title: fullTitle,
       description,
       locale: "nb_NO",
       images: [{ url: ogImage, width: 1200, height: 630, alt: trip.title }],
     },
     twitter: {
       card: "summary_large_image",
-      title: trip.title,
+      title: fullTitle,
       description,
       images: [ogImage],
     },

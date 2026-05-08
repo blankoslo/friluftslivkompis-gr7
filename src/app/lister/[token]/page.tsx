@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { connectToDatabase } from "@/lib/db/mongoose";
 import { SavedList, type ISavedListItem } from "@/models/SavedList";
 import { ShareButton } from "@/components/social/share-button";
-import { absoluteUrl, getSiteUrl } from "@/lib/site";
+import { getSiteUrl } from "@/lib/site";
 import { SavedListItemRemove } from "./list-item-remove";
 
 interface Props {
@@ -65,28 +65,49 @@ async function load(token: string): Promise<ListView | null> {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { token } = await params;
   const list = await load(token);
-  if (!list) return { title: "Turliste" };
-  const url = absoluteUrl(`/lister/${token}`);
-  const ogImage = absoluteUrl(`/api/og/liste/${token}`);
-  const description =
-    list.description ||
-    `${list.items.length} turer${list.ownerName ? ` fra ${list.ownerName}` : ""}`;
+  if (!list) {
+    return {
+      metadataBase: new URL(getSiteUrl()),
+      title: "Turliste ikke funnet - På tur med Monsen",
+      description:
+        "Denne turlista finnes ikke. Lag din egen samling av drømmeturer på Friluftskompis.",
+    };
+  }
+  const ogImage = `/api/og/liste/${token}`;
+  const count = list.items.length;
+  const titleParts = [list.name];
+  if (list.ownerName) titleParts.push(`fra ${list.ownerName}`);
+  const fullTitle = `${titleParts.join(" - ")} | Turliste på På tur med Monsen`;
+
+  const descParts: string[] = [];
+  if (list.description) descParts.push(list.description);
+  descParts.push(
+    `${count} ${count === 1 ? "kuratert tur" : "kuraterte turer"} i Norge${list.ownerName ? `, samlet av ${list.ownerName}` : ""}.`,
+  );
+  const previewTitles = list.items.slice(0, 3).map((i) => i.title);
+  if (previewTitles.length > 0) {
+    descParts.push(`Inkluderer: ${previewTitles.join(", ")}.`);
+  }
+  descParts.push("Bla, lagre dine egne, og planlegg neste tur.");
+  const description = descParts.join(" ");
+
   return {
     metadataBase: new URL(getSiteUrl()),
-    title: `${list.name} - Turliste`,
+    title: fullTitle,
     description,
+    alternates: { canonical: `/lister/${token}` },
     openGraph: {
       type: "website",
-      url,
+      url: `/lister/${token}`,
       siteName: "På tur med Monsen",
-      title: list.name,
+      title: fullTitle,
       description,
       locale: "nb_NO",
       images: [{ url: ogImage, width: 1200, height: 630, alt: list.name }],
     },
     twitter: {
       card: "summary_large_image",
-      title: list.name,
+      title: fullTitle,
       description,
       images: [ogImage],
     },

@@ -39,6 +39,9 @@ export async function GET(_req: Request, { params }: Props) {
     // fall through
   }
 
+  const header = owner ? `Turliste - ${owner}` : "Turliste";
+  const countLabel = `${count} ${count === 1 ? "tur" : "turer"}`;
+
   return new ImageResponse(
     (
       <div
@@ -55,22 +58,22 @@ export async function GET(_req: Request, { params }: Props) {
       >
         <div
           style={{
+            display: "flex",
             fontSize: 28,
             letterSpacing: 6,
             textTransform: "uppercase",
             opacity: 0.85,
-            display: "flex",
           }}
         >
-          Turliste {owner ? `- ${owner}` : ""}
+          {header}
         </div>
         <div
           style={{
+            display: "flex",
             fontSize: 76,
             fontWeight: 900,
             lineHeight: 1.05,
             marginTop: 24,
-            display: "flex",
           }}
         >
           {name}
@@ -78,31 +81,36 @@ export async function GET(_req: Request, { params }: Props) {
         {description ? (
           <div
             style={{
+              display: "flex",
               fontSize: 30,
               marginTop: 12,
               opacity: 0.9,
-              display: "flex",
             }}
           >
             {description}
           </div>
         ) : null}
-        <div style={{ flexGrow: 1 }} />
         <div
           style={{
-            fontSize: 32,
-            fontWeight: 700,
             display: "flex",
             flexDirection: "column",
-            gap: 8,
+            marginTop: "auto",
+            fontSize: 32,
+            fontWeight: 700,
           }}
         >
-          <div style={{ display: "flex", opacity: 0.95 }}>
-            {count} {count === 1 ? "tur" : "turer"}
-          </div>
+          <div style={{ display: "flex", opacity: 0.95 }}>{countLabel}</div>
           {preview.map((t) => (
-            <div key={t} style={{ display: "flex", fontSize: 24, opacity: 0.85 }}>
-              · {t}
+            <div
+              key={t}
+              style={{
+                display: "flex",
+                fontSize: 24,
+                opacity: 0.85,
+                marginTop: 6,
+              }}
+            >
+              {`· ${t}`}
             </div>
           ))}
         </div>

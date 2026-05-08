@@ -55,6 +55,17 @@ export async function GET(_req: Request, { params }: Props) {
     // fallthrough to defaults
   }
 
+  const stats: string[] = [];
+  if (dateRange) stats.push(dateRange);
+  if (cabinCount > 0) {
+    stats.push(`${cabinCount} ${cabinCount === 1 ? "hytte" : "hytter"}`);
+  }
+  if (participantCount > 0) {
+    stats.push(
+      `${participantCount} ${participantCount === 1 ? "deltaker" : "deltakere"}`,
+    );
+  }
+
   return new ImageResponse(
     (
       <div
@@ -71,22 +82,22 @@ export async function GET(_req: Request, { params }: Props) {
       >
         <div
           style={{
+            display: "flex",
             fontSize: 28,
             letterSpacing: 6,
             textTransform: "uppercase",
             opacity: 0.9,
-            display: "flex",
           }}
         >
           På tur med Monsen
         </div>
         <div
           style={{
+            display: "flex",
             fontSize: 84,
             fontWeight: 900,
             lineHeight: 1.05,
             marginTop: 32,
-            display: "flex",
           }}
         >
           {title}
@@ -94,45 +105,33 @@ export async function GET(_req: Request, { params }: Props) {
         {area ? (
           <div
             style={{
+              display: "flex",
               fontSize: 36,
               marginTop: 16,
               opacity: 0.92,
-              display: "flex",
             }}
           >
             {area}
           </div>
         ) : null}
-        <div style={{ flexGrow: 1 }} />
         <div
           style={{
             display: "flex",
-            gap: 32,
+            marginTop: "auto",
             fontSize: 28,
             fontWeight: 700,
             opacity: 0.95,
           }}
         >
-          {dateRange ? <span>{dateRange}</span> : null}
-          {cabinCount > 0 ? (
-            <span>
-              {cabinCount} {cabinCount === 1 ? "hytte" : "hytter"}
-            </span>
-          ) : null}
-          {participantCount > 0 ? (
-            <span>
-              {participantCount}{" "}
-              {participantCount === 1 ? "deltaker" : "deltakere"}
-            </span>
-          ) : null}
+          {stats.join("  ·  ")}
         </div>
         <div
           style={{
+            display: "flex",
             marginTop: 24,
             fontSize: 22,
             fontStyle: "italic",
             opacity: 0.85,
-            display: "flex",
           }}
         >
           &ldquo;Det er bare å begynne å gå.&rdquo; - Lars
