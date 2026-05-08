@@ -8,9 +8,10 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-sans: var(--font-source-sans), 'Source Sans 3', Inter, system-ui, sans-serif;
+  --font-mono: 'Courier New', monospace;
+  --font-heading: var(--font-playfair), 'Playfair Display', Georgia, serif;
+  --font-body: var(--font-source-sans), 'Source Sans 3', Inter, system-ui, sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -40,15 +41,19 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+  --radius-sm: 3px;
+  --radius-md: 5px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
+  --radius-2xl: 18px;
+  --radius-3xl: 22px;
+  --radius-4xl: 26px;
+  --radius-pill: 12px;
 
-  /* Lars Monsen tokens — available as Tailwind utilities */
+  /* Lars Monsen tokens — Tailwind utilities (bg-*, text-*, border-*) */
+  --color-bg: var(--neutral-bg);
+  --color-text-primary: var(--neutral-text-primary);
+  --color-flame-primary: var(--brand-flame-primary);
   --color-flame: var(--brand-flame-primary);
   --color-flame-hover: var(--brand-flame-hover);
   --color-flame-pressed: var(--brand-flame-pressed);
@@ -62,9 +67,29 @@
   --color-surface: var(--neutral-surface);
   --color-text-muted: var(--neutral-text-muted);
   --color-text-disabled: var(--neutral-text-disabled);
+  --color-success: var(--semantic-success);
+  --color-info: var(--semantic-info);
   --color-warning: var(--semantic-warning);
   --color-warning-bg: var(--semantic-warning-bg);
   --color-warning-border: var(--semantic-warning-border);
+
+  /* Typography sizes — text-h1, text-h2, text-h3, text-body, text-small */
+  --text-h1: 32px;
+  --text-h2: 24px;
+  --text-h3: 20px;
+  --text-body: 16px;
+  --text-small: 12px;
+
+  /* Spacing scale — p-xs, m-md, gap-lg ... */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+
+  /* Letter-spacing — tracking-label */
+  --tracking-label: 0.12em;
 }
 
 :root {

@@ -1,5 +1,17 @@
 # Friluftskompis - Hackathon 2026
 
+## Design system - BINDENDE
+
+All UI-kode MÅ følge [THEME.md](THEME.md) (Lars Monsen Design System). Regler:
+
+- Aldri hardkodede hex/rgb-farger i komponenter, CSS, Tailwind-klasser eller inline-styles. Bruk alltid token-navnet (`bg-flame-primary`, `text-text-primary`, `var(--flame-primary)` osv).
+- Aldri raw px-spacing utenom token-skalaen (`xs/sm/md/lg/xl/2xl`). Aldri raw border-radius utenom (`sm/md/lg/pill`).
+- Primær-CTA: `flame-primary`. Suksess: `forest`. Info/linker: `fjord`. Advarsel: `warning` (tint `warning-bg`). Highlight: `midnight-sun`.
+- Typografi: headings → `font-heading` (Georgia/Playfair), body → `font-body` (Source Sans Pro/Inter), labels får `letter-spacing-wide`.
+- Dark mode må fungere. Aldri farger som bare ser bra ut i én modus uten dark-variant.
+- Mangler et token? Utvid THEME.md først (både tabellene og JSON-blokken), deretter bruk det. Aldri legg ad-hoc-verdier i komponentene.
+- Når du bygger UI, les THEME.md før du velger farger eller spacing.
+
 ## Team Lag 7
 
 - Une Krog
