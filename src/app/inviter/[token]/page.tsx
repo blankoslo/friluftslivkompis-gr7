@@ -106,7 +106,7 @@ export default async function InvitePage({ params }: InvitePageProps) {
           {trip.title}
         </h1>
         <p
-          className="text-2xl mb-lg opacity-95"
+          className="text-2xl mb-xs opacity-95"
           style={{
             fontFamily: "var(--font-handwriting)",
             fontWeight: 700,
@@ -114,6 +114,12 @@ export default async function InvitePage({ params }: InvitePageProps) {
           }}
         >
           Bli med på tur, da!
+        </p>
+        <p
+          className="text-base mb-lg opacity-90"
+          style={{ fontFamily: "var(--font-handwriting)", fontWeight: 600 }}
+        >
+          &ldquo;{randomQuip("inviteHero")}&rdquo; - Lars
         </p>
 
         <section className="bg-bg border-4 border-flame-pressed rounded-lg p-lg mb-lg shadow-[6px_6px_0_var(--brand-flame-pressed)] text-text-primary">

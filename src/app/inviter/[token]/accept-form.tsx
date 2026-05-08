@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { randomQuip, type QuipCategory } from "@/lib/lars-monsen/quips";
 
 export function AcceptForm({ token }: { token: string }) {
   const router = useRouter();
@@ -38,34 +39,13 @@ export function AcceptForm({ token }: { token: string }) {
   }
 
   if (success === "accepted") {
-    return (
-      <p
-        className="text-2xl text-flame-pressed"
-        style={{ fontFamily: "var(--font-handwriting)", fontWeight: 700 }}
-      >
-        Takk, {name.trim()}! Du er meldt på. Vi sees i fjellet.
-      </p>
-    );
+    return <SuccessReply name={name.trim()} status="accepted" />;
   }
   if (success === "declined") {
-    return (
-      <p
-        className="text-2xl text-text-muted"
-        style={{ fontFamily: "var(--font-handwriting)", fontWeight: 700 }}
-      >
-        Synd å høre, {name.trim()}. Kanskje neste tur.
-      </p>
-    );
+    return <SuccessReply name={name.trim()} status="declined" />;
   }
   if (success === "pending") {
-    return (
-      <p
-        className="text-2xl text-midnight-sun"
-        style={{ fontFamily: "var(--font-handwriting)", fontWeight: 700 }}
-      >
-        Greit, {name.trim()}! Vi noterer at du er usikker — meld deg på når du vet mer.
-      </p>
-    );
+    return <SuccessReply name={name.trim()} status="pending" />;
   }
 
   return (
@@ -125,5 +105,48 @@ export function AcceptForm({ token }: { token: string }) {
         </button>
       </div>
     </form>
+  );
+}
+
+function SuccessReply({
+  name,
+  status,
+}: {
+  name: string;
+  status: "accepted" | "declined" | "pending";
+}) {
+  const config = {
+    accepted: {
+      headline: `Takk, ${name}! Du er meldt på. Vi sees i fjellet.`,
+      tone: "text-flame-pressed",
+      category: "inviteAccept" as QuipCategory,
+    },
+    declined: {
+      headline: `Synd å høre, ${name}. Kanskje neste tur.`,
+      tone: "text-text-muted",
+      category: "inviteDecline" as QuipCategory,
+    },
+    pending: {
+      headline: `Greit, ${name}! Vi noterer at du er usikker. Meld deg på når du vet mer.`,
+      tone: "text-midnight-sun",
+      category: "inviteMaybe" as QuipCategory,
+    },
+  }[status];
+
+  return (
+    <div className="flex flex-col gap-sm">
+      <p
+        className={`text-2xl ${config.tone}`}
+        style={{ fontFamily: "var(--font-handwriting)", fontWeight: 700 }}
+      >
+        {config.headline}
+      </p>
+      <p
+        className="text-base text-text-primary italic"
+        style={{ fontFamily: "var(--font-handwriting)", fontWeight: 600 }}
+      >
+        &ldquo;{randomQuip(config.category)}&rdquo; - Lars
+      </p>
+    </div>
   );
 }

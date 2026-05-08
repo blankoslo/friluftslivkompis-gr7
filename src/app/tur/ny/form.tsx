@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { randomQuip } from "@/lib/lars-monsen/quips";
 
 export function NyTurForm() {
   const router = useRouter();
@@ -39,6 +40,12 @@ export function NyTurForm() {
         throw new Error(data.error ?? "Kunne ikke opprette tur");
       }
       const trip = await res.json();
+      try {
+        sessionStorage.setItem(
+          "monsenToast",
+          JSON.stringify({ quip: randomQuip("tripCreated"), at: Date.now() }),
+        );
+      } catch {}
       router.push(`/tur/${trip._id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Ukjent feil");

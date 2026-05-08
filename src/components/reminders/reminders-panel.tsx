@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
+import { MonsenToast } from "@/components/lars-monsen/monsen-toast";
+import { randomQuip } from "@/lib/lars-monsen/quips";
 
 export interface Reminder {
   _id?: string;
@@ -36,6 +38,13 @@ export function RemindersPanel({ tripId, startDate, initialReminders }: Props) {
   const [draftKind, setDraftKind] = useState<Reminder["kind"]>("annet");
   const [, startSaving] = useTransition();
   const [now, setNow] = useState(() => Date.now());
+  const [toast, setToast] = useState<{ trigger: number; quip: string } | null>(
+    null,
+  );
+
+  function fireToast(category: "reminderAdded" | "reminderDue") {
+    setToast({ trigger: Date.now(), quip: randomQuip(category) });
+  }
 
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 60_000);
@@ -67,6 +76,7 @@ export function RemindersPanel({ tripId, startDate, initialReminders }: Props) {
       return;
     }
     persist([...reminders, p]);
+    fireToast("reminderAdded");
   }
 
   function addCustom(e: React.FormEvent) {
@@ -83,6 +93,7 @@ export function RemindersPanel({ tripId, startDate, initialReminders }: Props) {
     setDraftLabel("");
     setDraftDays(3);
     setDraftKind("annet");
+    fireToast("reminderAdded");
   }
 
   function remove(target: Reminder) {
@@ -154,6 +165,8 @@ export function RemindersPanel({ tripId, startDate, initialReminders }: Props) {
           </li>
         )}
       </ul>
+
+      <MonsenToast trigger={toast?.trigger ?? null} quip={toast?.quip ?? null} />
 
       <form onSubmit={addCustom} className="flex flex-wrap items-center gap-sm">
         <input

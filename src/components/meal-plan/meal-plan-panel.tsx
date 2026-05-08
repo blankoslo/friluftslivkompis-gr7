@@ -7,6 +7,7 @@ import {
   SourceBadge,
 } from "@/components/ui/ai-disclosure";
 import { randomQuip } from "@/lib/lars-monsen/quips";
+import { MonsenToast } from "@/components/lars-monsen/monsen-toast";
 import type { PackingListParticipant } from "@/components/packing/packing-list";
 
 export interface MealPlanIngredient {
@@ -74,7 +75,10 @@ export function MealPlanPanel({
   const [error, setError] = useState<string | null>(null);
   const [isGenerating, startGenerating] = useTransition();
   const [, startSaving] = useTransition();
-  const [loadingQuip] = useState(() => randomQuip("loading"));
+  const [loadingQuip] = useState(() => randomQuip("aiThinking"));
+  const [toast, setToast] = useState<{ trigger: number; quip: string } | null>(
+    null,
+  );
 
   const hasPlan = mealPlan.length > 0;
 
@@ -99,8 +103,10 @@ export function MealPlanPanel({
         setShopping(data.shoppingList);
         setConsumables(data.consumables);
         setIntro(data.intro);
+        setToast({ trigger: Date.now(), quip: randomQuip("mealPlanReady") });
       } catch (err) {
         setError(err instanceof Error ? err.message : "Klarte ikke å generere");
+        setToast({ trigger: Date.now(), quip: randomQuip("errorGeneric") });
       }
     });
   }
@@ -137,6 +143,7 @@ export function MealPlanPanel({
 
   return (
     <div className="flex flex-col gap-md">
+      <MonsenToast trigger={toast?.trigger ?? null} quip={toast?.quip ?? null} />
       {intro && (
         <div className="flex flex-col gap-xs rounded-md bg-midnight-sun-tint p-md">
           <SourceBadge tone="ai" label="AI-tekst" className="self-start" />

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { connectToDatabase } from "@/lib/db/mongoose";
 import { Trip, type ITrip } from "@/models/Trip";
+import { MonsenLine } from "@/components/lars-monsen/monsen-line";
 
 type TripCard = {
   id: string;
@@ -83,11 +84,12 @@ export default async function TurerPage() {
             Turer
           </h1>
           <p
-            className="text-text-primary text-xl leading-snug"
+            className="text-text-primary text-xl leading-snug mb-md"
             style={{ fontFamily: "var(--font-handwriting)" }}
           >
             Dine kommende og tidligere turer.
           </p>
+          <MonsenLine category="logTitle" variant="card" />
         </header>
 
         <section className="mb-2xl">

@@ -1,4 +1,5 @@
 import { NyTurForm } from "./form";
+import { MonsenLine } from "@/components/lars-monsen/monsen-line";
 
 export default function NyTurPage() {
   return (
@@ -9,11 +10,12 @@ export default function NyTurPage() {
             Ny tur
           </h1>
           <p
-            className="text-text-primary text-xl leading-snug"
+            className="text-text-primary text-xl leading-snug mb-md"
             style={{ fontFamily: "var(--font-handwriting)" }}
           >
             Gi turen et navn og noen datoer. Resten ordner vi underveis.
           </p>
+          <MonsenLine category="newTripIntro" variant="card" />
         </header>
 
         <NyTurForm />

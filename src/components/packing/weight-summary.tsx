@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { SourceBadge } from "@/components/ui/ai-disclosure";
+import { randomQuip } from "@/lib/lars-monsen/quips";
 import type { PackingItem, PackingListParticipant } from "./packing-list";
 
 interface MealDayLite {
@@ -183,12 +184,41 @@ export function WeightSummary({
           </li>
         ))}
       </ul>
-      {imbalance > 0.3 && (
-        <p className="rounded-md border border-warning-border bg-warning-bg p-sm text-sm text-warning">
-          Stor forskjell ({Math.round(imbalance * 100)} %) mellom tyngste og letteste
-          sekk. Vurder å flytte fellesutstyr fra de tunge til de lette.
-        </p>
+      {imbalance > 0.3 ? (
+        <SkewedBanner percent={Math.round(imbalance * 100)} />
+      ) : (
+        rows.length > 1 && totals.length > 1 && <BalancedBanner />
       )}
     </div>
+  );
+}
+
+function SkewedBanner({ percent }: { percent: number }) {
+  const [quip] = useState(() => randomQuip("weightSkewed"));
+  return (
+    <div className="rounded-md border-2 border-warning-border bg-warning-bg p-sm text-sm text-warning flex flex-col gap-xs">
+      <p>
+        Stor forskjell ({percent} %) mellom tyngste og letteste sekk. Vurder å flytte
+        fellesutstyr fra de tunge til de lette.
+      </p>
+      <p
+        className="text-xs italic"
+        style={{ fontFamily: "var(--font-handwriting)", fontWeight: 600 }}
+      >
+        &ldquo;{quip}&rdquo; - Lars
+      </p>
+    </div>
+  );
+}
+
+function BalancedBanner() {
+  const [quip] = useState(() => randomQuip("weightBalanced"));
+  return (
+    <p
+      className="rounded-md border-2 border-forest bg-forest-tint p-sm text-sm text-forest"
+      style={{ fontFamily: "var(--font-handwriting)", fontWeight: 600 }}
+    >
+      &ldquo;{quip}&rdquo; - Lars
+    </p>
   );
 }

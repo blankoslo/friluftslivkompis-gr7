@@ -8,6 +8,7 @@ import {
   type SplitParticipant,
 } from "@/lib/expenses/split";
 import { randomQuip } from "@/lib/lars-monsen/quips";
+import { MonsenToast } from "@/components/lars-monsen/monsen-toast";
 
 export interface ExpensesPanelParticipant {
   id: string;
@@ -49,6 +50,9 @@ export function ExpensesPanel({
   const [emptyQuip] = useState(() => randomQuip("expenses"));
   const [error, setError] = useState<string | null>(null);
   const [isSaving, startSaving] = useTransition();
+  const [toast, setToast] = useState<{ trigger: number; quip: string } | null>(
+    null,
+  );
 
   const dayOptions = useMemo(() => {
     if (totalDays && totalDays > 0) {
@@ -107,10 +111,12 @@ export function ExpensesPanel({
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
       setError(body.error ?? "Klarte ikke å lagre utgift");
+      setToast({ trigger: Date.now(), quip: randomQuip("errorGeneric") });
       return false;
     }
     const trip = await res.json();
     syncFromTrip(trip);
+    setToast({ trigger: Date.now(), quip: randomQuip("expenseAdded") });
     return true;
   }
 
@@ -185,6 +191,7 @@ export function ExpensesPanel({
 
   return (
     <div className="flex flex-col gap-lg">
+      <MonsenToast trigger={toast?.trigger ?? null} quip={toast?.quip ?? null} />
       <ExpenseForm
         participants={participants}
         dayOptions={dayOptions}

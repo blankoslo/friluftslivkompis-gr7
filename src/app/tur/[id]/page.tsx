@@ -36,6 +36,7 @@ import { CabinRouteEditor } from "@/components/route/cabin-route-editor";
 import { CabinAvailability } from "@/components/route/cabin-availability";
 import type { CabinPoint } from "@/lib/route";
 import { randomQuip } from "@/lib/lars-monsen/quips";
+import { MonsenSessionToast } from "@/components/lars-monsen/monsen-session-toast";
 import { ParticipantsLive } from "@/components/trips/participants-live";
 import { DayInviteLinks } from "@/components/trips/day-invite-links";
 import {
@@ -277,6 +278,7 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
 
   return (
     <main className="bg-bg min-h-screen">
+      <MonsenSessionToast />
       <div className="max-w-4xl mx-auto px-md py-lg sm:px-lg sm:py-xl">
         <header className="bg-flame-pressed text-white rounded-lg border-4 border-flame-pressed shadow-[6px_6px_0_var(--brand-flame-pressed)] mb-xl relative">
           {trip.isDemo && (
@@ -305,6 +307,12 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
                 {accepted} av {trip.participants.length} har sagt ja
               </p>
             )}
+            <p
+              className="text-sm opacity-95 mt-xs"
+              style={{ fontFamily: "var(--font-handwriting)", fontWeight: 600 }}
+            >
+              &ldquo;{randomQuip("panelHeader")}&rdquo; - Lars
+            </p>
           </div>
         </header>
 

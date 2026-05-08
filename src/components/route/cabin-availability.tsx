@@ -6,6 +6,7 @@ import type {
   CabinAvailabilityInfo,
   CabinAvailabilityStatus,
 } from "@/lib/ut/availability";
+import { randomQuip, type QuipCategory } from "@/lib/lars-monsen/quips";
 
 interface Props {
   cabins: CabinPoint[];
@@ -183,6 +184,13 @@ export function CabinAvailability({
 
             <p className="text-sm text-text-primary">{r.reason}</p>
 
+            <p
+              className="text-xs italic text-flame-pressed"
+              style={{ fontFamily: "var(--font-handwriting)", fontWeight: 600 }}
+            >
+              &ldquo;{randomQuip(statusToCategory(r.status), r.utId)}&rdquo; - Lars
+            </p>
+
             {r.bookingUrl && (
               <a
                 href={r.bookingUrl}
@@ -230,6 +238,12 @@ export function CabinAvailability({
       </ul>
     </div>
   );
+}
+
+function statusToCategory(status: CabinAvailabilityStatus): QuipCategory {
+  if (status === "fullt") return "cabinFull";
+  if (status === "ledig") return "cabinFree";
+  return "cabinUnknown";
 }
 
 function formatDate(iso: string): string {
