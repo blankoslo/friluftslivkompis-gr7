@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { connectToDatabase } from "@/lib/db/mongoose";
 import { Trip, type ITrip } from "@/models/Trip";
-import { pickQuips } from "@/lib/lars-monsen/quips";
 
 type LatestTrip = {
   id: string;
@@ -60,8 +59,6 @@ export default async function HomePage() {
   const badge = trip
     ? tripStatusBadge(trip.participants)
     : { label: "Demo", tone: "wait" as const };
-  const [quote] = pickQuips("homeWisdom", 1);
-
   return (
     <main className="bg-flame-primary text-white relative overflow-hidden min-h-screen">
       <div
@@ -74,13 +71,8 @@ export default async function HomePage() {
 
       <div className="relative max-w-[42rem] mx-auto px-md sm:px-lg">
 
-        {/* Speech bubble centered in the space above the title */}
-        <div className="flex items-center justify-center" style={{ height: "38vh" }}>
-          <SpeechBubble quote={quote} />
-        </div>
-
         {/* Title + search */}
-        <div className="flex flex-col items-center text-center pb-xl">
+        <div className="flex flex-col items-center text-center pt-[38vh] pb-xl">
           <h1
             className="font-heading font-bold leading-[0.95] mb-lg"
             style={{ fontSize: "clamp(40px, 9vw, 64px)" }}
@@ -198,50 +190,6 @@ export default async function HomePage() {
 
       </div>
     </main>
-  );
-}
-
-function SpeechBubble({ quote }: { quote: string }) {
-  return (
-    <div className="relative max-w-sm w-full">
-      <div className="bg-bg border-4 border-flame-pressed rounded-lg px-lg py-md shadow-[4px_4px_0_var(--brand-flame-pressed)] text-left">
-        <p
-          className="text-text-primary text-xl leading-snug mb-1"
-          style={{ fontFamily: "var(--font-handwriting)", fontWeight: 700 }}
-        >
-          {quote}
-        </p>
-        <p
-          className="text-flame-pressed text-sm"
-          style={{ fontFamily: "var(--font-handwriting)" }}
-        >
-          — Lars Monsen
-        </p>
-      </div>
-      {/* Tail pointing down toward the title */}
-      <div
-        className="absolute left-1/2 -bottom-[18px]"
-        style={{
-          transform: "translateX(-50%)",
-          width: 0,
-          height: 0,
-          borderLeft: "14px solid transparent",
-          borderRight: "14px solid transparent",
-          borderTop: "18px solid var(--brand-flame-pressed)",
-        }}
-      />
-      <div
-        className="absolute left-1/2 -bottom-[12px]"
-        style={{
-          transform: "translateX(-50%)",
-          width: 0,
-          height: 0,
-          borderLeft: "11px solid transparent",
-          borderRight: "11px solid transparent",
-          borderTop: "14px solid var(--color-bg)",
-        }}
-      />
-    </div>
   );
 }
 
