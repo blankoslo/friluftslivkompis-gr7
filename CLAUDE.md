@@ -17,6 +17,10 @@
 - [docs/Intro_til_Friluftskompis.md](docs/Intro_til_Friluftskompis.md) - case, scenarioer, produktvisjon, brukerreisens 6 faser.
 - [docs/Brukerhistorier.md](docs/Brukerhistorier.md) - alle stories med Gitt/Når/Så-akseptansekriterier og prioritet. MVP er D1, D2, B1, B3, B6, G1, P1, T1, R1.
 
+## Persona twist - Lars Monsen
+
+Appen har Lars Monsen som vert. All AI-genererte tekster (Claude-kall: D1 søk, P1 pakkeliste, framtidig chat) skal bruke Monsen-stemme: lun, røff, tørrvittig, naturnær, bokmål. Memes og kjente sitat vevd inn i copy, tomstander, loading, toasts og pakkeliste-anbefalinger. Pakkelister, turforslag og råd lener mot minimalisme og friluftslivets enkle gleder. Hold tonen som "inspirert av", ikke offisiell merkevare. Sentral persona-prompt + sitatbank ligger i `src/lib/claude/persona.ts` og injiseres i alle Anthropic-kall.
+
 ## External APIs
 
 Reference list from hackathon hub: https://hackathon.blank.no/apis. Status legend: ✅ wired, 🟡 planned, ⬜ not yet considered. Identify all server fetches with UA `Friluftskompis/1.0 (lag7@blank.no)`.
@@ -32,11 +36,13 @@ Reference list from hackathon hub: https://hackathon.blank.no/apis. Status legen
 - Base: `https://api.met.no` (e.g. `/weatherapi/locationforecast/2.0/complete`, `/nowcast/2.0`).
 - Required: User-Agent with app name + contact email. Generic UAs blocked. Rate limit 20 req/s/app. Respect `Expires` and `If-Modified-Since`.
 
-### UT.no / DNT 🟡 (open) — D2, B3, B6
+### UT.no / DNT ✅ (open) — D1, D2, B3, B6
 
-- GraphQL: `https://ut-backend-api-2-41145913385.europe-north1.run.app/internal/graphql`.
-- 1 999 hytter, 1 395 merkede ruter med GeoJSON, høydedata, sengeantall, servicegrad.
-- Send `Origin` and `Content-Type: application/json` headers. Cursor-based pagination.
+- GraphQL: `https://ut-backend-api-2-41145913385.europe-north1.run.app/internal/graphql`. Wrapper i `src/lib/ut/`.
+- Auth ikke nødvendig. `Origin` ikke påkrevd, men send det og `Content-Type: application/json`. Introspection åpen.
+- D1-søk bruker `search(input: { searchString, fullResult: true })`. Returnerer `prioritizedResult` + `result`, begge `[String!]!` semikolon-CSV: `prefix;id;lon,lat;name;subtype;extra`. Prefiks: `a` område, `d` hytte (extra `1` = DNT), `g` turforslag (Trip), `e` POI/fjelltopp.
+- Hydrer detaljer via `cabin(id:)`, `trip(id:)`, `area(id:)`, `poi(id:)`. Trip har `geojson` + `encodedPolyline` + `cabinIds`. Bruk `*Near` for radius-spørringer.
+- Koordinater alltid GeoJSON Point `[lon, lat]` (EPSG:4326). Cursor-paginering via `paging: { first, after }`.
 
 ### iNatur ⬜ (open) — D2b kommersielle hytter
 
