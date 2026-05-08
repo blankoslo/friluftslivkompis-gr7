@@ -1,0 +1,42 @@
+language: "no"
+
+reviews:
+  profile: assertive
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: false
+
+  path_filters:
+    - "!node_modules/**"
+    - "!.next/**"
+    - "!package-lock.json"
+    - "!*.docx"
+
+  path_instructions:
+    - path: "src/models/**"
+      instructions: |
+        Kontroller at Mongoose-skjemaer har riktige indekser for felter som
+        brukes i spørringer. Sjekk at alle relasjoner bruker ObjectId-referanser
+        korrekt og at required-felter er eksplisitt satt.
+
+    - path: "src/app/api/**"
+      instructions: |
+        Valider at alle API-ruter håndterer feil og returnerer korrekte
+        HTTP-statuskoder. Sjekk at brukerinput valideres før den skrives til
+        databasen. Påse at connectToDatabase() kalles før alle DB-operasjoner.
+
+    - path: "src/lib/db/**"
+      instructions: |
+        Sjekk at MongoDB-tilkoblingen bruker singleton-mønsteret korrekt for
+        å unngå connection leaks i Next.js serverless-miljø.
+
+    - path: "src/**/*.tsx"
+      instructions: |
+        Kontroller at komponenter er tilgjengelige (WCAG AA). Påse at
+        lastestatus og feilhåndtering vises for brukeren. Sjekk at
+        norsk tekst brukes konsistent i UI.
+
+chat:
+  auto_reply: true
