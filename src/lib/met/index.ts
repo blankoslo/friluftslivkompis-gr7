@@ -6,3 +6,11 @@ export {
   type MetFetchOptions,
 } from "./client";
 export { aggregateDaily, type DailyWeather } from "./daily";
+export {
+  fetchNowcast,
+  pickCurrentNowcast,
+  MetNowcastUnavailableError,
+  type MetNowcast,
+  type MetNowcastEntry,
+  type NowcastSnapshot,
+} from "./nowcast";

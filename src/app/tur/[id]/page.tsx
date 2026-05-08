@@ -37,6 +37,7 @@ import { CabinRouteEditor } from "@/components/route/cabin-route-editor";
 import { CabinAvailability } from "@/components/route/cabin-availability";
 import { CabinComparePanel } from "@/components/cabins/cabin-compare-panel";
 import { GpxExportButton } from "@/components/route/gpx-export-button";
+import { NowcastCard } from "@/components/weather/nowcast-card";
 import type { CabinPoint } from "@/lib/route";
 import { randomQuip } from "@/lib/lars-monsen/quips";
 import { MonsenSessionToast } from "@/components/lars-monsen/monsen-session-toast";
@@ -299,6 +300,13 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
     assignedTo: c.assignedTo,
   }));
 
+  const nowcastStart = trip.cabins[0];
+  const showNowcast =
+    !trip.isDemo &&
+    !!startISO &&
+    !!nowcastStart &&
+    isWithinTripWindow(startISO, trip.endDate ?? null);
+
   return (
     <main className="bg-bg min-h-screen">
       <MonsenSessionToast />
@@ -422,6 +430,16 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
             </Section>
           )}
 
+          {showNowcast && nowcastStart && (
+            <Section label="Sanntidsvær (NowCast)">
+              <NowcastCard
+                lat={nowcastStart.lat}
+                lon={nowcastStart.lon}
+                startName={nowcastStart.name}
+              />
+            </Section>
+          )}
+
           <Section label="Kart, tidslinje og vær">
             {trip.cabins.length < 2 ? (
               <p
@@ -525,6 +543,16 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
       </div>
     </main>
   );
+}
+
+function isWithinTripWindow(
+  startISO: string,
+  endISO: string | null,
+): boolean {
+  const today = new Date().toISOString().slice(0, 10);
+  if (today < startISO.slice(0, 10)) return false;
+  if (endISO && today > endISO.slice(0, 10)) return false;
+  return true;
 }
 
 function formatDateRange(start?: string, end?: string) {
