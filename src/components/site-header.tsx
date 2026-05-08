@@ -17,24 +17,26 @@ export function SiteHeader() {
           Friluftskompis
         </Link>
         <div className="flex gap-lg text-sm font-semibold text-text-muted">
-          <Link
-            href="/discover"
-            className="transition-colors hover:font-bold hover:text-flame-primary"
-          >
-            Discover
-          </Link>
-          <Link
-            href="/tur/ny"
-            className="transition-colors hover:font-bold hover:text-flame-primary"
-          >
-            Ny tur
-          </Link>
-          <Link
-            href="/logg"
-            className="transition-colors hover:font-bold hover:text-flame-primary"
-          >
-            Logg
-          </Link>
+          {[
+            { href: "/discover", label: "Discover" },
+            { href: "/tur/ny", label: "Ny tur" },
+            { href: "/logg", label: "Logg" },
+          ].map(({ href, label }) => {
+            const isActive = pathname.startsWith(href);
+            return (
+              <Link
+                key={href}
+                href={href}
+                className={
+                  isActive
+                    ? "text-flame-primary font-bold border-b-2 border-flame-primary pb-0.5"
+                    : "transition-colors hover:font-bold hover:text-flame-primary"
+                }
+              >
+                {label}
+              </Link>
+            );
+          })}
         </div>
       </nav>
     </header>
