@@ -163,7 +163,7 @@ export default async function HomePage() {
         <form
           action="/discover"
           method="get"
-          className="bg-bg border-4 border-flame-pressed rounded-lg p-md flex items-center gap-sm mb-md shadow-[4px_4px_0_var(--brand-flame-pressed)]"
+          className="bg-bg border-4 border-flame-pressed rounded-lg p-md flex items-center gap-sm mb-lg shadow-[4px_4px_0_var(--brand-flame-pressed)]"
         >
           <svg
             width="20"
@@ -194,7 +194,7 @@ export default async function HomePage() {
         <div className="flex flex-wrap gap-sm mb-xl">
           <Link
             href="/discover?inspire=1"
-            className="px-md py-sm bg-bg text-flame-pressed border-2 border-flame-pressed rounded-pill font-bold shadow-[2px_2px_0_var(--brand-flame-pressed)] hover:translate-y-[1px] transition-transform"
+            className="inline-flex items-center justify-center px-md py-sm bg-bg text-flame-pressed border-2 border-flame-pressed rounded-pill font-bold shadow-[2px_2px_0_var(--brand-flame-pressed)] hover:translate-y-[1px] transition-transform"
             style={{
               fontFamily: "var(--font-handwriting)",
               fontSize: "16px",
@@ -206,7 +206,7 @@ export default async function HomePage() {
             <Link
               key={s.label}
               href={`/discover?q=${encodeURIComponent(s.q)}`}
-              className="px-sm py-sm bg-flame-pressed text-white border-2 border-white rounded-pill font-bold text-xs hover:bg-flame-hover transition-colors"
+              className="inline-flex items-center justify-center px-sm py-sm bg-flame-pressed text-white border-2 border-white rounded-pill font-bold text-xs hover:bg-flame-hover transition-colors"
             >
               {s.label}
             </Link>
