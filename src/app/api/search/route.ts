@@ -1,19 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { HIKING_PLACE_TYPES, searchPlaces, type PlaceHit } from "@/lib/kartverket";
 import { searchUT, type UtHit } from "@/lib/ut";
-
-export type SearchResult = {
-  source: "ut" | "kartverket";
-  kind: "area" | "cabin" | "trip" | "poi" | "place";
-  id: string;
-  name: string;
-  lat: number;
-  lon: number;
-  subtype: string | null;
-  municipality: string | null;
-  county: string | null;
-  dntCabin: boolean | null;
-};
+import type { SearchResult } from "@/lib/search/types";
 
 function fromUt(hit: UtHit): SearchResult {
   return {

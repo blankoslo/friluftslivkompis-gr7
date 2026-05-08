@@ -1,14 +1,78 @@
-export default function DiscoverPage() {
-  return (
-    <main className="p-8 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-2">Discover</h1>
-      <p className="text-muted-foreground mb-8">
-        Søk etter hytter, fjelltopper og turforslag i hele Norge.
-      </p>
+"use client";
 
-      <div className="rounded-lg border bg-muted/40 h-96 flex items-center justify-center text-muted-foreground">
-        Kart med DNT-hytter kommer her (D2)
+import dynamic from "next/dynamic";
+import { useState } from "react";
+import { SearchBox } from "@/components/discover/search-box";
+import type { SearchResult } from "@/lib/search/types";
+
+const Map = dynamic(
+  () => import("@/components/discover/map").then((m) => m.Map),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-full w-full items-center justify-center rounded-lg bg-muted/40 text-sm text-muted-foreground">
+        Laster kart…
+      </div>
+    ),
+  },
+);
+
+export default function DiscoverPage() {
+  const [selected, setSelected] = useState<SearchResult | null>(null);
+
+  return (
+    <main className="mx-auto max-w-6xl px-6 py-6">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold tracking-tight">Discover</h1>
+        <p className="text-muted-foreground">
+          Søk etter områder, hytter, fjelltopper og turforslag i hele Norge.
+        </p>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-[360px_1fr]">
+        <div className="space-y-3">
+          <SearchBox selected={selected} onSelect={setSelected} />
+          {selected && <SelectedDetails selected={selected} />}
+        </div>
+
+        <div className="h-[70vh] min-h-[420px] overflow-hidden rounded-lg border">
+          <Map selected={selected} />
+        </div>
       </div>
     </main>
+  );
+}
+
+function SelectedDetails({ selected }: { selected: SearchResult }) {
+  return (
+    <div className="rounded-lg border bg-card p-4 text-sm">
+      <div className="mb-1 font-semibold">{selected.name}</div>
+      <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-xs text-muted-foreground">
+        <dt>Type</dt>
+        <dd className="text-foreground">
+          {selected.subtype ?? selected.kind}
+        </dd>
+        {selected.municipality && (
+          <>
+            <dt>Kommune</dt>
+            <dd className="text-foreground">{selected.municipality}</dd>
+          </>
+        )}
+        {selected.county && (
+          <>
+            <dt>Fylke</dt>
+            <dd className="text-foreground">{selected.county}</dd>
+          </>
+        )}
+        <dt>Koordinater</dt>
+        <dd className="font-mono text-foreground">
+          {selected.lat.toFixed(5)}, {selected.lon.toFixed(5)}
+        </dd>
+        <dt>Kilde</dt>
+        <dd className="text-foreground">
+          {selected.source === "ut" ? "UT.no / DNT" : "Kartverket"}
+        </dd>
+      </dl>
+    </div>
   );
 }
