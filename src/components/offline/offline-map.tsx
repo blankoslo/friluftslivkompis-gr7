@@ -155,7 +155,11 @@ export function OfflineMap({ trip, cabins }: Props) {
             type: "Point",
             coordinates: c.geojson!.coordinates as [number, number],
           },
-          properties: { id: c.id, name: c.name },
+          properties: {
+            id: c.id,
+            name: c.name,
+            popupHtml: cabinPopupHtml(c),
+          },
         }));
 
       map.addSource("offline-cabins", {
@@ -172,6 +176,23 @@ export function OfflineMap({ trip, cabins }: Props) {
           "circle-stroke-color": "#ffffff",
           "circle-stroke-width": 2,
         },
+      });
+
+      map.on("click", "offline-cabin-points", (e) => {
+        const f = e.features?.[0];
+        if (!f) return;
+        const geom = f.geometry as GeoJSON.Point;
+        const html = (f.properties?.popupHtml as string) ?? "";
+        new maplibregl.Popup({ maxWidth: "280px" })
+          .setLngLat(geom.coordinates as [number, number])
+          .setHTML(html)
+          .addTo(map);
+      });
+      map.on("mouseenter", "offline-cabin-points", () => {
+        map.getCanvas().style.cursor = "pointer";
+      });
+      map.on("mouseleave", "offline-cabin-points", () => {
+        map.getCanvas().style.cursor = "";
       });
       map.addLayer({
         id: "offline-cabin-labels",
@@ -453,6 +474,54 @@ function DownloadButton({
       Last ned for offline ({plan.count} tiles)
     </button>
   );
+}
+
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function cabinPopupHtml(c: Cabin): string {
+  const beds = [
+    c.bedsStaffed != null ? `${c.bedsStaffed} betjent` : null,
+    c.bedsSelfService != null ? `${c.bedsSelfService} selvbetjent` : null,
+    c.bedsNoService != null ? `${c.bedsNoService} ubetjent` : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+  const lines: string[] = [];
+  lines.push(
+    `<strong style="font-family:Georgia,serif;font-size:14px">${escapeHtml(
+      c.name,
+    )}</strong>`,
+  );
+  if (c.serviceLevel)
+    lines.push(
+      `<div style="font-size:11px;color:#5a4a3a;text-transform:uppercase;letter-spacing:0.05em">${escapeHtml(
+        c.serviceLevel,
+      )}${c.dntCabin ? " · DNT" : ""}</div>`,
+    );
+  if (beds)
+    lines.push(
+      `<div style="font-size:12px;margin-top:4px">Senger: ${escapeHtml(beds)}</div>`,
+    );
+  if (c.description) {
+    const trimmed = c.description.length > 220
+      ? c.description.slice(0, 217) + "…"
+      : c.description;
+    lines.push(
+      `<div style="font-size:12px;margin-top:6px;line-height:1.4">${escapeHtml(trimmed)}</div>`,
+    );
+  }
+  if (c.phone)
+    lines.push(
+      `<div style="font-size:11px;margin-top:6px">📞 ${escapeHtml(c.phone)}</div>`,
+    );
+  return `<div style="color:#1a1612">${lines.join("")}</div>`;
 }
 
 function flattenGeometry(
