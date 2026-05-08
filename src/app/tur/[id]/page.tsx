@@ -18,6 +18,7 @@ import { TripTimelineView } from "@/components/timeline/timeline";
 import { CabinRouteEditor } from "@/components/route/cabin-route-editor";
 import type { CabinPoint } from "@/lib/route";
 import { randomQuip } from "@/lib/lars-monsen/quips";
+import { ParticipantsLive } from "@/components/trips/participants-live";
 
 const DEMO_CABINS: CabinPoint[] = [
   { name: "Gjendesheim", lat: 61.4945, lon: 8.8108 },
@@ -180,7 +181,11 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
 
           {!trip.isDemo && (
             <Section label="Deltakere" badge="G1, G4" accent="forest">
-              <ParticipantList participants={trip.participants} />
+              <ParticipantsLive
+                tripIdOrToken={trip.inviteToken}
+                initialParticipants={trip.participants}
+                variant="tur"
+              />
             </Section>
           )}
 
@@ -238,66 +243,6 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
         </div>
       </div>
     </main>
-  );
-}
-
-function ParticipantList({
-  participants,
-}: {
-  participants: TripView["participants"];
-}) {
-  if (participants.length === 0) {
-    return (
-      <p
-        className="text-text-primary text-lg leading-snug"
-        style={{ fontFamily: "var(--font-handwriting)" }}
-      >
-        {randomQuip("noParticipants")} Del invitasjonslenken ovenfor.
-      </p>
-    );
-  }
-  return (
-    <ul className="grid gap-sm">
-      {participants.map((p, i) => (
-        <li
-          key={`${p.name}-${i}`}
-          className="flex items-center justify-between rounded-md border-2 border-flame-pressed bg-bg px-md py-sm shadow-[2px_2px_0_var(--brand-flame-pressed)]"
-        >
-          <span className="text-text-primary font-semibold">{p.name}</span>
-          <StatusBadge status={p.status} />
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-function StatusBadge({ status }: { status: IParticipant["status"] }) {
-  const map: Record<IParticipant["status"], { label: string; className: string }> = {
-    accepted: {
-      label: "Bekreftet",
-      className: "bg-forest text-white",
-    },
-    invited: {
-      label: "Invitert",
-      className: "bg-fjord text-white",
-    },
-    pending: {
-      label: "Venter",
-      className: "bg-midnight-sun text-text-primary",
-    },
-    declined: {
-      label: "Avslått",
-      className: "bg-flame-hover text-white",
-    },
-  };
-  const { label, className } = map[status];
-  return (
-    <span
-      className={`text-xs font-bold px-sm py-1 rounded-pill uppercase tracking-label ${className}`}
-      style={{ fontFamily: "var(--font-stamp)" }}
-    >
-      {label}
-    </span>
   );
 }
 

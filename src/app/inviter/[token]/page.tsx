@@ -1,7 +1,21 @@
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { connectToDatabase } from "@/lib/db/mongoose";
-import { Trip, type IParticipant } from "@/models/Trip";
+import {
+  Trip,
+  type IParticipant,
+  type ITripCabin,
+} from "@/models/Trip";
 import { AcceptForm } from "./accept-form";
+import {
+  ParticipantsLive,
+  type LiveParticipant,
+} from "@/components/trips/participants-live";
+import { buildTimeline } from "@/lib/timeline";
+import { TripTimelineView } from "@/components/timeline/timeline";
+import type { CabinPoint } from "@/lib/route";
+import { randomQuip } from "@/lib/lars-monsen/quips";
+import { InviteMapLoader } from "./invite-map-loader";
 
 interface InvitePageProps {
   params: Promise<{ token: string }>;
@@ -13,7 +27,8 @@ interface InviteView {
   inviteToken: string;
   startDate?: string;
   endDate?: string;
-  participants: Array<{ name: string; status: IParticipant["status"] }>;
+  participants: LiveParticipant[];
+  cabins: CabinPoint[];
 }
 
 async function loadByToken(token: string): Promise<InviteView | null> {
@@ -25,6 +40,7 @@ async function loadByToken(token: string): Promise<InviteView | null> {
     startDate?: Date;
     endDate?: Date;
     participants: IParticipant[];
+    cabins?: ITripCabin[];
   } | null>();
   if (!doc) return null;
   return {
@@ -37,7 +53,24 @@ async function loadByToken(token: string): Promise<InviteView | null> {
       name: p.name,
       status: p.status,
     })),
+    cabins: (doc.cabins ?? []).map((c) => ({
+      utId: c.utId,
+      name: c.name,
+      lat: c.lat,
+      lon: c.lon,
+    })),
   };
+}
+
+async function TimelineSection({
+  cabins,
+  startDate,
+}: {
+  cabins: CabinPoint[];
+  startDate: string | null;
+}) {
+  const timeline = await buildTimeline(cabins, startDate);
+  return <TripTimelineView timeline={timeline} />;
 }
 
 export default async function InvitePage({ params }: InvitePageProps) {
@@ -47,6 +80,7 @@ export default async function InvitePage({ params }: InvitePageProps) {
 
   const dateRange = formatDateRange(trip.startDate, trip.endDate);
   const accepted = trip.participants.filter((p) => p.status === "accepted");
+  const startISO = trip.startDate?.slice(0, 10) ?? null;
 
   return (
     <main className="bg-flame-primary text-white relative overflow-hidden min-h-screen">
@@ -108,6 +142,42 @@ export default async function InvitePage({ params }: InvitePageProps) {
           </dl>
         </section>
 
+        {trip.cabins.length > 0 && (
+          <section className="bg-bg border-4 border-flame-pressed rounded-lg p-lg mb-lg shadow-[6px_6px_0_var(--brand-flame-pressed)] text-text-primary">
+            <h2 className="font-heading font-bold text-h3 text-flame-pressed mb-md">
+              Kart
+            </h2>
+            <InviteMapLoader cabins={trip.cabins} />
+          </section>
+        )}
+
+        <section className="bg-bg border-4 border-flame-pressed rounded-lg p-lg mb-lg shadow-[6px_6px_0_var(--brand-flame-pressed)] text-text-primary">
+          <h2 className="font-heading font-bold text-h3 text-flame-pressed mb-md">
+            Vær og etapper
+          </h2>
+          {trip.cabins.length < 2 ? (
+            <p
+              className="text-text-primary text-lg leading-snug"
+              style={{ fontFamily: "var(--font-handwriting)" }}
+            >
+              {randomQuip("timelineEmpty")}
+            </p>
+          ) : (
+            <Suspense
+              fallback={
+                <p
+                  className="text-text-primary text-lg leading-snug"
+                  style={{ fontFamily: "var(--font-handwriting)" }}
+                >
+                  Henter værvarsel fra Yr...
+                </p>
+              }
+            >
+              <TimelineSection cabins={trip.cabins} startDate={startISO} />
+            </Suspense>
+          )}
+        </section>
+
         <section className="bg-bg border-4 border-flame-pressed rounded-lg p-lg mb-lg shadow-[6px_6px_0_var(--brand-flame-pressed)] text-text-primary">
           <h2 className="font-heading font-bold text-h3 text-flame-pressed mb-md">
             Si fra
@@ -117,66 +187,16 @@ export default async function InvitePage({ params }: InvitePageProps) {
 
         <section className="bg-bg border-4 border-flame-pressed rounded-lg p-lg shadow-[6px_6px_0_var(--brand-flame-pressed)] text-text-primary">
           <h2 className="font-heading font-bold text-h3 text-flame-pressed mb-md">
-            Deltakere ({accepted.length})
+            Deltakere
           </h2>
-          {trip.participants.length === 0 ? (
-            <p
-              className="text-text-muted text-xl"
-              style={{ fontFamily: "var(--font-handwriting)" }}
-            >
-              Ingen har takka ja enda - bli den fyrste!
-            </p>
-          ) : (
-            <ul className="space-y-sm">
-              {trip.participants.map((p, i) => (
-                <li
-                  key={`${p.name}-${i}`}
-                  className="flex items-center justify-between rounded-md border-2 border-flame-pressed bg-flame-tint px-md py-sm shadow-[2px_2px_0_var(--brand-flame-pressed)]"
-                >
-                  <span className="text-text-primary font-semibold">
-                    {p.name}
-                  </span>
-                  <StatusBadge status={p.status} />
-                </li>
-              ))}
-            </ul>
-          )}
+          <ParticipantsLive
+            tripIdOrToken={trip.inviteToken}
+            initialParticipants={trip.participants}
+            variant="inviter"
+          />
         </section>
       </div>
     </main>
-  );
-}
-
-function StatusBadge({ status }: { status: IParticipant["status"] }) {
-  const map: Record<
-    IParticipant["status"],
-    { label: string; className: string }
-  > = {
-    accepted: {
-      label: "Akseptert",
-      className: "bg-forest-tint text-forest border-forest",
-    },
-    invited: {
-      label: "Invitert",
-      className: "bg-fjord-tint text-fjord border-fjord",
-    },
-    pending: {
-      label: "Venter",
-      className: "bg-midnight-sun-tint text-midnight-sun border-midnight-sun",
-    },
-    declined: {
-      label: "Avslått",
-      className: "bg-warning-bg text-warning border-warning-border",
-    },
-  };
-  const { label, className } = map[status];
-  return (
-    <span
-      className={`text-small px-sm py-xs rounded-pill tracking-label uppercase border-2 font-bold ${className}`}
-      style={{ fontFamily: "var(--font-stamp)" }}
-    >
-      {label}
-    </span>
   );
 }
 
