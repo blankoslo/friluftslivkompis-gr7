@@ -34,10 +34,10 @@ function ToastBody({ quip, durationMs }: { quip: string; durationMs: number }) {
     >
       <div className="relative size-10 shrink-0 overflow-hidden rounded-full border-2 border-flame-pressed shadow-[2px_2px_0_var(--brand-flame-pressed)] bg-bg">
         <Image
-          src="/lars-monsen.jpg"
+          src="/lars-monsen-kayak.png"
           alt="Lars Monsen"
           fill
-          className="object-cover object-[center_20%]"
+          className="object-cover object-top"
           sizes="40px"
         />
       </div>

@@ -228,7 +228,7 @@ export default async function HomePage() {
             style={{ transform: "translateY(-50%) rotate(-4deg)" }}
           >
             <Image
-              src="/lars-monsen.jpg"
+              src="/lars-monsen-kayak.png"
               alt="Lars Monsen"
               width={96}
               height={96}
