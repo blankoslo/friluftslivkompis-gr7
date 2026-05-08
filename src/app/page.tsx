@@ -151,7 +151,7 @@ export default async function HomePage() {
             </button>
           </form>
 
-          <div className="flex flex-wrap justify-start w-full gap-sm">
+          <div className="flex flex-wrap justify-start w-full gap-sm mb-xl">
             <Link
               href="/lars-foreslar"
               className="inline-flex items-center justify-center px-md py-sm bg-bg text-flame-pressed border-2 border-flame-pressed rounded-pill font-bold shadow-[2px_2px_0_var(--brand-flame-pressed)] hover:translate-y-[1px] transition-transform"
@@ -160,61 +160,60 @@ export default async function HomePage() {
               Lars Monsen foreslår
             </Link>
           </div>
-        </div>
 
-        {/* Latest trip */}
-        <div className="flex justify-between items-baseline mb-md">
-          <h2 className="font-heading font-bold text-2xl">Mine turer</h2>
+          <div className="flex justify-between items-baseline w-full mb-md">
+            <h2 className="font-heading font-bold text-2xl">Mine turer</h2>
+            <Link
+              href="/turer"
+              className="text-xs font-bold uppercase tracking-label underline underline-offset-4"
+            >
+              Se alle
+            </Link>
+          </div>
+
           <Link
-            href="/turer"
-            className="text-xs font-bold uppercase tracking-label underline underline-offset-4"
+            href={tripHref}
+            className="w-full block bg-bg border-4 border-flame-pressed rounded-lg overflow-hidden mb-xl relative shadow-[6px_6px_0_var(--brand-flame-pressed)] hover:-translate-y-[2px] transition-transform"
+            style={{ transform: "rotate(1.2deg)" }}
           >
-            Se alle
-          </Link>
-        </div>
-
-        <Link
-          href={tripHref}
-          className="block bg-bg border-4 border-flame-pressed rounded-lg overflow-hidden mb-xl relative shadow-[6px_6px_0_var(--brand-flame-pressed)] hover:-translate-y-[2px] transition-transform"
-          style={{ transform: "rotate(1.2deg)" }}
-        >
-          <span
-            className="absolute -top-2 -left-2 w-16 h-5 bg-white/40 shadow-sm pointer-events-none"
-            style={{ transform: "rotate(-32deg)" }}
-          />
-          <div className="bg-flame-pressed text-white p-md h-32 flex flex-col justify-between">
-            <div className="flex justify-between gap-sm">
-              <span className="bg-bg text-flame-primary text-xs font-bold px-sm py-1 rounded-pill">
-                {badge.label}
-              </span>
-            </div>
-            <div>
-              <p className="text-xs font-bold opacity-90 mb-1">
-                {trip
-                  ? `${formatTripDates(trip.start, trip.end)}${trip.area ? ` - ${trip.area}` : ""}`
-                  : "14 - 16 mars - Rondane"}
-              </p>
-              <h3 className="font-heading font-black text-xl leading-tight">
-                {trip ? trip.title : "Fjols til Fjells"}
-              </h3>
-            </div>
-          </div>
-          <div className="p-md flex justify-between items-center">
-            <span className="text-flame-primary font-bold text-sm">
-              {trip
-                ? `${trip.participants.filter((p) => p.status === "accepted").length} av ${Math.max(trip.participants.length, 1)} har sagt ja`
-                : "3 av 3 har sagt ja"}
-            </span>
-            <ParticipantAvatars
-              names={
-                trip && trip.participants.length > 0
-                  ? trip.participants.map((p) => p.name)
-                  : ["Une", "Ola", "Maja"]
-              }
+            <span
+              className="absolute -top-2 -left-2 w-16 h-5 bg-white/40 shadow-sm pointer-events-none"
+              style={{ transform: "rotate(-32deg)" }}
             />
-          </div>
-        </Link>
+            <div className="bg-flame-pressed text-white p-md h-32 flex flex-col justify-between">
+              <div className="flex justify-between gap-sm">
+                <span className="bg-bg text-flame-primary text-xs font-bold px-sm py-1 rounded-pill">
+                  {badge.label}
+                </span>
+              </div>
+              <div>
+                <p className="text-xs font-bold opacity-90 mb-1">
+                  {trip
+                    ? `${formatTripDates(trip.start, trip.end)}${trip.area ? ` - ${trip.area}` : ""}`
+                    : "14 - 16 mars - Rondane"}
+                </p>
+                <h3 className="font-heading font-black text-xl leading-tight">
+                  {trip ? trip.title : "Fjols til Fjells"}
+                </h3>
+              </div>
+            </div>
+            <div className="p-md flex justify-between items-center">
+              <span className="text-flame-primary font-bold text-sm">
+                {trip
+                  ? `${trip.participants.filter((p) => p.status === "accepted").length} av ${Math.max(trip.participants.length, 1)} har sagt ja`
+                  : "3 av 3 har sagt ja"}
+              </span>
+              <ParticipantAvatars
+                names={
+                  trip && trip.participants.length > 0
+                    ? trip.participants.map((p) => p.name)
+                    : ["Une", "Ola", "Maja"]
+                }
+              />
+            </div>
+          </Link>
 
+        </div>
       </div>
     </main>
   );
