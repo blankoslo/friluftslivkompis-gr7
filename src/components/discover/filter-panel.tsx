@@ -7,6 +7,12 @@ import {
   TRIP_CATEGORIES,
   type TripCategory,
 } from "@/lib/discover/categories";
+import {
+  AGE_BAND_HINT,
+  AGE_BAND_LABEL,
+  AGE_BANDS,
+  type AgeFilter,
+} from "@/lib/discover/age";
 
 type Props = {
   active: ReadonlySet<TripCategory>;
@@ -16,6 +22,8 @@ type Props = {
   total: number;
   filteredTotal: number;
   loading: boolean;
+  minAge: AgeFilter;
+  onMinAgeChange: (band: AgeFilter) => void;
 };
 
 export function FilterPanel({
@@ -26,17 +34,24 @@ export function FilterPanel({
   total,
   filteredTotal,
   loading,
+  minAge,
+  onMinAgeChange,
 }: Props) {
+  const hasAnyFilter = active.size > 0 || minAge !== null;
+
   return (
     <div className="rounded-md border border-border bg-surface p-4">
       <div className="mb-2 flex items-center justify-between">
         <div className="font-heading text-sm font-semibold text-foreground">
           Filtrer turforslag
         </div>
-        {active.size > 0 && (
+        {hasAnyFilter && (
           <button
             type="button"
-            onClick={onClear}
+            onClick={() => {
+              onClear();
+              onMinAgeChange(null);
+            }}
             className="text-xs text-muted-foreground underline-offset-2 hover:underline"
           >
             Nullstill
@@ -81,6 +96,28 @@ export function FilterPanel({
         })}
       </div>
 
+      <div className="mt-3 border-t border-border pt-3">
+        <div className="mb-1.5 text-xs font-medium text-foreground">
+          Yngste deltaker
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          <AgeChip
+            label="Bare voksne"
+            active={minAge === null}
+            onClick={() => onMinAgeChange(null)}
+          />
+          {AGE_BANDS.map((band) => (
+            <AgeChip
+              key={band}
+              label={AGE_BAND_LABEL[band]}
+              hint={AGE_BAND_HINT[band]}
+              active={minAge === band}
+              onClick={() => onMinAgeChange(band)}
+            />
+          ))}
+        </div>
+      </div>
+
       <div className="mt-3 text-xs text-muted-foreground">
         {loading
           ? "Henter turforslag…"
@@ -91,3 +128,33 @@ export function FilterPanel({
     </div>
   );
 }
+
+function AgeChip({
+  label,
+  hint,
+  active,
+  onClick,
+}: {
+  label: string;
+  hint?: string;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title={hint}
+      aria-pressed={active}
+      className={cn(
+        "rounded-full border px-3 py-1 text-xs font-medium transition",
+        active
+          ? "border-foreground bg-foreground text-background"
+          : "border-border bg-background text-foreground hover:border-foreground/50",
+      )}
+    >
+      {label}
+    </button>
+  );
+}
+

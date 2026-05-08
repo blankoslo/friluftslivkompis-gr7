@@ -22,6 +22,8 @@ export type TripNearItem = {
   durationHours: number | null;
   durationMinutes: number | null;
   tripDistance: number | null;
+  activityTypeIds: number[];
+  accessibilityIds: number[];
   lat: number;
   lon: number;
 };
@@ -40,6 +42,8 @@ const TRIPS_NEAR_QUERY = /* GraphQL */ `
         durationMinutes
         distance
         startPointGeojson
+        activityTypes { id }
+        accessibilityIds
       }
     }
   }
@@ -58,6 +62,8 @@ type Response = {
       durationMinutes: number | null;
       distance: number | null;
       startPointGeojson: GeoJSONPoint | null;
+      activityTypes: Array<{ id: number }> | null;
+      accessibilityIds: number[] | null;
     };
   }>;
 };
@@ -88,6 +94,8 @@ export async function fetchTripsNear(
       durationHours: entry.trip.durationHours,
       durationMinutes: entry.trip.durationMinutes,
       tripDistance: entry.trip.distance,
+      activityTypeIds: (entry.trip.activityTypes ?? []).map((a) => a.id),
+      accessibilityIds: entry.trip.accessibilityIds ?? [],
       lon: coords[0],
       lat: coords[1],
     });

@@ -16,6 +16,7 @@ import {
   suggestRemoval,
   type TripCategory,
 } from "@/lib/discover/categories";
+import { filterByAge, type AgeFilter } from "@/lib/discover/age";
 
 const Map = dynamic(
   () => import("@/components/discover/map").then((m) => m.Map),
@@ -43,6 +44,7 @@ export default function DiscoverPage() {
   const [activeFilters, setActiveFilters] = useState<Set<TripCategory>>(
     () => new Set(),
   );
+  const [minAge, setMinAge] = useState<AgeFilter>(null);
   const viewportRef = useRef<Viewport | null>(null);
   const fetchAbortRef = useRef<AbortController | null>(null);
 
@@ -105,14 +107,21 @@ export default function DiscoverPage() {
     };
   }, []);
 
-  const filteredTrips = useMemo(
-    () => filterTrips(trips, activeFilters),
-    [trips, activeFilters],
+  const ageFilteredTrips = useMemo(
+    () => filterByAge(trips, minAge),
+    [trips, minAge],
   );
-  const counts = useMemo(() => categoryCounts(trips), [trips]);
+  const filteredTrips = useMemo(
+    () => filterTrips(ageFilteredTrips, activeFilters),
+    [ageFilteredTrips, activeFilters],
+  );
+  const counts = useMemo(
+    () => categoryCounts(ageFilteredTrips),
+    [ageFilteredTrips],
+  );
   const removalSuggestion = useMemo(
-    () => suggestRemoval(trips, activeFilters),
-    [trips, activeFilters],
+    () => suggestRemoval(ageFilteredTrips, activeFilters),
+    [ageFilteredTrips, activeFilters],
   );
 
   const toggleFilter = useCallback((cat: TripCategory) => {
@@ -163,9 +172,10 @@ export default function DiscoverPage() {
   }, [removalSuggestion]);
 
   const showCabinPanel = activeCabinId !== null;
-  const hasFilters = activeFilters.size > 0;
+  const hasFilters = activeFilters.size > 0 || minAge !== null;
   const showTripList = trips.length > 0 || hasFilters;
-  const showEmptyHint = filteredTrips.length === 0 && trips.length > 0;
+  const showEmptyHint =
+    filteredTrips.length === 0 && ageFilteredTrips.length > 0;
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-6">
@@ -188,9 +198,11 @@ export default function DiscoverPage() {
             counts={counts}
             onToggle={toggleFilter}
             onClear={clearFilters}
-            total={trips.length}
+            total={ageFilteredTrips.length}
             filteredTotal={filteredTrips.length}
             loading={tripsLoading}
+            minAge={minAge}
+            onMinAgeChange={setMinAge}
           />
 
           {showCabinPanel ? (
@@ -203,6 +215,7 @@ export default function DiscoverPage() {
             <TripList
               trips={filteredTrips}
               activeId={activeTripId}
+              minAge={minAge}
               onSelect={handleTripSelect}
               emptySuggestion={
                 showEmptyHint && removalSuggestion
