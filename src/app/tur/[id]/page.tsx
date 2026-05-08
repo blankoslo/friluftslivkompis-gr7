@@ -249,6 +249,22 @@ function computeTotalDays(
   return null;
 }
 
+function cabinsBboxParam(cabins: CabinPoint[]): string {
+  if (cabins.length === 0) return "";
+  let lonMin = Infinity;
+  let lonMax = -Infinity;
+  let latMin = Infinity;
+  let latMax = -Infinity;
+  for (const c of cabins) {
+    if (c.lon < lonMin) lonMin = c.lon;
+    if (c.lon > lonMax) lonMax = c.lon;
+    if (c.lat < latMin) latMin = c.lat;
+    if (c.lat > latMax) latMax = c.lat;
+  }
+  const fmt = (n: number) => n.toFixed(5);
+  return `&bbox=${fmt(lonMin)},${fmt(latMin)},${fmt(lonMax)},${fmt(latMax)}`;
+}
+
 
 export default async function TripPage({ params, searchParams }: TripPageProps) {
   const { id } = await params;
@@ -366,7 +382,7 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
             {!trip.isDemo && (
               <div className="mt-md flex flex-wrap items-center gap-sm">
                 <Link
-                  href={`/discover?addTo=${trip._id}&title=${encodeURIComponent(trip.title)}`}
+                  href={`/discover?addTo=${trip._id}&title=${encodeURIComponent(trip.title)}${cabinsBboxParam(trip.cabins)}`}
                   className="inline-flex items-center gap-xs rounded-md border-2 border-flame-pressed bg-bg px-md py-sm text-sm font-bold text-flame-pressed shadow-[3px_3px_0_var(--brand-flame-pressed)] hover:translate-y-[1px] hover:shadow-[2px_2px_0_var(--brand-flame-pressed)] transition-transform"
                 >
                   <span>🗺️</span>

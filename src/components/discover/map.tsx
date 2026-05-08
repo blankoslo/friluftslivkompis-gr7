@@ -38,6 +38,7 @@ type Props = {
   selected: SearchResult | null;
   trips: TripNearItem[];
   activeTripId: number | null;
+  initialBounds?: [[number, number], [number, number]] | null;
   onCabinClick: (id: number) => void;
   onTripClick: (id: number) => void;
   onViewportChange: (v: ViewportInfo) => void;
@@ -47,6 +48,7 @@ export function Map({
   selected,
   trips,
   activeTripId,
+  initialBounds,
   onCabinClick,
   onTripClick,
   onViewportChange,
@@ -105,6 +107,21 @@ export function Map({
       zoom: NORWAY_ZOOM,
       attributionControl: false,
     });
+
+    if (initialBounds) {
+      const [sw, ne] = initialBounds;
+      const sameSpot =
+        Math.abs(sw[0] - ne[0]) < 1e-6 && Math.abs(sw[1] - ne[1]) < 1e-6;
+      if (sameSpot) {
+        map.jumpTo({ center: sw, zoom: 11 });
+      } else {
+        map.fitBounds([sw, ne], {
+          padding: 60,
+          maxZoom: 12,
+          animate: false,
+        });
+      }
+    }
 
     map.addControl(
       new maplibregl.AttributionControl({

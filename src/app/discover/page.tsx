@@ -55,6 +55,10 @@ function DiscoverPageInner() {
   const searchParams = useSearchParams();
   const addingToTripId = searchParams?.get("addTo") ?? null;
   const addingTripTitle = searchParams?.get("title") ?? null;
+  const initialBounds = useMemo(
+    () => parseBboxParam(searchParams?.get("bbox") ?? null),
+    [searchParams],
+  );
   const [selected, setSelected] = useState<SearchResult | null>(null);
   const [activeCabinId, setActiveCabinId] = useState<number | null>(null);
   const [activeTripId, setActiveTripId] = useState<number | null>(null);
@@ -356,6 +360,7 @@ function DiscoverPageInner() {
               selected={selected}
               trips={filteredTrips}
               activeTripId={activeTripId}
+              initialBounds={initialBounds}
               onCabinClick={handleCabinClick}
               onTripClick={handleTripClickFromMap}
               onViewportChange={handleViewportChange}
@@ -423,6 +428,20 @@ function SelectedDetails({
       </button>
     </div>
   );
+}
+
+function parseBboxParam(
+  raw: string | null,
+): [[number, number], [number, number]] | null {
+  if (!raw) return null;
+  const parts = raw.split(",").map(Number);
+  if (parts.length !== 4 || parts.some((n) => !Number.isFinite(n))) return null;
+  const [lonMin, latMin, lonMax, latMax] = parts;
+  if (lonMin > lonMax || latMin > latMax) return null;
+  return [
+    [lonMin, latMin],
+    [lonMax, latMax],
+  ];
 }
 
 function Legend() {
