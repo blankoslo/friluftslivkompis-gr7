@@ -68,7 +68,7 @@ export default async function HomePage() {
   const badge = trip
     ? tripStatusBadge(trip.participants)
     : { label: "Demo", tone: "wait" as const };
-  const [wisdomTop, footerQuote] = pickQuips("homeWisdom", 2);
+  const [wisdomTop] = pickQuips("homeWisdom", 1);
 
   return (
     <main className="bg-flame-primary text-white relative overflow-hidden">
@@ -236,18 +236,6 @@ export default async function HomePage() {
           </div>
         </Link>
 
-        <footer className="mt-2xl text-center pb-xl">
-          <p
-            className="text-2xl opacity-95 mb-1"
-            style={{
-              fontFamily: "var(--font-handwriting)",
-              fontWeight: 700,
-            }}
-          >
-            &ldquo;{footerQuote}&rdquo;
-          </p>
-          <p className="text-sm opacity-75">- Lars Monsen</p>
-        </footer>
       </div>
     </main>
   );
