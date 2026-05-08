@@ -11,9 +11,11 @@ export function DeleteTripButton({ tripId }: { tripId: string }) {
   async function handleDelete() {
     setDeleting(true);
     try {
-      await fetch(`/api/trips/${tripId}`, { method: "DELETE" });
+      const res = await fetch(`/api/trips/${tripId}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Sletting feilet");
       router.refresh();
-    } finally {
+      // Keep deleting=true — the server re-render removes this component entirely
+    } catch {
       setDeleting(false);
       setConfirming(false);
     }
