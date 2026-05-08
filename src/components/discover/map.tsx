@@ -9,32 +9,76 @@ import maplibregl, {
 import "maplibre-gl/dist/maplibre-gl.css";
 import { rasterSource, KARTVERKET_ATTRIBUTION } from "@/lib/kartverket";
 import { resultZoom, type SearchResult } from "@/lib/search/types";
+import type { TripNearItem } from "@/lib/ut";
 
-const NORWAY_CENTER: [number, number] = [13, 65];
-const NORWAY_ZOOM = 4;
+const NORWAY_CENTER: [number, number] = [10.74, 59.91];
+const NORWAY_ZOOM = 8;
 const CABIN_LAYER_MIN_ZOOM = 7;
 
 const CABIN_COLOR_DNT = "#cc1f2c";
 const CABIN_COLOR_OUTLINE = "#ffffff";
 const CLUSTER_COLOR = "#cc1f2c";
+const TRIP_COLOR = "#0f766e";
+const TRIP_COLOR_ACTIVE = "#fbbf24";
+
+const TRIPS_SOURCE = "trip-starts";
+const TRIPS_LAYER = "trip-points";
+
+type ViewportInfo = {
+  lon: number;
+  lat: number;
+  radiusMeters: number;
+};
 
 type Props = {
   selected: SearchResult | null;
+  trips: TripNearItem[];
+  activeTripId: number | null;
   onCabinClick: (id: number) => void;
+  onTripClick: (id: number) => void;
+  onViewportChange: (v: ViewportInfo) => void;
 };
 
-export function Map({ selected, onCabinClick }: Props) {
+export function Map({
+  selected,
+  trips,
+  activeTripId,
+  onCabinClick,
+  onTripClick,
+  onViewportChange,
+}: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MlMap | null>(null);
   const markerRef = useRef<Marker | null>(null);
   const onCabinClickRef = useRef(onCabinClick);
+  const onTripClickRef = useRef(onTripClick);
+  const onViewportChangeRef = useRef(onViewportChange);
+  const styleReadyRef = useRef(false);
 
   useEffect(() => {
     onCabinClickRef.current = onCabinClick;
-  }, [onCabinClick]);
+    onTripClickRef.current = onTripClick;
+    onViewportChangeRef.current = onViewportChange;
+  }, [onCabinClick, onTripClick, onViewportChange]);
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
+
+    function emitViewport(map: MlMap) {
+      const center = map.getCenter();
+      const bounds = map.getBounds();
+      const ne = bounds.getNorthEast();
+      const sw = bounds.getSouthWest();
+      const radius = Math.max(
+        haversine(center.lng, center.lat, ne.lng, ne.lat),
+        haversine(center.lng, center.lat, sw.lng, sw.lat),
+      );
+      onViewportChangeRef.current({
+        lon: center.lng,
+        lat: center.lat,
+        radiusMeters: Math.round(radius),
+      });
+    }
 
     const map = new maplibregl.Map({
       container: containerRef.current,
@@ -140,11 +184,50 @@ export function Map({ selected, onCabinClick }: Props) {
         },
       });
 
+      map.addSource(TRIPS_SOURCE, {
+        type: "geojson",
+        data: { type: "FeatureCollection", features: [] },
+      });
+
+      map.addLayer({
+        id: TRIPS_LAYER,
+        type: "circle",
+        source: TRIPS_SOURCE,
+        paint: {
+          "circle-color": [
+            "case",
+            ["==", ["get", "active"], true],
+            TRIP_COLOR_ACTIVE,
+            TRIP_COLOR,
+          ],
+          "circle-radius": [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            5,
+            4,
+            10,
+            7,
+            14,
+            10,
+          ],
+          "circle-stroke-color": "#ffffff",
+          "circle-stroke-width": 2,
+        },
+      });
+
       map.on("click", "cabin-points", (e: MapLayerMouseEvent) => {
         const f = e.features?.[0];
         if (!f) return;
         const id = (f.properties as { id?: number })?.id;
         if (typeof id === "number") onCabinClickRef.current(id);
+      });
+
+      map.on("click", TRIPS_LAYER, (e: MapLayerMouseEvent) => {
+        const f = e.features?.[0];
+        if (!f) return;
+        const id = (f.properties as { id?: number })?.id;
+        if (typeof id === "number") onTripClickRef.current(id);
       });
 
       map.on("click", "cabin-clusters", async (e: MapLayerMouseEvent) => {
@@ -166,7 +249,7 @@ export function Map({ selected, onCabinClick }: Props) {
         }
       });
 
-      for (const layer of ["cabin-points", "cabin-clusters"]) {
+      for (const layer of ["cabin-points", "cabin-clusters", TRIPS_LAYER]) {
         map.on("mouseenter", layer, () => {
           map.getCanvas().style.cursor = "pointer";
         });
@@ -174,7 +257,12 @@ export function Map({ selected, onCabinClick }: Props) {
           map.getCanvas().style.cursor = "";
         });
       }
+
+      styleReadyRef.current = true;
+      emitViewport(map);
     });
+
+    map.on("moveend", () => emitViewport(map));
 
     mapRef.current = map;
 
@@ -183,8 +271,19 @@ export function Map({ selected, onCabinClick }: Props) {
       markerRef.current = null;
       map.remove();
       mapRef.current = null;
+      styleReadyRef.current = false;
     };
   }, []);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !styleReadyRef.current) return;
+    const src = map.getSource(TRIPS_SOURCE) as
+      | maplibregl.GeoJSONSource
+      | undefined;
+    if (!src) return;
+    src.setData(tripsToGeoJSON(trips, activeTripId));
+  }, [trips, activeTripId]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -195,7 +294,7 @@ export function Map({ selected, onCabinClick }: Props) {
     if (markerRef.current) {
       markerRef.current.setLngLat(target);
     } else {
-      markerRef.current = new maplibregl.Marker({ color: "#0f766e" })
+      markerRef.current = new maplibregl.Marker({ color: "#1e40af" })
         .setLngLat(target)
         .addTo(map);
     }
@@ -209,4 +308,39 @@ export function Map({ selected, onCabinClick }: Props) {
   }, [selected]);
 
   return <div ref={containerRef} className="h-full w-full rounded-lg" />;
+}
+
+function tripsToGeoJSON(
+  trips: TripNearItem[],
+  activeId: number | null,
+): GeoJSON.FeatureCollection {
+  return {
+    type: "FeatureCollection",
+    features: trips.map((t) => ({
+      type: "Feature",
+      id: t.id,
+      geometry: { type: "Point", coordinates: [t.lon, t.lat] },
+      properties: {
+        id: t.id,
+        name: t.name,
+        active: t.id === activeId,
+      },
+    })),
+  };
+}
+
+function haversine(
+  lon1: number,
+  lat1: number,
+  lon2: number,
+  lat2: number,
+): number {
+  const R = 6371000;
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(a));
 }

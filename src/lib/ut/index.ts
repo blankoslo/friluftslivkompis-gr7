@@ -21,6 +21,12 @@ export {
 } from "./hydrate";
 export { fetchAllDntCabins, type CabinListItem } from "./cabins";
 export {
+  fetchTripsNear,
+  type TripNearItem,
+  type TripActivityType,
+  type TripGrading,
+} from "./trips-near";
+export {
   serviceLevelLabel,
   cabinAccessibility,
   totalBeds,
