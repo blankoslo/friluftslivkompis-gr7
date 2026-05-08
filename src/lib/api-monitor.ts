@@ -1,3 +1,4 @@
+import "server-only";
 import { connectToDatabase } from "@/lib/db/mongoose";
 import { ApiError, type ApiProvider } from "@/models/ApiError";
 

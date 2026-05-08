@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import maplibregl, { Map as MlMap } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { rasterSource, KARTVERKET_ATTRIBUTION } from "@/lib/kartverket";
+import { rasterSource, KARTVERKET_ATTRIBUTION } from "@/lib/kartverket/tiles";
 
 type CabinPin = {
   name: string;

@@ -7,7 +7,7 @@ import maplibregl, {
   type MapLayerMouseEvent,
 } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { rasterSource, KARTVERKET_ATTRIBUTION } from "@/lib/kartverket";
+import { rasterSource, KARTVERKET_ATTRIBUTION } from "@/lib/kartverket/tiles";
 import { resultZoom, type SearchResult } from "@/lib/search/types";
 import type { TripNearItem } from "@/lib/ut";
 

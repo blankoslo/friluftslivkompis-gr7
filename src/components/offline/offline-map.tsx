@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import maplibregl, { Map as MlMap, Marker } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { rasterSource, KARTVERKET_ATTRIBUTION } from "@/lib/kartverket";
+import { rasterSource, KARTVERKET_ATTRIBUTION } from "@/lib/kartverket/tiles";
 import { APP_CACHE, DATA_CACHE, TILE_CACHE } from "@/lib/offline/cache";
 import {
   bboxFromCoords,
