@@ -43,7 +43,8 @@ export type QuipCategory =
   | "panelHeader"
   | "logTitle"
   | "newTripIntro"
-  | "inviteHero";
+  | "inviteHero"
+  | "inviteShare";
 
 const QUIPS: Record<QuipCategory, string[]> = {
   tripSelect: [
@@ -336,6 +337,13 @@ const QUIPS: Record<QuipCategory, string[]> = {
     "Du er invitert. Si ja, ellers ringer Lars.",
     "Bli med eller bli hjemme. Sofaen er feig.",
     "Velkommen. Pakk lett, smil tungt.",
+  ],
+  inviteShare: [
+    "Send videre til en venn. Flere bein, mindre frykt.",
+    "Del lenka. Sofagriser kan også reddes.",
+    "Spre invitasjonen. Vidda har plass til flere.",
+    "Send til en kompis. Bjørnene foretrekker grupper.",
+    "Del den. Ingen fortjener å gå glipp av dette.",
   ],
 };
 

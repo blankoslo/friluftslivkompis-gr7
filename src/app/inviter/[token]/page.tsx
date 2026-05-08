@@ -13,9 +13,10 @@ import {
 } from "@/components/trips/participants-live";
 import { buildTimeline } from "@/lib/timeline";
 import { TripTimelineView } from "@/components/timeline/timeline";
-import type { CabinPoint } from "@/lib/route";
+import { haversineKm, type CabinPoint } from "@/lib/route";
 import { randomQuip } from "@/lib/lars-monsen/quips";
 import { InviteMapLoader } from "./invite-map-loader";
+import { ShareButton } from "./share-button";
 
 interface InvitePageProps {
   params: Promise<{ token: string }>;
@@ -79,8 +80,15 @@ export default async function InvitePage({ params }: InvitePageProps) {
   if (!trip) notFound();
 
   const dateRange = formatDateRange(trip.startDate, trip.endDate);
-  const accepted = trip.participants.filter((p) => p.status === "accepted");
+  const acceptedCount = trip.participants.filter(
+    (p) => p.status === "accepted",
+  ).length;
+  const declinedCount = trip.participants.filter(
+    (p) => p.status === "declined",
+  ).length;
+  const invitedCount = trip.participants.length - declinedCount;
   const startISO = trip.startDate?.slice(0, 10) ?? null;
+  const stats = computeHeroStats(trip);
 
   return (
     <main className="bg-flame-primary text-white relative overflow-hidden min-h-screen">
@@ -93,12 +101,15 @@ export default async function InvitePage({ params }: InvitePageProps) {
       />
 
       <div className="relative max-w-[42rem] mx-auto px-md py-xl sm:px-lg sm:py-2xl">
-        <p
-          className="text-small font-bold uppercase tracking-label opacity-90 mb-xs"
-          style={{ fontFamily: "var(--font-stamp)" }}
-        >
-          Du er invitert
-        </p>
+        <div className="flex items-start justify-between gap-md mb-xs">
+          <p
+            className="text-small font-bold uppercase tracking-label opacity-90"
+            style={{ fontFamily: "var(--font-stamp)" }}
+          >
+            Du er invitert
+          </p>
+          <ShareButton token={trip.inviteToken} title={trip.title} />
+        </div>
         <h1
           className="font-heading font-bold leading-[0.95] mb-md"
           style={{ fontSize: "clamp(40px, 9vw, 64px)" }}
@@ -106,7 +117,7 @@ export default async function InvitePage({ params }: InvitePageProps) {
           {trip.title}
         </h1>
         <p
-          className="text-2xl mb-xs opacity-95"
+          className="text-2xl mb-md opacity-95"
           style={{
             fontFamily: "var(--font-handwriting)",
             fontWeight: 700,
@@ -115,12 +126,35 @@ export default async function InvitePage({ params }: InvitePageProps) {
         >
           Bli med på tur, da!
         </p>
+
+        {stats.chips.length > 0 && (
+          <ul className="flex flex-wrap gap-xs mb-md" aria-label="Turfakta">
+            {stats.chips.map((chip) => (
+              <li
+                key={chip.label}
+                className="inline-flex items-baseline gap-1 rounded-pill border-2 border-white/70 bg-white/10 px-md py-xs text-small font-bold text-white backdrop-blur"
+                style={{ fontFamily: "var(--font-stamp)", letterSpacing: "0.04em" }}
+              >
+                <span className="text-base">{chip.value}</span>
+                <span className="opacity-80 uppercase">{chip.label}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+
         <p
           className="text-base mb-lg opacity-90"
           style={{ fontFamily: "var(--font-handwriting)", fontWeight: 600 }}
         >
           &ldquo;{randomQuip("inviteHero")}&rdquo; - Lars
         </p>
+
+        <section className="bg-bg border-4 border-flame-pressed rounded-lg p-lg mb-lg shadow-[6px_6px_0_var(--brand-flame-pressed)] text-text-primary">
+          <h2 className="font-heading font-bold text-h3 text-flame-pressed mb-md">
+            Si fra
+          </h2>
+          <AcceptForm token={trip.inviteToken} />
+        </section>
 
         <section className="bg-bg border-4 border-flame-pressed rounded-lg p-lg mb-lg shadow-[6px_6px_0_var(--brand-flame-pressed)] text-text-primary">
           <h2 className="font-heading font-bold text-h3 text-flame-pressed mb-md">
@@ -142,7 +176,14 @@ export default async function InvitePage({ params }: InvitePageProps) {
             <div className="flex justify-between gap-md">
               <dt className="text-text-muted font-semibold">Påmeldte</dt>
               <dd className="text-text-primary text-right">
-                {accepted.length} av {Math.max(trip.participants.length, 1)}
+                {acceptedCount === 0 && invitedCount === 0
+                  ? "Ingen enda"
+                  : `${acceptedCount} av ${Math.max(invitedCount, acceptedCount)} har sagt ja`}
+                {declinedCount > 0 ? (
+                  <span className="block text-small text-text-muted font-normal">
+                    {declinedCount} kan ikke
+                  </span>
+                ) : null}
               </dd>
             </div>
           </dl>
@@ -184,13 +225,6 @@ export default async function InvitePage({ params }: InvitePageProps) {
           )}
         </section>
 
-        <section className="bg-bg border-4 border-flame-pressed rounded-lg p-lg mb-lg shadow-[6px_6px_0_var(--brand-flame-pressed)] text-text-primary">
-          <h2 className="font-heading font-bold text-h3 text-flame-pressed mb-md">
-            Si fra
-          </h2>
-          <AcceptForm token={trip.inviteToken} />
-        </section>
-
         <section className="bg-bg border-4 border-flame-pressed rounded-lg p-lg shadow-[6px_6px_0_var(--brand-flame-pressed)] text-text-primary">
           <h2 className="font-heading font-bold text-h3 text-flame-pressed mb-md">
             Deltakere
@@ -204,6 +238,48 @@ export default async function InvitePage({ params }: InvitePageProps) {
       </div>
     </main>
   );
+}
+
+type HeroChip = { label: string; value: string };
+
+function computeHeroStats(trip: InviteView): { chips: HeroChip[] } {
+  const chips: HeroChip[] = [];
+  const days = computeDays(trip.startDate, trip.endDate, trip.cabins.length);
+  if (days > 0) {
+    chips.push({ label: days === 1 ? "dag" : "dager", value: String(days) });
+  }
+  if (trip.cabins.length > 0) {
+    chips.push({
+      label: trip.cabins.length === 1 ? "hytte" : "hytter",
+      value: String(trip.cabins.length),
+    });
+  }
+  const km = totalKm(trip.cabins);
+  if (km > 0) {
+    chips.push({ label: "km", value: km.toFixed(km < 10 ? 1 : 0) });
+  }
+  return { chips };
+}
+
+function computeDays(start?: string, end?: string, cabinCount = 0): number {
+  if (start && end) {
+    const a = new Date(start).getTime();
+    const b = new Date(end).getTime();
+    if (Number.isFinite(a) && Number.isFinite(b) && b >= a) {
+      return Math.max(1, Math.round((b - a) / 86_400_000) + 1);
+    }
+  }
+  if (cabinCount >= 2) return cabinCount - 1;
+  return 0;
+}
+
+function totalKm(cabins: CabinPoint[]): number {
+  if (cabins.length < 2) return 0;
+  let sum = 0;
+  for (let i = 0; i < cabins.length - 1; i++) {
+    sum += haversineKm(cabins[i], cabins[i + 1]);
+  }
+  return Math.round(sum * 10) / 10;
 }
 
 function formatDateRange(start?: string, end?: string) {
