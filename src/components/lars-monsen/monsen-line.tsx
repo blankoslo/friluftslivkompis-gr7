@@ -35,7 +35,7 @@ export function MonsenLine({
           />
         </div>
         <p
-          className="text-sm leading-snug text-text-primary"
+          className="text-base leading-snug text-text-primary"
           style={{ fontFamily: "var(--font-handwriting)", fontWeight: 600 }}
         >
           {text}

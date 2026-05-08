@@ -90,7 +90,7 @@ export default async function TurerPage() {
           >
             Dine kommende og tidligere turer.
           </p>
-          <MonsenLine category="logTitle" variant="card" />
+          <MonsenLine category="logTitle" variant="card" align="center" />
         </header>
 
         <section className="mb-2xl">
