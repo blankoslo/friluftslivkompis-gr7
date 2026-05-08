@@ -592,6 +592,21 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
             </Section>
           )}
           {!trip.isDemo && (
+            <Section label="ETA-deling (soloturer)">
+              <p className="text-sm text-text-muted mb-md">
+                Del forventet hjemkomst med en kontakt. Lars sier ifra hvis du
+                blir vesentlig forsinket.
+              </p>
+              <Link
+                href={`/tur/${trip._id}/eta-deling`}
+                className="inline-flex items-center gap-xs rounded-md border-2 border-fjord bg-fjord-tint px-md py-sm text-sm font-bold text-fjord shadow-[3px_3px_0_var(--accent-fjord)] hover:translate-y-[1px] hover:shadow-[2px_2px_0_var(--accent-fjord)] transition-transform"
+              >
+                <span>📡</span>
+                Sett opp ETA-deling
+              </Link>
+            </Section>
+          )}
+          {!trip.isDemo && (
             <Section label="Utgifter">
               <ExpensesPanel
                 tripId={trip._id}
