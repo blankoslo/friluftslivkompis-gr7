@@ -2,6 +2,10 @@
 
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
+import {
+  AiDisclosure,
+  SourceBadge,
+} from "@/components/ui/ai-disclosure";
 import { randomQuip } from "@/lib/lars-monsen/quips";
 
 export interface PackingItem {
@@ -92,9 +96,12 @@ export function PackingList({ tripId, initialItems }: Props) {
   return (
     <div className="flex flex-col gap-md">
       {(intro || items.length === 0) && (
-        <p className="rounded-md bg-midnight-sun-tint p-md text-sm italic text-text-primary">
-          {intro ?? fallbackIntro}
-        </p>
+        <div className="flex flex-col gap-xs rounded-md bg-midnight-sun-tint p-md">
+          {intro && <SourceBadge tone="ai" label="AI-tekst" className="self-start" />}
+          <p className="text-sm italic text-text-primary">
+            {intro ?? fallbackIntro}
+          </p>
+        </div>
       )}
 
       {error && (
@@ -123,7 +130,12 @@ export function PackingList({ tripId, initialItems }: Props) {
       </div>
 
       {aiItems.length > 0 && (
-        <Section title="AI-foreslått" badge="Monsen">
+        <Section title="AI-foreslått" tone="ai" badge="Monsen-AI">
+          <AiDisclosure className="mb-sm">
+            Forslag fra Claude basert på vær, varighet og gruppestørrelse. Det
+            er anslag, ikke fasit, du bestemmer hva som faktisk havner i
+            sekken.
+          </AiDisclosure>
           <ul className="flex flex-col gap-xs">
             {items.map((item, idx) =>
               item.isAiSuggested ? (
@@ -140,7 +152,7 @@ export function PackingList({ tripId, initialItems }: Props) {
         </Section>
       )}
 
-      <Section title="Lagt til av deg" badge="Eget">
+      <Section title="Lagt til av deg" tone="data" badge="Eget">
         <ul className="flex flex-col gap-xs">
           {items.map((item, idx) =>
             !item.isAiSuggested ? (
@@ -177,10 +189,12 @@ export function PackingList({ tripId, initialItems }: Props) {
 function Section({
   title,
   badge,
+  tone,
   children,
 }: {
   title: string;
   badge: string;
+  tone: "ai" | "data";
   children: React.ReactNode;
 }) {
   return (
@@ -189,9 +203,7 @@ function Section({
         <h3 className="font-heading text-sm font-semibold text-text-primary">
           {title}
         </h3>
-        <span className="rounded-pill bg-surface px-sm py-[2px] text-[10px] uppercase tracking-label text-text-muted">
-          {badge}
-        </span>
+        <SourceBadge tone={tone} label={badge} />
       </div>
       {children}
     </section>
@@ -224,11 +236,7 @@ function Row({
       >
         {item.name}
       </span>
-      {ai && (
-        <span className="rounded-pill bg-midnight-sun-tint px-sm py-[2px] text-[10px] uppercase tracking-label text-midnight-sun">
-          AI
-        </span>
-      )}
+      {ai && <SourceBadge tone="ai" label="AI" />}
       <button
         onClick={onRemove}
         className="text-text-muted hover:text-warning text-xs"

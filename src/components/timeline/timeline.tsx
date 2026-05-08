@@ -4,6 +4,7 @@ import type { DailyWeather } from "@/lib/met";
 import { WeatherSymbol, weatherLabel } from "./weather-symbol";
 import { cn } from "@/lib/utils";
 import { randomQuip } from "@/lib/lars-monsen/quips";
+import { reliabilityExplanation } from "@/components/ui/ai-disclosure";
 
 const DIFFICULTY_LABEL: Record<RouteLeg["difficulty"], string> = {
   easy: "Lett",
@@ -99,17 +100,22 @@ function WeatherBlock({ weather }: { weather: DailyWeather | null }) {
           )}
         </div>
         {weather.reliability !== "high" && (
-          <span
-            className={cn(
-              "inline-flex w-fit text-xs font-bold px-sm py-1 rounded-pill uppercase tracking-label",
-              weather.reliability === "low"
-                ? "bg-flame-hover text-white"
-                : "bg-fjord text-white",
-            )}
-            style={{ fontFamily: "var(--font-stamp)" }}
-          >
-            {RELIABILITY_LABEL[weather.reliability]} prognose
-          </span>
+          <div className="flex flex-col gap-xs">
+            <span
+              className={cn(
+                "inline-flex w-fit text-xs font-bold px-sm py-1 rounded-pill uppercase tracking-label",
+                weather.reliability === "low"
+                  ? "bg-flame-hover text-white"
+                  : "bg-fjord text-white",
+              )}
+              style={{ fontFamily: "var(--font-stamp)" }}
+            >
+              {RELIABILITY_LABEL[weather.reliability]} prognose
+            </span>
+            <span className="text-xs text-text-muted leading-snug">
+              {reliabilityExplanation(weather.reliability)}
+            </span>
+          </div>
         )}
       </div>
     </div>
@@ -197,12 +203,18 @@ export function TripTimelineView({ timeline }: { timeline: TripTimeline }) {
           <TimelineDayCard key={d.dayNumber} day={d} />
         ))}
       </div>
-      {timeline.weatherUpdatedAt && (
-        <p className="text-small text-text-muted">
-          Værdata fra MET Norway, oppdatert{" "}
-          {new Date(timeline.weatherUpdatedAt).toLocaleString("no-NB")}.
+      <div className="flex flex-col gap-xs text-small text-text-muted">
+        {timeline.weatherUpdatedAt && (
+          <p>
+            Værdata fra MET Norway, oppdatert{" "}
+            {new Date(timeline.weatherUpdatedAt).toLocaleString("no-NB")}.
+          </p>
+        )}
+        <p>
+          Tider og stigning er anslag (Naismith + Kartverket høydedata). Tilpass
+          for vær, gruppe og dagsform.
         </p>
-      )}
+      </div>
     </div>
   );
 }
