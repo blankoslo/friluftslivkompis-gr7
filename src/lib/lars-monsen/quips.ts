@@ -45,7 +45,10 @@ export type QuipCategory =
   | "newTripIntro"
   | "inviteHero"
   | "inviteShare"
-  | "etaShare";
+  | "etaShare"
+  | "logEmpty"
+  | "listSaved"
+  | "listShare";
 
 const QUIPS: Record<QuipCategory, string[]> = {
   tripSelect: [
@@ -355,6 +358,23 @@ const QUIPS: Record<QuipCategory, string[]> = {
     "Bra valgt. Solotur uten plan er bare fjas i bushen.",
     "Ferdig. Send et bilde av utsikten når du er fremme.",
     "Bra. En forsinkelse uten varsling er bare drama.",
+  ],
+  logEmpty: [
+    "Ingen turer planlagt. Sofaen vant runden, men kampen er ikke over.",
+    "Tom logg. Lufta er fri og ventetiden kort.",
+    "Ingen turer ennå. Pakk sekken, ikke unnskyldningene.",
+    "Helt blankt. Da er det bare å booke første hytta.",
+    "Tom kalender. Bjørnene venter ikke evig.",
+  ],
+  listSaved: [
+    "Lagret. Ikke la den ligge i støv.",
+    "Den er på lista. Sofaen rister allerede.",
+    "Den blir med videre. Bra valg.",
+  ],
+  listShare: [
+    "Send lista videre. Flere bein, mindre frykt.",
+    "Del den. Ingen liste blir bedre av å ligge i lomma.",
+    "Spre ordet. Naturen tåler litt sosialt press.",
   ],
 };
 

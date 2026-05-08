@@ -21,17 +21,17 @@ export function MonsenLine({
   if (variant === "card") {
     return (
       <div
-        className={`flex items-start gap-sm rounded-md border-2 border-flame-pressed bg-flame-tint px-md py-sm shadow-[2px_2px_0_var(--brand-flame-pressed)] ${
+        className={`flex items-center gap-sm rounded-md border-2 border-flame-pressed bg-flame-tint px-md py-sm shadow-[2px_2px_0_var(--brand-flame-pressed)] ${
           align === "center" ? "justify-center text-center" : ""
         }`}
       >
-        <div className="relative size-8 shrink-0 overflow-hidden rounded-full border-2 border-flame-pressed bg-bg">
+        <div className="relative size-10 shrink-0 overflow-hidden rounded-full border-2 border-flame-pressed bg-bg">
           <Image
             src="/lars-monsen-kayak.png"
             alt="Lars Monsen"
             fill
             className="object-cover object-top"
-            sizes="32px"
+            sizes="40px"
           />
         </div>
         <p
