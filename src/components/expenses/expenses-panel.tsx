@@ -111,12 +111,18 @@ export function ExpensesPanel({
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
       setError(body.error ?? "Klarte ikke å lagre utgift");
-      setToast({ trigger: Date.now(), quip: randomQuip("errorGeneric") });
+      setToast((prev) => ({
+        trigger: (prev?.trigger ?? 0) + 1,
+        quip: randomQuip("errorGeneric"),
+      }));
       return false;
     }
     const trip = await res.json();
     syncFromTrip(trip);
-    setToast({ trigger: Date.now(), quip: randomQuip("expenseAdded") });
+    setToast((prev) => ({
+      trigger: (prev?.trigger ?? 0) + 1,
+      quip: randomQuip("expenseAdded"),
+    }));
     return true;
   }
 

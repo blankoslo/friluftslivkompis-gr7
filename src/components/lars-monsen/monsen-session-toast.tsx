@@ -18,6 +18,7 @@ export function MonsenSessionToast() {
       const parsed = JSON.parse(raw) as { quip?: string; at?: number };
       if (!parsed.quip) return;
       if (parsed.at && Date.now() - parsed.at > 30_000) return;
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setData({ trigger: Date.now(), quip: parsed.quip });
     } catch {}
   }, []);

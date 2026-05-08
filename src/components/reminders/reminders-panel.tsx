@@ -43,7 +43,10 @@ export function RemindersPanel({ tripId, startDate, initialReminders }: Props) {
   );
 
   function fireToast(category: "reminderAdded" | "reminderDue") {
-    setToast({ trigger: Date.now(), quip: randomQuip(category) });
+    setToast((prev) => ({
+      trigger: (prev?.trigger ?? 0) + 1,
+      quip: randomQuip(category),
+    }));
   }
 
   useEffect(() => {
