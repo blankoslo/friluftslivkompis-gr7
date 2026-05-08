@@ -240,7 +240,7 @@ export function PackingList({
       )}
 
       {mode === "fellesutstyr" && (
-        <Section title="Fellesutstyr" tone="data" badge="P2">
+        <Section title="Fellesutstyr" tone="data" badge="Felles">
           <ul className="flex flex-col gap-xs">
             {sharedItems.map((item, idx) => (
               <Row

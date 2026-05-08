@@ -318,19 +318,19 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
 
         <div className="grid gap-lg">
           {!trip.isDemo && (
-            <Section label="Inviter deltakere" badge="G1">
+            <Section label="Inviter deltakere">
               <InviteLink token={trip.inviteToken} />
             </Section>
           )}
 
           {!trip.isDemo && trip.cabins.length >= 2 && (
-            <Section label="Inviter til én dag" badge="G9">
+            <Section label="Inviter til én dag">
               <DayInviteLinks inviteToken={trip.inviteToken} cabins={trip.cabins} />
             </Section>
           )}
 
           {!trip.isDemo && (
-            <Section label="Deltakere" badge="G1, G4">
+            <Section label="Deltakere">
               <ParticipantsLive
                 tripIdOrToken={trip.inviteToken}
                 initialParticipants={trip.participants}
@@ -339,7 +339,7 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
             </Section>
           )}
 
-          <Section label="Hytter og etapper" badge="B3">
+          <Section label="Hytter og etapper">
             <CabinRouteEditor
               initialCabins={trip.cabins}
               tripId={trip._id}
@@ -348,7 +348,7 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
           </Section>
 
           {!trip.isDemo && (
-            <Section label="Hyttetilgjengelighet" badge="B2">
+            <Section label="Hyttetilgjengelighet">
               <CabinAvailability
                 cabins={trip.cabins}
                 persons={Math.max(1, trip.participants.length || 1)}
@@ -358,7 +358,7 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
             </Section>
           )}
 
-          <Section label="Tidslinje og vær" badge="B1 / B6">
+          <Section label="Tidslinje og vær">
             {trip.cabins.length < 2 ? (
               <p
                 className="text-text-primary text-lg leading-snug"
@@ -387,7 +387,7 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
           </Section>
 
           {!trip.isDemo && (
-            <Section label="Pakkeliste" badge="P1, P2, P3">
+            <Section label="Pakkeliste">
               <PackingList
                 tripId={trip._id}
                 initialItems={trip.packingList}
@@ -397,7 +397,7 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
             </Section>
           )}
           {!trip.isDemo && (
-            <Section label="Matplan og handle" badge="P5, P5b, P7">
+            <Section label="Matplan og handle">
               <MealPlanPanel
                 tripId={trip._id}
                 participants={packingParticipants}
@@ -408,7 +408,7 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
             </Section>
           )}
           {!trip.isDemo && (
-            <Section label="Bærevekt per person" badge="P6">
+            <Section label="Bærevekt per person">
               <WeightSummary
                 participants={packingParticipants}
                 packingList={trip.packingList}
@@ -420,7 +420,7 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
             </Section>
           )}
           {!trip.isDemo && (
-            <Section label="Påminnelser" badge="P4">
+            <Section label="Påminnelser">
               <RemindersPanel
                 tripId={trip._id}
                 startDate={trip.startDate}
@@ -429,7 +429,7 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
             </Section>
           )}
           {!trip.isDemo && (
-            <Section label="Utgifter" badge="R1">
+            <Section label="Utgifter">
               <ExpensesPanel
                 tripId={trip._id}
                 initialParticipants={trip.participants.map<ExpensesPanelParticipant>(
@@ -460,11 +460,9 @@ function formatDateRange(start?: string, end?: string) {
 
 function Section({
   label,
-  badge,
   children,
 }: {
   label: string;
-  badge: string;
   children: React.ReactNode;
 }) {
   return (
@@ -473,12 +471,6 @@ function Section({
         <h2 className="font-heading font-bold text-h2 text-forest">
           {label}
         </h2>
-        <span
-          className="text-xs font-bold px-sm py-1 rounded-pill uppercase tracking-label bg-forest text-white"
-          style={{ fontFamily: "var(--font-stamp)" }}
-        >
-          {badge}
-        </span>
       </div>
       <div className="text-text-primary text-body">{children}</div>
     </section>
