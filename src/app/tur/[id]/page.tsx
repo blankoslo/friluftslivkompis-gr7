@@ -15,6 +15,7 @@ import {
 } from "@/components/packing/packing-list";
 import { buildTimeline } from "@/lib/timeline";
 import { TripTimelineView } from "@/components/timeline/timeline";
+import { CabinRouteEditor } from "@/components/route/cabin-route-editor";
 import type { CabinPoint } from "@/lib/route";
 import { randomQuip } from "@/lib/lars-monsen/quips";
 
@@ -183,7 +184,15 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
             </Section>
           )}
 
-          <Section label="Tidslinje, vær, rute" badge="B1 / B3 / B6" accent="fjord">
+          <Section label="Hytter og etapper" badge="B3" accent="fjord">
+            <CabinRouteEditor
+              initialCabins={trip.cabins}
+              tripId={trip._id}
+              isDemo={trip.isDemo}
+            />
+          </Section>
+
+          <Section label="Tidslinje og vær" badge="B1 / B6" accent="fjord">
             {trip.cabins.length < 2 ? (
               <p
                 className="text-text-primary text-lg leading-snug"
