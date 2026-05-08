@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import mongoose from "mongoose";
 import { connectToDatabase } from "@/lib/db/mongoose";
 import { Trip } from "@/models/Trip";
 
@@ -8,7 +9,10 @@ export async function GET(
 ) {
   await connectToDatabase();
   const { id } = await params;
-  const trip = await Trip.findById(id).lean();
+  const query = mongoose.isValidObjectId(id)
+    ? { $or: [{ _id: id }, { inviteToken: id }] }
+    : { inviteToken: id };
+  const trip = await Trip.findOne(query).lean();
   if (!trip) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return NextResponse.json(trip);
 }
