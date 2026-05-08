@@ -7,12 +7,6 @@ import { pickQuips } from "@/lib/lars-monsen/quips";
 
 const OSLO = { lat: 59.9139, lon: 10.7522 };
 
-const SUGGESTIONS = [
-  { label: "Helgetur i mars", q: "helgetur mars" },
-  { label: "Familietur", q: "familietur" },
-  { label: "Hytte-til-hytte", q: "hytte til hytte" },
-];
-
 type LatestTrip = {
   id: string;
   inviteToken: string;
@@ -193,7 +187,7 @@ export default async function HomePage() {
 
         <div className="flex flex-wrap gap-sm mb-xl pb-sm">
           <Link
-            href="/discover?inspire=1"
+            href="/lars-foreslar"
             className="inline-flex items-center justify-center px-md py-sm bg-bg text-flame-pressed border-2 border-flame-pressed rounded-pill font-bold shadow-[2px_2px_0_var(--brand-flame-pressed)] hover:translate-y-[1px] transition-transform"
             style={{
               fontFamily: "var(--font-handwriting)",
@@ -202,15 +196,6 @@ export default async function HomePage() {
           >
             Lars Monsen foreslår
           </Link>
-          {SUGGESTIONS.map((s) => (
-            <Link
-              key={s.label}
-              href={`/discover?q=${encodeURIComponent(s.q)}`}
-              className="inline-flex items-center justify-center px-sm py-sm bg-flame-pressed text-white border-2 border-white rounded-pill font-bold text-xs hover:bg-flame-hover transition-colors"
-            >
-              {s.label}
-            </Link>
-          ))}
         </div>
 
         <section className="bg-bg border-4 border-flame-pressed rounded-lg p-lg pl-[112px] mb-lg relative min-h-[120px] shadow-[6px_6px_0_var(--brand-flame-pressed)]">
