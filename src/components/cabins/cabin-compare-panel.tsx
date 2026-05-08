@@ -91,7 +91,7 @@ export function CabinComparePanel({ tripId, cabinCount }: Props) {
             ✨ Sammenlign hytter
           </button>
           <span className="text-xs text-text-muted">
-            Lars og Claude leser hytteinfo og gir en kort oppsummering.
+            Lars leser hytteinfo og gir en kort oppsummering.
           </span>
         </div>
       )}
