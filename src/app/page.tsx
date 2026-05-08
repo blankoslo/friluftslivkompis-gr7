@@ -124,7 +124,7 @@ export default async function HomePage() {
             </button>
           </form>
 
-          <div className="flex flex-wrap justify-center gap-sm">
+          <div className="flex flex-wrap justify-start w-full gap-sm">
             <Link
               href="/lars-foreslar"
               className="inline-flex items-center justify-center px-md py-sm bg-bg text-flame-pressed border-2 border-flame-pressed rounded-pill font-bold shadow-[2px_2px_0_var(--brand-flame-pressed)] hover:translate-y-[1px] transition-transform"
