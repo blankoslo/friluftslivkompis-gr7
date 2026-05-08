@@ -1,8 +1,9 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { SearchBox } from "@/components/discover/search-box";
 import { CabinPanel } from "@/components/discover/cabin-panel";
 import { FilterPanel } from "@/components/discover/filter-panel";
@@ -42,7 +43,18 @@ const MAX_RADIUS_M = 200_000;
 type Viewport = { lon: number; lat: number; radiusMeters: number };
 
 export default function DiscoverPage() {
+  return (
+    <Suspense fallback={<div className="p-md text-text-muted">Laster...</div>}>
+      <DiscoverPageInner />
+    </Suspense>
+  );
+}
+
+function DiscoverPageInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const addingToTripId = searchParams?.get("addTo") ?? null;
+  const addingTripTitle = searchParams?.get("title") ?? null;
   const [selected, setSelected] = useState<SearchResult | null>(null);
   const [activeCabinId, setActiveCabinId] = useState<number | null>(null);
   const [activeTripId, setActiveTripId] = useState<number | null>(null);
@@ -187,6 +199,33 @@ export default function DiscoverPage() {
     [router],
   );
 
+  const handleAddCabinToTrip = useCallback(
+    async (cabin: { utId?: number; name: string; lat: number; lon: number }) => {
+      if (!addingToTripId) return;
+      try {
+        const res = await fetch(`/api/trips/${addingToTripId}/cabins`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ cabin }),
+        });
+        if (!res.ok) {
+          setMonsenQuip({ id: Date.now(), text: "Klarte ikke å legge til. Prøv igjen." });
+          return;
+        }
+        const data = (await res.json()) as { duplicate?: boolean };
+        setMonsenQuip({
+          id: Date.now(),
+          text: data.duplicate
+            ? `${cabin.name} ligger allerede i ruten.`
+            : `${cabin.name} lagt til i ruten. Trykk «Tilbake til tur» når du er ferdig.`,
+        });
+      } catch {
+        setMonsenQuip({ id: Date.now(), text: "Nettverksfeil. Prøv igjen." });
+      }
+    },
+    [addingToTripId],
+  );
+
   const removeMostRestrictive = useCallback(() => {
     if (!removalSuggestion) return;
     setActiveFilters((prev) => {
@@ -205,9 +244,30 @@ export default function DiscoverPage() {
   return (
     <main className="bg-bg text-text-primary min-h-screen">
       <div className="mx-auto max-w-5xl px-md py-lg sm:px-lg sm:py-xl">
+        {addingToTripId && (
+          <div className="mb-md flex flex-wrap items-center justify-between gap-sm rounded-lg border-2 border-flame-pressed bg-midnight-sun-tint px-md py-sm shadow-[3px_3px_0_var(--brand-flame-pressed)]">
+            <div className="flex flex-col">
+              <span
+                className="text-xs uppercase tracking-label text-flame-pressed"
+                style={{ fontFamily: "var(--font-stamp)" }}
+              >
+                Legger til hytter i
+              </span>
+              <span className="font-heading text-base font-bold text-text-primary">
+                {addingTripTitle ?? "pågående tur"}
+              </span>
+            </div>
+            <Link
+              href={`/tur/${addingToTripId}`}
+              className="rounded-md bg-flame-primary px-md py-sm text-sm font-bold text-white hover:bg-flame-hover active:bg-flame-pressed"
+            >
+              Tilbake til tur →
+            </Link>
+          </div>
+        )}
         <header className="mb-lg">
           <h1 className="font-heading text-3xl font-bold text-text-primary sm:text-4xl">
-            Finn turen
+            {addingToTripId ? "Legg til hytter på kart" : "Finn turen"}
           </h1>
           <p
             className="mt-xs text-flame-pressed"
@@ -218,7 +278,9 @@ export default function DiscoverPage() {
               display: "inline-block",
             }}
           >
-            {heroQuip} ↓
+            {addingToTripId
+              ? "Klikk en hytte i kartet, så får du en knapp for å legge den i ruten."
+              : `${heroQuip} ↓`}
           </p>
         </header>
 
@@ -243,6 +305,14 @@ export default function DiscoverPage() {
                 key={activeCabinId}
                 cabinId={activeCabinId!}
                 onClose={() => setActiveCabinId(null)}
+                addToTrip={
+                  addingToTripId
+                    ? {
+                        title: addingTripTitle,
+                        onAdd: handleAddCabinToTrip,
+                      }
+                    : null
+                }
               />
             ) : showTripList ? (
               <TripList
@@ -265,7 +335,16 @@ export default function DiscoverPage() {
             ) : selected ? (
               <SelectedDetails
                 selected={selected}
+                addingMode={Boolean(addingToTripId)}
+                addingTitle={addingTripTitle}
                 onCreateTrip={() => handleCreateTrip(selected.name, selected.municipality ?? undefined)}
+                onAddToTrip={() =>
+                  handleAddCabinToTrip({
+                    name: selected.name,
+                    lat: selected.lat,
+                    lon: selected.lon,
+                  })
+                }
               />
             ) : (
               <Legend />
@@ -291,10 +370,16 @@ export default function DiscoverPage() {
 
 function SelectedDetails({
   selected,
+  addingMode,
+  addingTitle,
   onCreateTrip,
+  onAddToTrip,
 }: {
   selected: SearchResult;
+  addingMode: boolean;
+  addingTitle: string | null;
   onCreateTrip: () => void;
+  onAddToTrip: () => void;
 }) {
   return (
     <div className="rounded-lg border-2 border-flame-pressed bg-bg p-md text-sm shadow-[4px_4px_0_var(--brand-flame-pressed)]">
@@ -329,10 +414,12 @@ function SelectedDetails({
       </dl>
       <button
         type="button"
-        onClick={onCreateTrip}
+        onClick={addingMode ? onAddToTrip : onCreateTrip}
         className="mt-md w-full rounded-md bg-flame-primary px-md py-sm text-sm font-bold text-white hover:bg-flame-hover active:bg-flame-pressed shadow-[3px_3px_0_var(--brand-flame-pressed)] hover:translate-y-[1px] hover:shadow-[2px_2px_0_var(--brand-flame-pressed)] transition-transform"
       >
-        Lag tur her →
+        {addingMode
+          ? `+ Legg til${addingTitle ? ` i ${addingTitle}` : " i tur"}`
+          : "Lag tur her →"}
       </button>
     </div>
   );

@@ -14,6 +14,15 @@ import { StaleBadge } from "@/components/ui/stale-badge";
 type Props = {
   cabinId: number;
   onClose: () => void;
+  addToTrip?: {
+    title: string | null;
+    onAdd: (cabin: {
+      utId: number;
+      name: string;
+      lat: number;
+      lon: number;
+    }) => void;
+  } | null;
 };
 
 type State =
@@ -28,7 +37,7 @@ type ApiResponse = {
   snapshotAt?: string | null;
 };
 
-export function CabinPanel({ cabinId, onClose }: Props) {
+export function CabinPanel({ cabinId, onClose, addToTrip }: Props) {
   const [state, setState] = useState<State>({ status: "loading" });
   const [quip] = useState(() => randomQuip("cabinSelect"));
 
@@ -96,6 +105,24 @@ export function CabinPanel({ cabinId, onClose }: Props) {
             </div>
           )}
           <CabinBody cabin={state.cabin} />
+          {addToTrip && state.cabin.geojson && (
+            <button
+              type="button"
+              onClick={() => {
+                const coords = state.cabin.geojson?.coordinates;
+                if (!coords || coords.length < 2) return;
+                addToTrip.onAdd({
+                  utId: state.cabin.id,
+                  name: state.cabin.name,
+                  lon: coords[0],
+                  lat: coords[1],
+                });
+              }}
+              className="mt-3 w-full rounded-md bg-flame-primary px-3 py-2 text-sm font-bold text-white hover:bg-flame-hover active:bg-flame-pressed shadow-[3px_3px_0_var(--brand-flame-pressed)] hover:translate-y-[1px] hover:shadow-[2px_2px_0_var(--brand-flame-pressed)] transition-transform"
+            >
+              + Legg til {addToTrip.title ? `i ${addToTrip.title}` : "i tur"}
+            </button>
+          )}
         </>
       )}
 

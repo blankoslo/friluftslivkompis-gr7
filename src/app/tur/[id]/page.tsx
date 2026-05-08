@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import mongoose from "mongoose";
 import { connectToDatabase } from "@/lib/db/mongoose";
@@ -30,10 +31,11 @@ import {
   RemindersPanel,
   type Reminder,
 } from "@/components/reminders/reminders-panel";
-import { buildTimeline } from "@/lib/timeline";
-import { TripTimelineView } from "@/components/timeline/timeline";
+import { RouteMapAndTimeline } from "@/components/route/route-map-and-timeline";
 import { CabinRouteEditor } from "@/components/route/cabin-route-editor";
 import { CabinAvailability } from "@/components/route/cabin-availability";
+import { CabinComparePanel } from "@/components/cabins/cabin-compare-panel";
+import { GpxExportButton } from "@/components/route/gpx-export-button";
 import type { CabinPoint } from "@/lib/route";
 import { randomQuip } from "@/lib/lars-monsen/quips";
 import { MonsenSessionToast } from "@/components/lars-monsen/monsen-session-toast";
@@ -230,18 +232,6 @@ function computeTotalDays(
   return null;
 }
 
-async function TimelineSection({
-  cabins,
-  startDate,
-  skipElevation,
-}: {
-  cabins: CabinPoint[];
-  startDate: string | null;
-  skipElevation: boolean;
-}) {
-  const timeline = await buildTimeline(cabins, startDate, { skipElevation });
-  return <TripTimelineView timeline={timeline} />;
-}
 
 export default async function TripPage({ params, searchParams }: TripPageProps) {
   const { id } = await params;
@@ -345,6 +335,27 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
               tripId={trip._id}
               isDemo={trip.isDemo}
             />
+            {!trip.isDemo && (
+              <div className="mt-md flex flex-wrap items-center gap-sm">
+                <Link
+                  href={`/discover?addTo=${trip._id}&title=${encodeURIComponent(trip.title)}`}
+                  className="inline-flex items-center gap-xs rounded-md border-2 border-flame-pressed bg-bg px-md py-sm text-sm font-bold text-flame-pressed shadow-[3px_3px_0_var(--brand-flame-pressed)] hover:translate-y-[1px] hover:shadow-[2px_2px_0_var(--brand-flame-pressed)] transition-transform"
+                >
+                  <span>🗺️</span>
+                  Finn flere hytter på kart
+                </Link>
+                <span className="text-xs text-text-muted">
+                  Åpner Discover med pågående tur i sikte.
+                </span>
+              </div>
+            )}
+          </Section>
+
+          <Section label="Eksporter til klokke / GPS">
+            <GpxExportButton
+              tripIdOrToken={trip._id}
+              cabinCount={trip.cabins.length}
+            />
           </Section>
 
           {!trip.isDemo && (
@@ -358,7 +369,7 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
             </Section>
           )}
 
-          <Section label="Tidslinje og vær">
+          <Section label="Kart, tidslinje og vær">
             {trip.cabins.length < 2 ? (
               <p
                 className="text-text-primary text-lg leading-snug"
@@ -377,7 +388,7 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
                   </p>
                 }
               >
-                <TimelineSection
+                <RouteMapAndTimeline
                   cabins={trip.cabins}
                   startDate={startISO}
                   skipElevation={skipElevation}
