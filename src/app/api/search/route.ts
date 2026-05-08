@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { HIKING_PLACE_TYPES, searchPlaces, type PlaceHit } from "@/lib/kartverket";
-import { searchUT, type UtHit } from "@/lib/ut";
+import {
+  searchUT,
+  searchCabinsInSnapshot,
+  SNAPSHOT_GENERATED_AT,
+  type UtHit,
+} from "@/lib/ut";
 import type { SearchResult } from "@/lib/search/types";
 
-function fromUt(hit: UtHit): SearchResult {
+function fromUt(hit: UtHit, stale = false): SearchResult {
   return {
     source: "ut",
     kind: hit.kind,
@@ -15,6 +20,7 @@ function fromUt(hit: UtHit): SearchResult {
     municipality: null,
     county: null,
     dntCabin: hit.dntCabin,
+    stale,
   };
 }
 
@@ -30,6 +36,7 @@ function fromKartverket(hit: PlaceHit): SearchResult {
     municipality: hit.municipality,
     county: hit.county,
     dntCabin: null,
+    stale: false,
   };
 }
 
@@ -69,30 +76,44 @@ export async function GET(req: NextRequest) {
     console.error("[/api/search] kartverket failed", kvRes.reason);
   }
 
-  if (utRes.status === "rejected" && kvRes.status === "rejected") {
+  const utFailed = utRes.status === "rejected";
+  const utHits =
+    utRes.status === "fulfilled" ? utRes.value.map((h) => fromUt(h, false)) : [];
+  const kvHits =
+    kvRes.status === "fulfilled" ? kvRes.value.map(fromKartverket) : [];
+
+  const fallbackUtHits = utFailed
+    ? searchCabinsInSnapshot(q, limit).map((h) => fromUt(h, true))
+    : [];
+
+  if (utFailed && kvRes.status === "rejected" && fallbackUtHits.length === 0) {
     return NextResponse.json(
-      { error: "search upstream failed", results: [] },
+      { error: "search upstream failed", results: [], stale: false },
       { status: 502 },
     );
   }
 
-  const utHits = utRes.status === "fulfilled" ? utRes.value.map(fromUt) : [];
-  const kvHits =
-    kvRes.status === "fulfilled" ? kvRes.value.map(fromKartverket) : [];
-
-  const merged: SearchResult[] = [...utHits];
+  const merged: SearchResult[] = [...utHits, ...fallbackUtHits];
   for (const hit of kvHits) {
     if (merged.some((existing) => isNearDup(existing, hit))) continue;
     merged.push(hit);
   }
 
+  const anyStale = merged.some((r) => r.stale);
+
   return NextResponse.json(
-    { results: merged.slice(0, limit) },
     {
-      headers: {
-        "Cache-Control":
-          "public, s-maxage=3600, stale-while-revalidate=86400",
-      },
+      results: merged.slice(0, limit),
+      stale: anyStale,
+      snapshotAt: anyStale ? SNAPSHOT_GENERATED_AT : null,
+    },
+    {
+      headers: anyStale
+        ? { "Cache-Control": "no-store", "X-Data-Source": "snapshot" }
+        : {
+            "Cache-Control":
+              "public, s-maxage=3600, stale-while-revalidate=86400",
+          },
     },
   );
 }

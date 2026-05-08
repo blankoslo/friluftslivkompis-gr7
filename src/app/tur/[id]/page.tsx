@@ -4,16 +4,32 @@ import mongoose from "mongoose";
 import { connectToDatabase } from "@/lib/db/mongoose";
 import {
   Trip,
+  type IConsumable,
   type IExpense,
+  type IMealDay,
   type IParticipant,
   type IPackingItem,
+  type IReminder,
+  type IShoppingItem,
   type ITripCabin,
 } from "@/models/Trip";
 import { InviteLink } from "./invite-link";
 import {
   PackingList,
   type PackingItem,
+  type PackingListParticipant,
 } from "@/components/packing/packing-list";
+import { WeightSummary } from "@/components/packing/weight-summary";
+import {
+  MealPlanPanel,
+  type ConsumableItem,
+  type MealPlanDay,
+  type ShoppingListItem,
+} from "@/components/meal-plan/meal-plan-panel";
+import {
+  RemindersPanel,
+  type Reminder,
+} from "@/components/reminders/reminders-panel";
 import { buildTimeline } from "@/lib/timeline";
 import { TripTimelineView } from "@/components/timeline/timeline";
 import { CabinRouteEditor } from "@/components/route/cabin-route-editor";
@@ -45,7 +61,7 @@ function demoStartIso(): string {
 
 interface TripPageProps {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ skipElevation?: string }>;
+  searchParams: Promise<{ skipElevation?: string; as?: string }>;
 }
 
 interface TripView {
@@ -64,6 +80,10 @@ interface TripView {
   packingList: PackingItem[];
   cabins: CabinPoint[];
   expenses: ExpensesPanelExpense[];
+  mealPlan: MealPlanDay[];
+  shoppingList: ShoppingListItem[];
+  consumables: ConsumableItem[];
+  reminders: Reminder[];
   totalDays: number | null;
   isDemo: boolean;
 }
@@ -82,6 +102,10 @@ async function loadTrip(id: string): Promise<TripView | null> {
       packingList: [],
       cabins: DEMO_CABINS,
       expenses: [],
+      mealPlan: [],
+      shoppingList: [],
+      consumables: [],
+      reminders: [],
       totalDays: DEMO_CABINS.length - 1,
       isDemo: true,
     };
@@ -98,9 +122,13 @@ async function loadTrip(id: string): Promise<TripView | null> {
     startDate?: Date;
     endDate?: Date;
     participants: (IParticipant & { _id: mongoose.Types.ObjectId })[];
-    packingList?: IPackingItem[];
+    packingList?: (IPackingItem & { _id?: mongoose.Types.ObjectId })[];
     cabins?: ITripCabin[];
     expenses?: IExpense[];
+    mealPlan?: IMealDay[];
+    shoppingList?: (IShoppingItem & { _id?: mongoose.Types.ObjectId })[];
+    consumables?: (IConsumable & { _id?: mongoose.Types.ObjectId })[];
+    reminders?: (IReminder & { _id?: mongoose.Types.ObjectId })[];
   } | null>();
   if (!doc) return null;
   const cabins = (doc.cabins ?? []).map((c) => ({
@@ -123,9 +151,16 @@ async function loadTrip(id: string): Promise<TripView | null> {
       days: p.days,
     })),
     packingList: (doc.packingList ?? []).map((item) => ({
+      _id: item._id?.toString(),
       name: item.name,
       packed: item.packed ?? false,
       isAiSuggested: item.isAiSuggested ?? false,
+      quantity: item.quantity ?? 1,
+      category: item.category,
+      isShared: item.isShared ?? false,
+      weightGrams: item.weightGrams,
+      reason: item.reason,
+      assignedTo: item.assignedTo?.toString(),
     })),
     cabins,
     expenses: (doc.expenses ?? []).map((e) => ({
@@ -136,6 +171,45 @@ async function loadTrip(id: string): Promise<TripView | null> {
       splitAmong: (e.splitAmong ?? []).map((s) => s.toString()),
       dayNumber: e.dayNumber ?? null,
       createdAt: e.createdAt?.toISOString(),
+    })),
+    mealPlan: (doc.mealPlan ?? []).map((d) => ({
+      dayNumber: d.dayNumber,
+      participantsToday: d.participantsToday,
+      meals: (d.meals ?? []).map((m) => ({
+        type: m.type,
+        name: m.name,
+        ingredients: (m.ingredients ?? []).map((i) => ({
+          name: i.name,
+          quantity: i.quantity,
+          unit: i.unit,
+          category: i.category,
+          weightGrams: i.weightGrams,
+        })),
+      })),
+    })),
+    shoppingList: (doc.shoppingList ?? []).map((s) => ({
+      _id: s._id?.toString(),
+      name: s.name,
+      quantity: s.quantity,
+      unit: s.unit,
+      category: s.category,
+      bought: s.bought ?? false,
+      assignedTo: s.assignedTo?.toString(),
+    })),
+    consumables: (doc.consumables ?? []).map((c) => ({
+      _id: c._id?.toString(),
+      name: c.name,
+      quantity: c.quantity,
+      unit: c.unit,
+      reason: c.reason,
+      bought: c.bought ?? false,
+      assignedTo: c.assignedTo?.toString(),
+    })),
+    reminders: (doc.reminders ?? []).map((r) => ({
+      _id: r._id?.toString(),
+      daysBefore: r.daysBefore,
+      label: r.label,
+      kind: r.kind ?? "annet",
     })),
     totalDays: computeTotalDays(doc.startDate, doc.endDate, cabins.length),
     isDemo: false,
@@ -170,7 +244,7 @@ async function TimelineSection({
 
 export default async function TripPage({ params, searchParams }: TripPageProps) {
   const { id } = await params;
-  const { skipElevation: skipElevQs } = await searchParams;
+  const { skipElevation: skipElevQs, as: asParticipantId } = await searchParams;
   const skipElevation = skipElevQs === "1" || skipElevQs === "true";
 
   const trip = await loadTrip(id);
@@ -179,6 +253,27 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
   const dateRange = formatDateRange(trip.startDate, trip.endDate);
   const startISO = trip.startDate?.slice(0, 10) ?? null;
   const accepted = trip.participants.filter((p) => p.status === "accepted").length;
+  const packingParticipants: PackingListParticipant[] = trip.participants.map(
+    (p) => ({ id: p.id, name: p.name }),
+  );
+  const participantDays = Object.fromEntries(
+    trip.participants.map((p) => [p.id, p.days ?? []]),
+  );
+  const mealDayLite = trip.mealPlan.map((d) => ({
+    dayNumber: d.dayNumber,
+    participantsToday: d.participantsToday,
+    totalWeightGrams: d.meals.reduce(
+      (acc, m) =>
+        acc + m.ingredients.reduce((a, i) => a + (i.weightGrams ?? 0), 0),
+      0,
+    ),
+  }));
+  const consumablesLite = trip.consumables.map((c) => ({
+    name: c.name,
+    quantity: c.quantity,
+    weightGrams: undefined,
+    assignedTo: c.assignedTo,
+  }));
 
   return (
     <main className="bg-bg min-h-screen">
@@ -284,8 +379,45 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
           </Section>
 
           {!trip.isDemo && (
-            <Section label="Pakkeliste" badge="P1" accent="midnight-sun">
-              <PackingList tripId={trip._id} initialItems={trip.packingList} />
+            <Section label="Pakkeliste" badge="P1, P2, P3" accent="midnight-sun">
+              <PackingList
+                tripId={trip._id}
+                initialItems={trip.packingList}
+                participants={packingParticipants}
+                currentParticipantId={asParticipantId}
+              />
+            </Section>
+          )}
+          {!trip.isDemo && (
+            <Section label="Matplan og handle" badge="P5, P5b, P7" accent="forest">
+              <MealPlanPanel
+                tripId={trip._id}
+                participants={packingParticipants}
+                initialMealPlan={trip.mealPlan}
+                initialShoppingList={trip.shoppingList}
+                initialConsumables={trip.consumables}
+              />
+            </Section>
+          )}
+          {!trip.isDemo && (
+            <Section label="Bærevekt per person" badge="P6" accent="fjord">
+              <WeightSummary
+                participants={packingParticipants}
+                packingList={trip.packingList}
+                mealDays={mealDayLite}
+                consumables={consumablesLite}
+                participantDays={participantDays}
+                totalDays={trip.totalDays}
+              />
+            </Section>
+          )}
+          {!trip.isDemo && (
+            <Section label="Påminnelser" badge="P4" accent="midnight-sun">
+              <RemindersPanel
+                tripId={trip._id}
+                startDate={trip.startDate}
+                initialReminders={trip.reminders}
+              />
             </Section>
           )}
           {!trip.isDemo && (

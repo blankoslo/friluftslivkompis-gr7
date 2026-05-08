@@ -9,6 +9,7 @@ export type TripPhase =
   | "return";
 
 export interface IParticipant {
+  _id?: mongoose.Types.ObjectId;
   userId?: mongoose.Types.ObjectId;
   name: string;
   email?: string;
@@ -33,11 +34,26 @@ export interface ITripCabin {
   lon: number;
 }
 
+export type PackingCategory =
+  | "klær"
+  | "sove"
+  | "mat"
+  | "navigasjon"
+  | "sikkerhet"
+  | "fellesutstyr"
+  | "annet";
+
 export interface IPackingItem {
+  _id?: mongoose.Types.ObjectId;
   name: string;
   assignedTo?: mongoose.Types.ObjectId;
   packed: boolean;
   isAiSuggested: boolean;
+  quantity?: number;
+  category?: PackingCategory;
+  isShared?: boolean;
+  weightGrams?: number;
+  reason?: string;
 }
 
 export interface IExpense {
@@ -48,6 +64,62 @@ export interface IExpense {
   splitAmong: mongoose.Types.ObjectId[];
   dayNumber?: number;
   createdAt?: Date;
+}
+
+export type MealType = "frokost" | "lunsj" | "middag" | "snack";
+
+export interface IIngredient {
+  name: string;
+  quantity: number;
+  unit: string;
+  category?: string;
+  weightGrams?: number;
+}
+
+export interface IMeal {
+  type: MealType;
+  name: string;
+  ingredients: IIngredient[];
+}
+
+export interface IMealDay {
+  dayNumber: number;
+  participantsToday: number;
+  meals: IMeal[];
+}
+
+export interface IShoppingItem {
+  _id?: mongoose.Types.ObjectId;
+  name: string;
+  quantity: number;
+  unit: string;
+  category?: string;
+  assignedTo?: mongoose.Types.ObjectId;
+  bought: boolean;
+}
+
+export interface IConsumable {
+  _id?: mongoose.Types.ObjectId;
+  name: string;
+  quantity: number;
+  unit: string;
+  reason?: string;
+  assignedTo?: mongoose.Types.ObjectId;
+  bought: boolean;
+}
+
+export interface IReminder {
+  _id?: mongoose.Types.ObjectId;
+  daysBefore: number;
+  label: string;
+  kind: "pakk" | "handle" | "vær" | "annet";
+}
+
+export interface IPackingSnapshot {
+  weatherKey?: string;
+  participantsHash?: string;
+  durationDays?: number;
+  generatedAt?: Date;
 }
 
 export interface ITrip {
@@ -66,6 +138,11 @@ export interface ITrip {
   legs: ILeg[];
   participants: IParticipant[];
   packingList: IPackingItem[];
+  packingSnapshot?: IPackingSnapshot;
+  mealPlan: IMealDay[];
+  shoppingList: IShoppingItem[];
+  consumables: IConsumable[];
+  reminders: IReminder[];
   expenses: IExpense[];
   createdBy: mongoose.Types.ObjectId;
   createdAt: Date;
@@ -104,12 +181,98 @@ const legSchema = new Schema<ILeg>({
   weather: { type: Schema.Types.Mixed },
 });
 
+const PACKING_CATEGORIES = [
+  "klær",
+  "sove",
+  "mat",
+  "navigasjon",
+  "sikkerhet",
+  "fellesutstyr",
+  "annet",
+] as const;
+
 const packingItemSchema = new Schema<IPackingItem>({
   name: { type: String, required: true },
-  assignedTo: { type: Schema.Types.ObjectId, ref: "User" },
+  assignedTo: { type: Schema.Types.ObjectId },
   packed: { type: Boolean, default: false },
   isAiSuggested: { type: Boolean, default: false },
+  quantity: { type: Number, default: 1 },
+  category: { type: String, enum: PACKING_CATEGORIES },
+  isShared: { type: Boolean, default: false },
+  weightGrams: { type: Number },
+  reason: { type: String },
 });
+
+const ingredientSchema = new Schema<IIngredient>(
+  {
+    name: { type: String, required: true },
+    quantity: { type: Number, required: true },
+    unit: { type: String, required: true },
+    category: String,
+    weightGrams: Number,
+  },
+  { _id: false },
+);
+
+const mealSchema = new Schema<IMeal>(
+  {
+    type: {
+      type: String,
+      enum: ["frokost", "lunsj", "middag", "snack"],
+      required: true,
+    },
+    name: { type: String, required: true },
+    ingredients: [ingredientSchema],
+  },
+  { _id: false },
+);
+
+const mealDaySchema = new Schema<IMealDay>(
+  {
+    dayNumber: { type: Number, required: true },
+    participantsToday: { type: Number, required: true },
+    meals: [mealSchema],
+  },
+  { _id: false },
+);
+
+const shoppingItemSchema = new Schema<IShoppingItem>({
+  name: { type: String, required: true },
+  quantity: { type: Number, required: true },
+  unit: { type: String, required: true },
+  category: String,
+  assignedTo: { type: Schema.Types.ObjectId },
+  bought: { type: Boolean, default: false },
+});
+
+const consumableSchema = new Schema<IConsumable>({
+  name: { type: String, required: true },
+  quantity: { type: Number, required: true },
+  unit: { type: String, required: true },
+  reason: String,
+  assignedTo: { type: Schema.Types.ObjectId },
+  bought: { type: Boolean, default: false },
+});
+
+const reminderSchema = new Schema<IReminder>({
+  daysBefore: { type: Number, required: true },
+  label: { type: String, required: true },
+  kind: {
+    type: String,
+    enum: ["pakk", "handle", "vær", "annet"],
+    default: "annet",
+  },
+});
+
+const packingSnapshotSchema = new Schema<IPackingSnapshot>(
+  {
+    weatherKey: String,
+    participantsHash: String,
+    durationDays: Number,
+    generatedAt: Date,
+  },
+  { _id: false },
+);
 
 const expenseSchema = new Schema<IExpense>(
   {
@@ -142,10 +305,15 @@ const tripSchema = new Schema<ITrip>(
     legs: [legSchema],
     participants: [participantSchema],
     packingList: [packingItemSchema],
+    packingSnapshot: packingSnapshotSchema,
+    mealPlan: [mealDaySchema],
+    shoppingList: [shoppingItemSchema],
+    consumables: [consumableSchema],
+    reminders: [reminderSchema],
     expenses: [expenseSchema],
     createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export const Trip = models.Trip || model<ITrip>("Trip", tripSchema);

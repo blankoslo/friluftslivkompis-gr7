@@ -9,11 +9,14 @@ export type SearchResult = {
   municipality: string | null;
   county: string | null;
   dntCabin: boolean | null;
+  stale?: boolean;
 };
 
 export type SearchResponse = {
   results: SearchResult[];
   error?: string;
+  stale?: boolean;
+  snapshotAt?: string | null;
 };
 
 const KIND_LABEL: Record<SearchResult["kind"], string> = {

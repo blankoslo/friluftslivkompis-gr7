@@ -27,6 +27,15 @@ export {
   type TripGrading,
 } from "./trips-near";
 export {
+  SNAPSHOT_GENERATED_AT,
+  SNAPSHOT_SOURCE,
+  SNAPSHOT_COUNT,
+  snapshotAgeDays,
+  getCabinFromSnapshot,
+  listCabinsFromSnapshot,
+  searchCabinsInSnapshot,
+} from "./fallback";
+export {
   serviceLevelLabel,
   cabinAccessibility,
   totalBeds,

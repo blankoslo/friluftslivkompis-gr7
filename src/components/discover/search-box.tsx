@@ -7,6 +7,7 @@ import {
   type SearchResponse,
   type SearchResult,
 } from "@/lib/search/types";
+import { StaleBadge } from "@/components/ui/stale-badge";
 
 const DEBOUNCE_MS = 200;
 const MIN_CHARS = 3;
@@ -23,6 +24,8 @@ export function SearchBox({ selected, onSelect }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
+  const [stale, setStale] = useState(false);
+  const [snapshotAt, setSnapshotAt] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const trimmed = query.trim();
@@ -45,6 +48,8 @@ export function SearchBox({ selected, onSelect }: Props) {
           throw new Error(data.error ?? `Søk feilet (${res.status})`);
         }
         setResults(data.results);
+        setStale(data.stale === true);
+        setSnapshotAt(data.snapshotAt ?? null);
         setActive(0);
       } catch (err) {
         if ((err as Error).name === "AbortError") return;
@@ -136,6 +141,14 @@ export function SearchBox({ selected, onSelect }: Props) {
           role="listbox"
           className="absolute z-20 mt-1 max-h-96 w-full overflow-auto rounded-lg border border-border bg-background shadow-lg"
         >
+          {!visibleLoading && stale && (
+            <li className="border-b border-border bg-warning-bg/40 px-4 py-2">
+              <StaleBadge snapshotAt={snapshotAt} />
+              <p className="mt-1 text-xs text-text-muted leading-snug">
+                DNT-tjenesten svarer ikke. Viser hytter fra forhåndslastet snapshot.
+              </p>
+            </li>
+          )}
           {visibleLoading && (
             <li className="px-4 py-3 text-sm text-muted-foreground">Søker…</li>
           )}
@@ -172,14 +185,17 @@ export function SearchBox({ selected, onSelect }: Props) {
                     </div>
                   )}
                 </div>
-                <span
-                  className={cn(
-                    "shrink-0 rounded-md px-2 py-0.5 text-xs font-medium",
-                    badgeClasses(r),
-                  )}
-                >
-                  {resultLabel(r)}
-                </span>
+                <div className="flex shrink-0 items-center gap-1">
+                  {r.stale && <StaleBadge snapshotAt={snapshotAt} compact />}
+                  <span
+                    className={cn(
+                      "rounded-md px-2 py-0.5 text-xs font-medium",
+                      badgeClasses(r),
+                    )}
+                  >
+                    {resultLabel(r)}
+                  </span>
+                </div>
               </li>
             ))}
         </ul>

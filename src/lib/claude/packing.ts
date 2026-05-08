@@ -16,6 +16,7 @@ export interface GeneratedPackingItem {
   category: PackingCategory;
   quantity: number;
   isShared: boolean;
+  weightGrams: number;
   reason: string;
 }
 
@@ -40,7 +41,7 @@ const PACKING_SCHEMA = {
     items: {
       type: "array",
       description:
-        "Pakkeliste tilpasset vær, varighet og gruppestørrelse. 12-25 elementer.",
+        "Pakkeliste tilpasset vær, varighet og gruppestørrelse. 14-26 elementer.",
       items: {
         type: "object",
         properties: {
@@ -60,11 +61,16 @@ const PACKING_SCHEMA = {
           quantity: {
             type: "integer",
             description:
-              "Antall. For personlig utstyr: 1. For mat/dagsporsjoner: dager. For fellesutstyr: 1.",
+              "Antall. Personlig: 1. Mat/dagsporsjoner: dager. Fellesutstyr: 1.",
           },
           isShared: {
             type: "boolean",
             description: "True hvis fellesutstyr som gruppen deler på.",
+          },
+          weightGrams: {
+            type: "integer",
+            description:
+              "Estimert vekt i gram per enhet (én ting). Realistiske turtall: hodelykt 80, sovepose 1200, telt 2500, gass 230g boks, dagsmat 700.",
           },
           reason: {
             type: "string",
@@ -72,7 +78,14 @@ const PACKING_SCHEMA = {
               "Maks 80 tegn, Monsen-tonen. Hvorfor denne tingen er med.",
           },
         },
-        required: ["name", "category", "quantity", "isShared", "reason"],
+        required: [
+          "name",
+          "category",
+          "quantity",
+          "isShared",
+          "weightGrams",
+          "reason",
+        ],
         additionalProperties: false,
       },
     },
@@ -155,12 +168,29 @@ function buildUserPrompt(input: PackingGenerationInput): string {
 
   lines.push("");
   lines.push("Krav:");
-  lines.push("- 12-25 elementer.");
+  lines.push("- 14-26 elementer.");
   lines.push("- Skill mellom personlig utstyr og fellesutstyr (isShared=true).");
   lines.push("- Tilpass klær til temperaturen og nedbør.");
   lines.push("- Mengder skal reflektere dager og personer (mat, gass).");
   lines.push("- Ta alltid med kart, kompass, hodelykt og førstehjelp.");
+  lines.push("- weightGrams skal være realistisk vekt per enhet.");
   lines.push("- Returner gyldig JSON som matcher schema.");
 
   return lines.join("\n");
+}
+
+export function snapshotKey(input: {
+  participantCount: number;
+  durationDays: number;
+  weather: TripWeatherSummary | null;
+}): { weatherKey: string; participantsHash: string; durationDays: number } {
+  const w = input.weather;
+  const weatherKey = w
+    ? `${Math.round(w.minTempC)}|${Math.round(w.maxTempC)}|${Math.round(w.totalPrecipMm)}|${Math.round(w.maxWindMs)}|${w.dominantSymbol ?? ""}`
+    : "none";
+  return {
+    weatherKey,
+    participantsHash: String(input.participantCount),
+    durationDays: input.durationDays,
+  };
 }

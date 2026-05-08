@@ -9,6 +9,7 @@ import {
 } from "@/lib/ut";
 import { cn } from "@/lib/utils";
 import { randomQuip } from "@/lib/lars-monsen/quips";
+import { StaleBadge } from "@/components/ui/stale-badge";
 
 type Props = {
   cabinId: number;
@@ -18,7 +19,14 @@ type Props = {
 type State =
   | { status: "loading" }
   | { status: "error"; message: string }
-  | { status: "ready"; cabin: Cabin };
+  | { status: "ready"; cabin: Cabin; stale: boolean; snapshotAt: string | null };
+
+type ApiResponse = {
+  cabin?: Cabin;
+  error?: string;
+  stale?: boolean;
+  snapshotAt?: string | null;
+};
 
 export function CabinPanel({ cabinId, onClose }: Props) {
   const [state, setState] = useState<State>({ status: "loading" });
@@ -29,11 +37,16 @@ export function CabinPanel({ cabinId, onClose }: Props) {
 
     fetch(`/api/cabins/${cabinId}`, { signal: controller.signal })
       .then(async (res) => {
-        const data = (await res.json()) as { cabin?: Cabin; error?: string };
+        const data = (await res.json()) as ApiResponse;
         if (!res.ok || !data.cabin) {
           throw new Error(data.error ?? `Hytte ${cabinId} kunne ikke hentes`);
         }
-        setState({ status: "ready", cabin: data.cabin });
+        setState({
+          status: "ready",
+          cabin: data.cabin,
+          stale: data.stale === true,
+          snapshotAt: data.snapshotAt ?? null,
+        });
       })
       .catch((err) => {
         if ((err as Error).name === "AbortError") return;
@@ -71,7 +84,20 @@ export function CabinPanel({ cabinId, onClose }: Props) {
         <p className="text-destructive">{state.message}</p>
       )}
 
-      {state.status === "ready" && <CabinBody cabin={state.cabin} />}
+      {state.status === "ready" && (
+        <>
+          {state.stale && (
+            <div className="mb-3">
+              <StaleBadge snapshotAt={state.snapshotAt} />
+              <p className="mt-1.5 text-xs text-text-muted leading-relaxed">
+                DNT-tjenesten er nede. Viser forhåndslastet snapshot - tall og
+                åpningstider kan ha endret seg.
+              </p>
+            </div>
+          )}
+          <CabinBody cabin={state.cabin} />
+        </>
+      )}
 
       {state.status === "ready" && (
         <p

@@ -1,13 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
-import { fetchAllDntCabins } from "@/lib/ut";
+import {
+  fetchAllDntCabins,
+  listCabinsFromSnapshot,
+  SNAPSHOT_GENERATED_AT,
+  SNAPSHOT_SOURCE,
+  type CabinListItem,
+} from "@/lib/ut";
 
 export const revalidate = 86400;
 
-export async function GET(req: NextRequest) {
-  try {
-    const cabins = await fetchAllDntCabins({ signal: req.signal });
-
-    const features = cabins.map((c) => ({
+function toFeatureCollection(cabins: CabinListItem[], stale: boolean) {
+  return {
+    type: "FeatureCollection" as const,
+    stale,
+    snapshotAt: stale ? SNAPSHOT_GENERATED_AT : null,
+    snapshotSource: stale ? SNAPSHOT_SOURCE : null,
+    features: cabins.map((c) => ({
       type: "Feature" as const,
       id: c.id,
       geometry: { type: "Point" as const, coordinates: [c.lon, c.lat] },
@@ -21,23 +29,30 @@ export async function GET(req: NextRequest) {
         bedsNoService: c.bedsNoService ?? 0,
         bedsExtra: c.bedsExtra ?? 0,
         bedsWinter: c.bedsWinter ?? 0,
+        stale,
       },
-    }));
+    })),
+  };
+}
 
-    return NextResponse.json(
-      { type: "FeatureCollection", features },
-      {
-        headers: {
-          "Cache-Control":
-            "public, s-maxage=86400, stale-while-revalidate=604800",
-        },
+export async function GET(req: NextRequest) {
+  try {
+    const cabins = await fetchAllDntCabins({ signal: req.signal });
+    return NextResponse.json(toFeatureCollection(cabins, false), {
+      headers: {
+        "Cache-Control":
+          "public, s-maxage=86400, stale-while-revalidate=604800",
       },
-    );
+    });
   } catch (err) {
-    console.error("[/api/cabins]", err);
-    return NextResponse.json(
-      { error: "cabins upstream failed", type: "FeatureCollection", features: [] },
-      { status: 502 },
-    );
+    console.error("[/api/cabins] upstream failed, using snapshot", err);
+    const fallback = listCabinsFromSnapshot();
+    return NextResponse.json(toFeatureCollection(fallback, true), {
+      status: 200,
+      headers: {
+        "Cache-Control": "no-store",
+        "X-Data-Source": "snapshot",
+      },
+    });
   }
 }

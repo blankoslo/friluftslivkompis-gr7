@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCabin } from "@/lib/ut";
+import {
+  getCabin,
+  getCabinFromSnapshot,
+  SNAPSHOT_GENERATED_AT,
+  SNAPSHOT_SOURCE,
+} from "@/lib/ut";
 
 export const revalidate = 86400;
 
@@ -15,23 +20,39 @@ export async function GET(
 
   try {
     const cabin = await getCabin(id, { signal: req.signal });
-    if (!cabin) {
-      return NextResponse.json({ error: "not found" }, { status: 404 });
+    if (cabin) {
+      return NextResponse.json(
+        { cabin, stale: false, snapshotAt: null },
+        {
+          headers: {
+            "Cache-Control":
+              "public, s-maxage=86400, stale-while-revalidate=604800",
+          },
+        },
+      );
     }
+  } catch (err) {
+    console.error("[/api/cabins/:id] upstream failed, trying snapshot", err);
+  }
+
+  const fallback = getCabinFromSnapshot(id);
+  if (fallback) {
     return NextResponse.json(
-      { cabin },
       {
+        cabin: fallback,
+        stale: true,
+        snapshotAt: SNAPSHOT_GENERATED_AT,
+        snapshotSource: SNAPSHOT_SOURCE,
+      },
+      {
+        status: 200,
         headers: {
-          "Cache-Control":
-            "public, s-maxage=86400, stale-while-revalidate=604800",
+          "Cache-Control": "no-store",
+          "X-Data-Source": "snapshot",
         },
       },
     );
-  } catch (err) {
-    console.error("[/api/cabins/:id]", err);
-    return NextResponse.json(
-      { error: "cabin upstream failed" },
-      { status: 502 },
-    );
   }
+
+  return NextResponse.json({ error: "not found" }, { status: 404 });
 }
