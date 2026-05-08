@@ -39,14 +39,20 @@ export function AcceptForm({ token }: { token: string }) {
 
   if (success === "accepted") {
     return (
-      <p className="text-text-primary">
+      <p
+        className="text-2xl text-flame-pressed"
+        style={{ fontFamily: "var(--font-handwriting)", fontWeight: 700 }}
+      >
         Takk, {name.trim()}! Du er meldt på. Vi sees i fjellet.
       </p>
     );
   }
   if (success === "declined") {
     return (
-      <p className="text-text-muted">
+      <p
+        className="text-2xl text-text-muted"
+        style={{ fontFamily: "var(--font-handwriting)", fontWeight: 700 }}
+      >
         Synd å høre, {name.trim()}. Kanskje neste tur.
       </p>
     );
@@ -61,7 +67,10 @@ export function AcceptForm({ token }: { token: string }) {
       className="space-y-md"
     >
       <label htmlFor="name" className="block space-y-xs">
-        <span className="text-small text-text-muted tracking-label uppercase">
+        <span
+          className="text-small text-text-muted tracking-label uppercase font-bold"
+          style={{ fontFamily: "var(--font-stamp)" }}
+        >
           Navnet ditt
         </span>
         <input
@@ -70,12 +79,12 @@ export function AcceptForm({ token }: { token: string }) {
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Ola Nordmann"
-          className="w-full rounded-md border border-border bg-bg px-md py-sm text-body text-text-primary placeholder:text-text-muted focus:outline-none focus:border-flame-primary"
+          className="w-full rounded-md border-2 border-flame-pressed bg-bg px-md py-sm text-body text-text-primary placeholder:text-text-muted focus:outline-none focus:border-flame-primary shadow-[4px_4px_0_var(--brand-flame-pressed)]"
         />
       </label>
 
       {error && (
-        <p className="text-small text-warning bg-warning-bg border border-warning-border rounded-md px-md py-sm">
+        <p className="text-small text-warning bg-warning-bg border-2 border-warning-border rounded-md px-md py-sm font-semibold">
           {error}
         </p>
       )}
@@ -84,7 +93,7 @@ export function AcceptForm({ token }: { token: string }) {
         <button
           type="submit"
           disabled={submitting || !name.trim()}
-          className="inline-flex h-11 items-center justify-center rounded-md bg-flame-primary px-lg text-body font-medium text-white transition-colors hover:bg-flame-hover active:bg-flame-pressed disabled:opacity-50 disabled:cursor-not-allowed"
+          className="inline-flex h-11 items-center justify-center rounded-md bg-flame-primary px-lg text-body font-bold text-white transition-colors hover:bg-flame-hover active:bg-flame-pressed disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {submitting ? "Sender..." : "Bli med"}
         </button>
@@ -92,7 +101,7 @@ export function AcceptForm({ token }: { token: string }) {
           type="button"
           onClick={() => submit("declined")}
           disabled={submitting || !name.trim()}
-          className="inline-flex h-11 items-center justify-center rounded-md border border-border bg-bg px-lg text-body font-medium text-text-muted transition-colors hover:border-warning-border hover:text-warning disabled:opacity-50 disabled:cursor-not-allowed"
+          className="inline-flex h-11 items-center justify-center rounded-pill border-2 border-flame-pressed bg-bg px-lg text-body font-bold text-flame-pressed shadow-[2px_2px_0_var(--brand-flame-pressed)] hover:translate-y-[1px] transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Kan ikke
         </button>

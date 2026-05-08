@@ -11,9 +11,9 @@ const DIFFICULTY_LABEL: Record<RouteLeg["difficulty"], string> = {
 };
 
 const DIFFICULTY_STYLES: Record<RouteLeg["difficulty"], string> = {
-  easy: "bg-forest-tint text-forest",
-  moderate: "bg-fjord-tint text-fjord",
-  tough: "bg-warning-bg text-warning border border-warning-border",
+  easy: "bg-forest text-white",
+  moderate: "bg-fjord text-white",
+  tough: "bg-flame-hover text-white",
 };
 
 const RELIABILITY_LABEL: Record<DailyWeather["reliability"], string> = {
@@ -42,10 +42,13 @@ function StatBlock({
 }) {
   return (
     <div className="flex flex-col gap-xs">
-      <span className="text-small uppercase tracking-label text-text-muted">
+      <span
+        className="text-small uppercase tracking-label text-flame-pressed font-bold"
+        style={{ fontFamily: "var(--font-stamp)" }}
+      >
         {label}
       </span>
-      <span className="font-heading text-h3 text-text-primary">
+      <span className="font-heading text-h3 font-bold text-text-primary">
         {value}
         {unit ? <span className="text-text-muted text-body ml-1">{unit}</span> : null}
       </span>
@@ -56,7 +59,7 @@ function StatBlock({
 export function TimelineSummary({ timeline }: { timeline: TripTimeline }) {
   const { totals, days } = timeline;
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-md p-md rounded-md border border-border bg-surface">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-md p-md rounded-md border-2 border-flame-pressed bg-bg shadow-[4px_4px_0_var(--brand-flame-pressed)]">
       <StatBlock label="Dager" value={String(days.length)} />
       <StatBlock label="Distanse" value={totals.distanceKm.toFixed(1)} unit="km" />
       <StatBlock label="Stigning" value={String(totals.elevationGain)} unit="m" />
@@ -68,7 +71,10 @@ export function TimelineSummary({ timeline }: { timeline: TripTimeline }) {
 function WeatherBlock({ weather }: { weather: DailyWeather | null }) {
   if (!weather) {
     return (
-      <div className="flex items-center gap-sm text-text-muted text-small">
+      <div
+        className="flex items-center gap-sm text-text-muted text-base"
+        style={{ fontFamily: "var(--font-handwriting)" }}
+      >
         Værvarsel mangler
       </div>
     );
@@ -77,13 +83,13 @@ function WeatherBlock({ weather }: { weather: DailyWeather | null }) {
     <div className="flex items-start gap-md">
       <WeatherSymbol code={weather.symbolCode} />
       <div className="flex flex-col gap-xs flex-1">
-        <span className="text-body text-text-primary">
+        <span className="text-body font-semibold text-text-primary">
           {weatherLabel(weather.symbolCode)}
         </span>
         <div className="flex flex-wrap gap-md text-small text-text-muted">
           {weather.tempMin !== null && weather.tempMax !== null && (
             <span>
-              {Math.round(weather.tempMin)}°–{Math.round(weather.tempMax)}°C
+              {Math.round(weather.tempMin)}°-{Math.round(weather.tempMax)}°C
             </span>
           )}
           {weather.precipMm > 0 && <span>{weather.precipMm.toFixed(1)} mm nedbør</span>}
@@ -94,11 +100,12 @@ function WeatherBlock({ weather }: { weather: DailyWeather | null }) {
         {weather.reliability !== "high" && (
           <span
             className={cn(
-              "inline-flex w-fit text-small px-sm py-xs rounded-pill",
+              "inline-flex w-fit text-xs font-bold px-sm py-1 rounded-pill uppercase tracking-label",
               weather.reliability === "low"
-                ? "bg-warning-bg text-warning"
-                : "bg-fjord-tint text-fjord",
+                ? "bg-flame-hover text-white"
+                : "bg-fjord text-white",
             )}
+            style={{ fontFamily: "var(--font-stamp)" }}
           >
             {RELIABILITY_LABEL[weather.reliability]} prognose
           </span>
@@ -115,33 +122,34 @@ export function TimelineDayCard({
 }) {
   const { leg, weather, date, dayNumber } = day;
   return (
-    <article className="rounded-md border border-border bg-surface overflow-hidden">
-      <header className="flex items-center justify-between gap-md px-md py-sm border-b border-border bg-bg">
+    <article className="rounded-lg border-4 border-flame-pressed bg-bg shadow-[6px_6px_0_var(--brand-flame-pressed)] overflow-hidden">
+      <header className="flex items-center justify-between gap-md px-md py-sm bg-flame-pressed text-white">
         <div className="flex items-center gap-md">
-          <span className="font-heading text-h3 text-flame">Dag {dayNumber}</span>
+          <span className="font-heading text-h3 font-bold">Dag {dayNumber}</span>
           {date && (
-            <span className="text-small text-text-muted capitalize">
+            <span className="text-small opacity-90 capitalize">
               {formatDate(date)}
             </span>
           )}
         </div>
         <span
           className={cn(
-            "text-small px-sm py-xs rounded-pill",
+            "text-xs font-bold px-sm py-1 rounded-pill uppercase tracking-label",
             DIFFICULTY_STYLES[leg.difficulty],
           )}
+          style={{ fontFamily: "var(--font-stamp)" }}
         >
           {DIFFICULTY_LABEL[leg.difficulty]}
         </span>
       </header>
       <div className="grid md:grid-cols-2 gap-md p-md">
         <div className="flex flex-col gap-sm">
-          <div className="flex items-baseline gap-sm">
-            <span className="font-heading text-body text-text-primary">
+          <div className="flex items-baseline gap-sm flex-wrap">
+            <span className="font-heading text-body font-bold text-text-primary">
               {leg.from.name}
             </span>
-            <span className="text-text-muted">→</span>
-            <span className="font-heading text-body text-text-primary">
+            <span className="text-flame-primary font-bold">→</span>
+            <span className="font-heading text-body font-bold text-text-primary">
               {leg.to.name}
             </span>
           </div>
@@ -149,13 +157,16 @@ export function TimelineDayCard({
             <StatBlock label="Distanse" value={leg.distanceKm.toFixed(1)} unit="km" />
             <StatBlock
               label="Stigning"
-              value={leg.hasElevationData ? String(leg.elevationGain) : "—"}
+              value={leg.hasElevationData ? String(leg.elevationGain) : "-"}
               unit={leg.hasElevationData ? "m" : undefined}
             />
             <StatBlock label="Tid" value={leg.estimatedHours.toFixed(1)} unit="t" />
           </div>
           {!leg.hasElevationData && (
-            <span className="text-small text-text-muted">
+            <span
+              className="text-base text-text-muted leading-snug"
+              style={{ fontFamily: "var(--font-handwriting)" }}
+            >
               Høydedata mangler. Bruk kart for verifikasjon.
             </span>
           )}
@@ -169,7 +180,10 @@ export function TimelineDayCard({
 export function TripTimelineView({ timeline }: { timeline: TripTimeline }) {
   if (!timeline.days.length) {
     return (
-      <div className="rounded-md border border-border bg-surface p-md text-text-muted">
+      <div
+        className="rounded-lg border-2 border-flame-pressed bg-bg p-md text-text-primary text-lg shadow-[4px_4px_0_var(--brand-flame-pressed)]"
+        style={{ fontFamily: "var(--font-handwriting)" }}
+      >
         Legg til minst to hytter for å bygge tidslinje.
       </div>
     );

@@ -60,24 +60,21 @@ export function LarsMonsenChat() {
 
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
-      {/* Initial speech bubble */}
       {!open && bubbleVisible && (
         <div
-          className="relative max-w-[220px] cursor-pointer rounded-2xl rounded-br-sm bg-flame px-4 py-3 text-sm leading-snug text-white shadow-lg transition-opacity"
+          className="relative max-w-[240px] cursor-pointer rounded-lg rounded-br-sm bg-bg border-2 border-flame-pressed px-md py-sm text-base leading-snug text-text-primary shadow-[3px_3px_0_var(--brand-flame-pressed)] transition-opacity"
+          style={{ fontFamily: "var(--font-handwriting)", fontWeight: 600 }}
           onClick={() => { setOpen(true); setBubbleVisible(false); }}
         >
           {BUBBLE_QUOTE}
-          {/* Bubble tail */}
-          <span className="absolute -bottom-2 right-4 h-0 w-0 border-l-[8px] border-r-[4px] border-t-[8px] border-l-transparent border-r-transparent border-t-flame" />
+          <span className="absolute -bottom-[10px] right-4 h-0 w-0 border-l-[8px] border-r-[4px] border-t-[10px] border-l-transparent border-r-transparent border-t-flame-pressed" />
         </div>
       )}
 
-      {/* Chat panel */}
       {open && (
-        <div className="flex h-[460px] w-80 flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-2xl">
-          {/* Header */}
-          <div className="flex items-center gap-3 bg-flame px-4 py-3">
-            <div className="relative size-9 shrink-0 overflow-hidden rounded-full border-2 border-white/40 shadow">
+        <div className="flex h-[480px] w-80 flex-col overflow-hidden rounded-lg border-4 border-flame-pressed bg-bg shadow-[6px_6px_0_var(--brand-flame-pressed)]">
+          <div className="flex items-center gap-sm bg-flame-pressed px-md py-sm">
+            <div className="relative size-9 shrink-0 overflow-hidden rounded-full border-2 border-bg shadow">
               <Image
                 src="/lars-monsen.jpg"
                 alt="Lars Monsen"
@@ -87,13 +84,23 @@ export function LarsMonsenChat() {
               />
             </div>
             <div className="flex-1">
-              <div className="text-sm font-semibold text-white">Lars Monsen</div>
-              <div className="text-xs text-white/75">Villmarkspioner & turguide</div>
+              <div
+                className="text-lg font-bold text-white leading-none"
+                style={{ fontFamily: "var(--font-handwriting)" }}
+              >
+                Lars Monsen
+              </div>
+              <div
+                className="text-[10px] uppercase tracking-label text-white/80 mt-1"
+                style={{ fontFamily: "var(--font-stamp)" }}
+              >
+                VILLMARKSPIONER
+              </div>
             </div>
             <button
               aria-label="Lukk chat"
               onClick={() => setOpen(false)}
-              className="text-white/70 transition-colors hover:text-white"
+              className="text-white/80 transition-colors hover:text-white"
             >
               ✕
             </button>
@@ -118,10 +125,10 @@ export function LarsMonsenChat() {
                   </div>
                 )}
                 <div
-                  className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm leading-relaxed ${
+                  className={`max-w-[85%] rounded-lg px-md py-sm text-sm leading-relaxed border-2 ${
                     m.role === "user"
-                      ? "rounded-br-sm bg-flame text-white"
-                      : "rounded-bl-sm bg-muted text-foreground"
+                      ? "rounded-br-sm bg-flame-primary text-white border-flame-pressed"
+                      : "rounded-bl-sm bg-flame-tint text-text-primary border-flame-pressed"
                   }`}
                 >
                   {m.content}
@@ -134,7 +141,7 @@ export function LarsMonsenChat() {
                 <div className="relative size-6 shrink-0 overflow-hidden rounded-full border border-flame/30">
                   <Image src="/lars-monsen.jpg" alt="" fill className="object-cover object-[center_20%]" sizes="24px" />
                 </div>
-                <div className="rounded-2xl rounded-bl-sm bg-muted px-3 py-2 text-sm text-muted-foreground">
+                <div className="rounded-lg rounded-bl-sm bg-flame-tint border-2 border-flame-pressed px-md py-sm text-sm text-text-primary">
                   <span className="inline-flex gap-1">
                     <span className="animate-bounce [animation-delay:0ms]">·</span>
                     <span className="animate-bounce [animation-delay:150ms]">·</span>
@@ -146,11 +153,10 @@ export function LarsMonsenChat() {
             <div ref={bottomRef} />
           </div>
 
-          {/* Input */}
-          <div className="flex gap-2 border-t border-border p-3">
+          <div className="flex gap-sm border-t-2 border-flame-pressed bg-bg p-sm">
             <input
-              className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none transition-colors focus:border-flame disabled:opacity-50"
-              placeholder="Spør Lars om turer…"
+              className="flex-1 rounded-md border-2 border-flame-pressed bg-bg px-sm py-2 text-sm font-semibold text-text-primary outline-none transition-colors focus:ring-2 focus:ring-flame-primary disabled:opacity-50 placeholder:text-flame-primary/50"
+              placeholder="Spør Lars om turer..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && send()}
@@ -160,7 +166,7 @@ export function LarsMonsenChat() {
             <button
               onClick={send}
               disabled={loading || !input.trim()}
-              className="rounded-lg bg-flame px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-flame-hover disabled:opacity-40"
+              className="rounded-md bg-flame-primary px-md py-2 text-sm font-bold text-white shadow-[2px_2px_0_var(--brand-flame-pressed)] hover:bg-flame-hover hover:translate-y-[1px] hover:shadow-[1px_1px_0_var(--brand-flame-pressed)] transition-all disabled:opacity-40"
             >
               Send
             </button>
@@ -172,7 +178,7 @@ export function LarsMonsenChat() {
       <button
         aria-label={open ? "Lukk Lars Monsen chat" : "Åpne Lars Monsen chat"}
         onClick={() => { setOpen((o) => !o); setBubbleVisible(false); }}
-        className="relative flex size-14 items-center justify-center overflow-hidden rounded-full border-2 border-flame bg-flame shadow-lg transition-colors hover:border-flame-hover"
+        className="relative flex size-14 items-center justify-center overflow-hidden rounded-full border-4 border-flame-pressed bg-flame-primary shadow-[4px_4px_0_var(--brand-flame-pressed)] hover:translate-y-[1px] hover:shadow-[3px_3px_0_var(--brand-flame-pressed)] transition-all"
       >
         {open ? (
           <span className="text-base font-bold text-white">✕</span>

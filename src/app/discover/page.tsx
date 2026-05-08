@@ -23,8 +23,11 @@ const Map = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="flex h-full w-full items-center justify-center rounded-md bg-surface text-sm text-muted-foreground">
-        Laster kart…
+      <div
+        className="flex h-full w-full items-center justify-center bg-bg text-flame-pressed"
+        style={{ fontFamily: "var(--font-handwriting)", fontSize: "20px" }}
+      >
+        Laster kartet, hold ut...
       </div>
     ),
   },
@@ -178,72 +181,81 @@ export default function DiscoverPage() {
     filteredTrips.length === 0 && ageFilteredTrips.length > 0;
 
   return (
-    <main className="mx-auto max-w-6xl px-6 py-6">
-      <div className="mb-6">
-        <h1 className="font-heading text-3xl font-bold tracking-tight text-foreground">
-          Discover
-        </h1>
-        <p className="text-muted-foreground">
-          Søk etter områder, hytter, fjelltopper og turforslag i hele Norge.
-          Pan kartet, så finner Lars turer i området.
-        </p>
-      </div>
+    <main className="bg-bg text-text-primary min-h-screen">
+      <div className="mx-auto max-w-5xl px-md py-lg sm:px-lg sm:py-xl">
+        <header className="mb-lg">
+          <h1 className="font-heading text-3xl font-bold text-text-primary sm:text-4xl">
+            Finn turen
+          </h1>
+          <p
+            className="mt-xs text-flame-pressed"
+            style={{
+              fontFamily: "var(--font-handwriting)",
+              fontSize: "20px",
+              transform: "rotate(-0.5deg)",
+              display: "inline-block",
+            }}
+          >
+            Pan kartet, så finner Lars turene i området ↓
+          </p>
+        </header>
 
-      <div className="grid gap-4 lg:grid-cols-[360px_1fr]">
-        <div className="space-y-3">
-          <SearchBox selected={selected} onSelect={handleSelect} />
+        <div className="grid gap-md lg:grid-cols-[360px_1fr]">
+          <div className="order-2 space-y-md lg:order-1">
+            <SearchBox selected={selected} onSelect={handleSelect} />
 
-          <FilterPanel
-            active={activeFilters}
-            counts={counts}
-            onToggle={toggleFilter}
-            onClear={clearFilters}
-            total={ageFilteredTrips.length}
-            filteredTotal={filteredTrips.length}
-            loading={tripsLoading}
-            minAge={minAge}
-            onMinAgeChange={setMinAge}
-          />
-
-          {showCabinPanel ? (
-            <CabinPanel
-              key={activeCabinId}
-              cabinId={activeCabinId!}
-              onClose={() => setActiveCabinId(null)}
-            />
-          ) : showTripList ? (
-            <TripList
-              trips={filteredTrips}
-              activeId={activeTripId}
+            <FilterPanel
+              active={activeFilters}
+              counts={counts}
+              onToggle={toggleFilter}
+              onClear={clearFilters}
+              total={ageFilteredTrips.length}
+              filteredTotal={filteredTrips.length}
+              loading={tripsLoading}
               minAge={minAge}
-              onSelect={handleTripSelect}
-              emptySuggestion={
-                showEmptyHint && removalSuggestion
-                  ? CATEGORY_LABEL[removalSuggestion]
-                  : null
-              }
-              onClearSuggestion={
-                showEmptyHint && removalSuggestion
-                  ? removeMostRestrictive
-                  : undefined
-              }
+              onMinAgeChange={setMinAge}
             />
-          ) : selected ? (
-            <SelectedDetails selected={selected} />
-          ) : (
-            <Legend />
-          )}
-        </div>
 
-        <div className="h-[70vh] min-h-[420px] overflow-hidden rounded-md border border-border">
-          <Map
-            selected={selected}
-            trips={filteredTrips}
-            activeTripId={activeTripId}
-            onCabinClick={handleCabinClick}
-            onTripClick={handleTripClickFromMap}
-            onViewportChange={handleViewportChange}
-          />
+            {showCabinPanel ? (
+              <CabinPanel
+                key={activeCabinId}
+                cabinId={activeCabinId!}
+                onClose={() => setActiveCabinId(null)}
+              />
+            ) : showTripList ? (
+              <TripList
+                trips={filteredTrips}
+                activeId={activeTripId}
+                minAge={minAge}
+                onSelect={handleTripSelect}
+                emptySuggestion={
+                  showEmptyHint && removalSuggestion
+                    ? CATEGORY_LABEL[removalSuggestion]
+                    : null
+                }
+                onClearSuggestion={
+                  showEmptyHint && removalSuggestion
+                    ? removeMostRestrictive
+                    : undefined
+                }
+              />
+            ) : selected ? (
+              <SelectedDetails selected={selected} />
+            ) : (
+              <Legend />
+            )}
+          </div>
+
+          <div className="order-1 h-[50vh] min-h-[320px] overflow-hidden rounded-lg border-4 border-flame-pressed shadow-[6px_6px_0_var(--brand-flame-pressed)] lg:order-2 lg:h-[70vh] lg:min-h-[420px]">
+            <Map
+              selected={selected}
+              trips={filteredTrips}
+              activeTripId={activeTripId}
+              onCabinClick={handleCabinClick}
+              onTripClick={handleTripClickFromMap}
+              onViewportChange={handleViewportChange}
+            />
+          </div>
         </div>
       </div>
     </main>
@@ -252,31 +264,33 @@ export default function DiscoverPage() {
 
 function SelectedDetails({ selected }: { selected: SearchResult }) {
   return (
-    <div className="rounded-md border border-border bg-surface p-4 text-sm">
-      <div className="mb-1 font-heading font-semibold text-foreground">{selected.name}</div>
-      <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-xs text-muted-foreground">
+    <div className="rounded-lg border-2 border-flame-pressed bg-bg p-md text-sm shadow-[4px_4px_0_var(--brand-flame-pressed)]">
+      <div className="mb-xs font-heading text-base font-bold text-text-primary">
+        {selected.name}
+      </div>
+      <dl className="grid grid-cols-[auto_1fr] gap-x-sm gap-y-1 text-xs text-text-muted">
         <dt>Type</dt>
-        <dd className="text-foreground">
+        <dd className="text-text-primary">
           {selected.subtype ?? selected.kind}
         </dd>
         {selected.municipality && (
           <>
             <dt>Kommune</dt>
-            <dd className="text-foreground">{selected.municipality}</dd>
+            <dd className="text-text-primary">{selected.municipality}</dd>
           </>
         )}
         {selected.county && (
           <>
             <dt>Fylke</dt>
-            <dd className="text-foreground">{selected.county}</dd>
+            <dd className="text-text-primary">{selected.county}</dd>
           </>
         )}
         <dt>Koordinater</dt>
-        <dd className="font-mono text-foreground">
+        <dd className="font-mono text-text-primary">
           {selected.lat.toFixed(5)}, {selected.lon.toFixed(5)}
         </dd>
         <dt>Kilde</dt>
-        <dd className="text-foreground">
+        <dd className="text-text-primary">
           {selected.source === "ut" ? "UT.no / DNT" : "Kartverket"}
         </dd>
       </dl>
@@ -286,19 +300,24 @@ function SelectedDetails({ selected }: { selected: SearchResult }) {
 
 function Legend() {
   return (
-    <div className="rounded-md border border-border bg-surface p-4 text-xs text-muted-foreground">
-      <div className="mb-2 font-heading font-semibold text-foreground">Tegnforklaring</div>
+    <div className="rounded-lg border-2 border-flame-pressed bg-bg p-md text-xs text-text-muted shadow-[4px_4px_0_var(--brand-flame-pressed)]">
+      <div
+        className="mb-sm text-flame-pressed"
+        style={{ fontFamily: "var(--font-handwriting)", fontSize: "20px" }}
+      >
+        Tegnforklaring
+      </div>
       <ul className="space-y-1.5">
-        <li className="flex items-center gap-2">
+        <li className="flex items-center gap-sm">
           <span className="inline-block size-3 rounded-full border-2 border-white bg-flame-primary" />
-          DNT-hytte (zoom inn for å se)
+          <span className="text-text-primary">DNT-hytte (zoom inn for å se)</span>
         </li>
-        <li className="flex items-center gap-2">
+        <li className="flex items-center gap-sm">
           <span className="inline-block size-3 rounded-full border-2 border-white bg-forest" />
-          Turforslag fra UT.no
+          <span className="text-text-primary">Turforslag fra UT.no</span>
         </li>
-        <li>
-          Tilgjengelige kategorier: {TRIP_CATEGORIES.map((c) => CATEGORY_LABEL[c]).join(", ")}.
+        <li className="pt-xs">
+          Kategorier: {TRIP_CATEGORIES.map((c) => CATEGORY_LABEL[c]).join(", ")}.
         </li>
       </ul>
     </div>

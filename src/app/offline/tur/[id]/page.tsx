@@ -26,25 +26,33 @@ export default async function OfflineTripPage({
   ).filter((c): c is Cabin => c !== null);
 
   return (
-    <main className="mx-auto flex h-[calc(100vh-3.5rem)] max-w-6xl flex-col gap-md p-md">
-      <div className="flex items-center justify-between">
-        <div>
-          <Link
-            href="/discover"
-            className="text-small text-fjord hover:underline"
+    <main className="bg-bg min-h-screen">
+      <div className="mx-auto flex h-[calc(100vh-3.5rem)] max-w-5xl flex-col gap-md px-md py-md sm:px-lg">
+        <div className="bg-flame-pressed text-white rounded-lg border-4 border-flame-pressed shadow-[6px_6px_0_var(--brand-flame-pressed)] p-md flex items-center justify-between gap-md relative">
+          <span
+            className="absolute -top-3 right-md bg-forest text-white text-xs font-bold px-sm py-1 rounded border-2 border-forest uppercase tracking-label"
+            style={{
+              fontFamily: "var(--font-stamp)",
+              transform: "rotate(4deg)",
+            }}
           >
-            ← Tilbake til Discover
-          </Link>
-          <h1 className="mt-xs font-heading text-h2 font-bold text-text-primary">
-            Offline-modus
-          </h1>
+            OFFLINE
+          </span>
+          <div>
+            <Link
+              href="/discover"
+              className="text-small font-bold opacity-90 hover:opacity-100 underline underline-offset-4"
+            >
+              ← Tilbake til Discover
+            </Link>
+            <h1 className="mt-xs font-heading text-h2 font-black">
+              {trip.name ?? "Offline-modus"}
+            </h1>
+          </div>
         </div>
-        <span className="rounded-pill bg-fjord-tint px-md py-xs text-small font-medium tracking-label text-fjord">
-          T1
-        </span>
-      </div>
-      <div className="min-h-0 flex-1">
-        <OfflineMapLoader trip={trip} cabins={cabins} />
+        <div className="min-h-0 flex-1 rounded-lg border-4 border-flame-pressed shadow-[6px_6px_0_var(--brand-flame-pressed)] overflow-hidden bg-bg">
+          <OfflineMapLoader trip={trip} cabins={cabins} />
+        </div>
       </div>
     </main>
   );

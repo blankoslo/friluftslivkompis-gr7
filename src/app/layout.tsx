@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Source_Sans_3 } from "next/font/google";
-import Link from "next/link";
+import { Caveat, Playfair_Display, Source_Sans_3, Special_Elite } from "next/font/google";
 import { LarsMonsenChat } from "@/components/lars-monsen/lars-monsen-chat";
+import { SiteHeader } from "@/components/site-header";
 import { ServiceWorkerRegister } from "@/components/sw-register";
 import "./globals.css";
 
@@ -14,6 +14,20 @@ const playfair = Playfair_Display({
 const sourceSans = Source_Sans_3({
   variable: "--font-source-sans",
   subsets: ["latin"],
+  display: "swap",
+});
+
+const caveat = Caveat({
+  variable: "--font-caveat",
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  display: "swap",
+});
+
+const specialElite = Special_Elite({
+  variable: "--font-special-elite",
+  subsets: ["latin"],
+  weight: "400",
   display: "swap",
 });
 
@@ -30,30 +44,10 @@ export default function RootLayout({
   return (
     <html
       lang="no"
-      className={`${playfair.variable} ${sourceSans.variable} h-full antialiased`}
+      className={`${playfair.variable} ${sourceSans.variable} ${caveat.variable} ${specialElite.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        <header className="sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur-sm">
-          <nav className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
-            <Link
-              href="/"
-              className="font-heading font-bold text-xl tracking-tight hover:text-flame transition-colors"
-            >
-              Friluftskompis
-            </Link>
-            <div className="flex gap-6 text-sm text-muted-foreground">
-              <Link href="/discover" className="hover:text-flame transition-colors">
-                Discover
-              </Link>
-              <Link href="/tur/ny" className="hover:text-flame transition-colors">
-                Ny tur
-              </Link>
-              <Link href="/logg" className="hover:text-flame transition-colors">
-                Logg
-              </Link>
-            </div>
-          </nav>
-        </header>
+        <SiteHeader />
         <div className="flex-1">{children}</div>
         <LarsMonsenChat />
         <ServiceWorkerRegister />

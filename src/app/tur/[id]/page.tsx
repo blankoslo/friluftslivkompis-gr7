@@ -58,7 +58,7 @@ async function loadTrip(id: string): Promise<TripView | null> {
     const start = demoStartIso();
     return {
       _id: "demo",
-      title: "Demo · Jotunheim-runden",
+      title: "Demo - Jotunheim-runden",
       area: "Jotunheimen",
       inviteToken: DEMO_TOKEN,
       startDate: `${start}T00:00:00.000Z`,
@@ -134,63 +134,98 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
 
   const dateRange = formatDateRange(trip.startDate, trip.endDate);
   const startISO = trip.startDate?.slice(0, 10) ?? null;
+  const accepted = trip.participants.filter((p) => p.status === "accepted").length;
 
   return (
-    <main className="p-xl max-w-4xl mx-auto">
-      <header className="mb-xl">
-        <h1 className="font-heading text-h1 font-bold text-text-primary mb-xs">
-          {trip.title}
-        </h1>
-        <p className="text-text-muted text-body">
-          {[trip.area, dateRange].filter(Boolean).join(" · ") || "Klar for planlegging"}
-        </p>
-      </header>
-
-      <div className="grid gap-md">
-        {!trip.isDemo && (
-          <Section label="Inviter deltakere" badge="G1" accent="forest">
-            <InviteLink token={trip.inviteToken} />
-          </Section>
-        )}
-
-        {!trip.isDemo && (
-          <Section label="Deltakere" badge="G1, G4" accent="forest">
-            <ParticipantList participants={trip.participants} />
-          </Section>
-        )}
-
-        <Section label="Tidslinje · vær · rute" badge="B1 · B3 · B6" accent="fjord">
-          {trip.cabins.length < 2 ? (
-            <p className="text-text-muted">
-              Legg til minst to hytter for å se etapper, høydemeter og værvarsel.
-            </p>
-          ) : (
-            <Suspense
-              fallback={
-                <p className="text-text-muted">
-                  Beregner etapper og henter værdata fra Yr…
-                </p>
-              }
+    <main className="bg-bg min-h-screen">
+      <div className="max-w-4xl mx-auto px-md py-lg sm:px-lg sm:py-xl">
+        <header className="bg-flame-pressed text-white rounded-lg border-4 border-flame-pressed shadow-[6px_6px_0_var(--brand-flame-pressed)] overflow-hidden mb-xl relative">
+          {trip.isDemo && (
+            <span
+              className="absolute -top-3 right-md bg-midnight-sun text-text-primary text-xs font-bold px-sm py-1 rounded border-2 border-text-primary uppercase tracking-label z-10"
+              style={{
+                fontFamily: "var(--font-stamp)",
+                transform: "rotate(4deg)",
+              }}
             >
-              <TimelineSection
-                cabins={trip.cabins}
-                startDate={startISO}
-                skipElevation={skipElevation}
-              />
-            </Suspense>
+              DEMO
+            </span>
           )}
-        </Section>
+          <div className="p-lg flex flex-col gap-sm">
+            <p
+              className="text-sm opacity-90 uppercase tracking-label"
+              style={{ fontFamily: "var(--font-stamp)" }}
+            >
+              {[trip.area, dateRange].filter(Boolean).join(" - ") || "Klar for planlegging"}
+            </p>
+            <h1 className="font-heading text-3xl sm:text-4xl font-black leading-tight">
+              {trip.title}
+            </h1>
+            {trip.participants.length > 0 && (
+              <p className="text-sm opacity-90">
+                {accepted} av {trip.participants.length} har sagt ja
+              </p>
+            )}
+          </div>
+        </header>
 
-        {!trip.isDemo && (
-          <Section label="Pakkeliste" badge="P1" accent="midnight-sun">
-            <PackingList tripId={trip._id} initialItems={trip.packingList} />
+        <div className="grid gap-lg">
+          {!trip.isDemo && (
+            <Section label="Inviter deltakere" badge="G1" accent="forest">
+              <InviteLink token={trip.inviteToken} />
+            </Section>
+          )}
+
+          {!trip.isDemo && (
+            <Section label="Deltakere" badge="G1, G4" accent="forest">
+              <ParticipantList participants={trip.participants} />
+            </Section>
+          )}
+
+          <Section label="Tidslinje, vær, rute" badge="B1 / B3 / B6" accent="fjord">
+            {trip.cabins.length < 2 ? (
+              <p
+                className="text-text-primary text-lg leading-snug"
+                style={{ fontFamily: "var(--font-handwriting)" }}
+              >
+                Legg til minst to hytter, så regner Lars ut etapper, høydemeter og henter værvarsel for deg.
+              </p>
+            ) : (
+              <Suspense
+                fallback={
+                  <p
+                    className="text-text-primary text-lg leading-snug"
+                    style={{ fontFamily: "var(--font-handwriting)" }}
+                  >
+                    Beregner etapper og henter værdata fra Yr...
+                  </p>
+                }
+              >
+                <TimelineSection
+                  cabins={trip.cabins}
+                  startDate={startISO}
+                  skipElevation={skipElevation}
+                />
+              </Suspense>
+            )}
           </Section>
-        )}
-        {!trip.isDemo && (
-          <Section label="Utgifter" badge="R1" accent="flame">
-            Kostnadsregistrering og splitt kommer her
-          </Section>
-        )}
+
+          {!trip.isDemo && (
+            <Section label="Pakkeliste" badge="P1" accent="midnight-sun">
+              <PackingList tripId={trip._id} initialItems={trip.packingList} />
+            </Section>
+          )}
+          {!trip.isDemo && (
+            <Section label="Utgifter" badge="R1" accent="flame">
+              <p
+                className="text-text-primary text-lg leading-snug"
+                style={{ fontFamily: "var(--font-handwriting)" }}
+              >
+                Kostnadsregistrering og splitt kommer her. Regn med at det blir litt enklere enn å regne sjøl rundt bålet.
+              </p>
+            </Section>
+          )}
+        </div>
       </div>
     </main>
   );
@@ -203,19 +238,22 @@ function ParticipantList({
 }) {
   if (participants.length === 0) {
     return (
-      <p className="text-text-muted">
+      <p
+        className="text-text-primary text-lg leading-snug"
+        style={{ fontFamily: "var(--font-handwriting)" }}
+      >
         Ingen deltakere ennå. Del invitasjonslenken ovenfor.
       </p>
     );
   }
   return (
-    <ul className="space-y-sm">
+    <ul className="grid gap-sm">
       {participants.map((p, i) => (
         <li
           key={`${p.name}-${i}`}
-          className="flex items-center justify-between rounded-md border border-border bg-bg px-md py-sm"
+          className="flex items-center justify-between rounded-md border-2 border-flame-pressed bg-bg px-md py-sm shadow-[2px_2px_0_var(--brand-flame-pressed)]"
         >
-          <span className="text-text-primary">{p.name}</span>
+          <span className="text-text-primary font-semibold">{p.name}</span>
           <StatusBadge status={p.status} />
         </li>
       ))}
@@ -226,26 +264,27 @@ function ParticipantList({
 function StatusBadge({ status }: { status: IParticipant["status"] }) {
   const map: Record<IParticipant["status"], { label: string; className: string }> = {
     accepted: {
-      label: "Akseptert",
-      className: "bg-forest-tint text-forest",
+      label: "Bekreftet",
+      className: "bg-forest text-white",
     },
     invited: {
       label: "Invitert",
-      className: "bg-fjord-tint text-fjord",
+      className: "bg-fjord text-white",
     },
     pending: {
       label: "Venter",
-      className: "bg-midnight-sun-tint text-midnight-sun",
+      className: "bg-midnight-sun text-text-primary",
     },
     declined: {
       label: "Avslått",
-      className: "bg-warning-bg text-warning",
+      className: "bg-flame-hover text-white",
     },
   };
   const { label, className } = map[status];
   return (
     <span
-      className={`text-small font-mono px-sm py-xs rounded-pill tracking-label ${className}`}
+      className={`text-xs font-bold px-sm py-1 rounded-pill uppercase tracking-label ${className}`}
+      style={{ fontFamily: "var(--font-stamp)" }}
     >
       {label}
     </span>
@@ -261,32 +300,23 @@ function formatDateRange(start?: string, end?: string) {
       year: "numeric",
     });
   if (!end || end === start) return fmt(start);
-  return `${fmt(start)} – ${fmt(end)}`;
+  return `${fmt(start)} - ${fmt(end)}`;
 }
 
 type Accent = "flame" | "forest" | "fjord" | "midnight-sun";
 
-const accentStyles: Record<Accent, { border: string; badge: string; heading: string }> = {
-  flame: {
-    border: "border-flame/30",
-    badge: "bg-flame-tint text-flame",
-    heading: "text-flame",
-  },
-  forest: {
-    border: "border-forest/30",
-    badge: "bg-forest-tint text-forest",
-    heading: "text-forest",
-  },
-  fjord: {
-    border: "border-fjord/30",
-    badge: "bg-fjord-tint text-fjord",
-    heading: "text-fjord",
-  },
-  "midnight-sun": {
-    border: "border-midnight-sun/30",
-    badge: "bg-midnight-sun-tint text-midnight-sun",
-    heading: "text-midnight-sun",
-  },
+const accentHeading: Record<Accent, string> = {
+  flame: "text-flame-primary",
+  forest: "text-forest",
+  fjord: "text-fjord",
+  "midnight-sun": "text-midnight-sun",
+};
+
+const accentBadge: Record<Accent, string> = {
+  flame: "bg-flame-primary text-white",
+  forest: "bg-forest text-white",
+  fjord: "bg-fjord text-white",
+  "midnight-sun": "bg-midnight-sun text-text-primary",
 };
 
 function Section({
@@ -300,15 +330,15 @@ function Section({
   accent: Accent;
   children: React.ReactNode;
 }) {
-  const styles = accentStyles[accent];
   return (
-    <section className={`rounded-md border ${styles.border} bg-surface p-lg`}>
-      <div className="flex items-center gap-sm mb-md">
-        <h2 className={`font-heading font-semibold text-h3 ${styles.heading}`}>
+    <section className="bg-bg border-4 border-flame-pressed rounded-lg shadow-[6px_6px_0_var(--brand-flame-pressed)] p-lg relative">
+      <div className="flex items-center gap-sm mb-md flex-wrap">
+        <h2 className={`font-heading font-bold text-h2 ${accentHeading[accent]}`}>
           {label}
         </h2>
         <span
-          className={`text-small font-mono px-sm py-xs rounded ${styles.badge}`}
+          className={`text-xs font-bold px-sm py-1 rounded-pill uppercase tracking-label ${accentBadge[accent]}`}
+          style={{ fontFamily: "var(--font-stamp)" }}
         >
           {badge}
         </span>

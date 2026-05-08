@@ -15,11 +15,15 @@ const NORWAY_CENTER: [number, number] = [10.74, 59.91];
 const NORWAY_ZOOM = 8;
 const CABIN_LAYER_MIN_ZOOM = 7;
 
-const CABIN_COLOR_DNT = "#cc1f2c";
+function readToken(name: string, fallback: string): string {
+  if (typeof window === "undefined") return fallback;
+  const v = getComputedStyle(document.documentElement)
+    .getPropertyValue(name)
+    .trim();
+  return v || fallback;
+}
+
 const CABIN_COLOR_OUTLINE = "#ffffff";
-const CLUSTER_COLOR = "#cc1f2c";
-const TRIP_COLOR = "#0f766e";
-const TRIP_COLOR_ACTIVE = "#fbbf24";
 
 const TRIPS_SOURCE = "trip-starts";
 const TRIPS_LAYER = "trip-points";
@@ -111,6 +115,11 @@ export function Map({
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
 
     map.on("load", () => {
+      const cabinColor = readToken("--brand-flame-pressed", "#7A3515");
+      const clusterColor = readToken("--brand-flame-primary", "#C8602A");
+      const tripColor = readToken("--accent-forest", "#3D5E35");
+      const tripColorActive = readToken("--accent-midnight-sun", "#B8891E");
+
       map.addSource("dnt-cabins", {
         type: "geojson",
         data: "/api/cabins",
@@ -126,7 +135,7 @@ export function Map({
         filter: ["has", "point_count"],
         minzoom: CABIN_LAYER_MIN_ZOOM,
         paint: {
-          "circle-color": CLUSTER_COLOR,
+          "circle-color": clusterColor,
           "circle-opacity": 0.85,
           "circle-stroke-color": "#ffffff",
           "circle-stroke-width": 2,
@@ -167,7 +176,7 @@ export function Map({
         filter: ["!", ["has", "point_count"]],
         minzoom: CABIN_LAYER_MIN_ZOOM,
         paint: {
-          "circle-color": CABIN_COLOR_DNT,
+          "circle-color": cabinColor,
           "circle-radius": [
             "interpolate",
             ["linear"],
@@ -197,8 +206,8 @@ export function Map({
           "circle-color": [
             "case",
             ["==", ["get", "active"], true],
-            TRIP_COLOR_ACTIVE,
-            TRIP_COLOR,
+            tripColorActive,
+            tripColor,
           ],
           "circle-radius": [
             "interpolate",
@@ -294,7 +303,9 @@ export function Map({
     if (markerRef.current) {
       markerRef.current.setLngLat(target);
     } else {
-      markerRef.current = new maplibregl.Marker({ color: "#1e40af" })
+      markerRef.current = new maplibregl.Marker({
+        color: readToken("--accent-fjord", "#3D6475"),
+      })
         .setLngLat(target)
         .addTo(map);
     }
