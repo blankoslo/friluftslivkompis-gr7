@@ -73,7 +73,7 @@ export function LarsMonsenChat() {
       )}
 
       {open && (
-        <div className="flex h-[480px] w-80 flex-col overflow-hidden rounded-lg border-4 border-flame-pressed bg-bg shadow-[6px_6px_0_var(--brand-flame-pressed)]">
+        <div className="flex h-[520px] w-[22rem] flex-col overflow-hidden rounded-lg border-4 border-flame-pressed bg-bg shadow-[6px_6px_0_var(--brand-flame-pressed)]">
           <div className="flex items-center gap-sm bg-flame-pressed px-md py-sm">
             <div className="relative size-9 shrink-0 overflow-hidden rounded-full border-2 border-bg shadow">
               <Image
@@ -131,7 +131,7 @@ export function LarsMonsenChat() {
                   </div>
                 )}
                 <div
-                  className={`max-w-[85%] rounded-lg px-md py-sm text-sm leading-relaxed border-2 ${
+                  className={`max-w-[88%] rounded-lg px-md py-sm text-base leading-relaxed border-2 ${
                     m.role === "user"
                       ? "rounded-br-sm bg-flame-primary text-white border-flame-pressed"
                       : "rounded-bl-sm bg-flame-tint text-text-primary border-flame-pressed"
@@ -147,7 +147,7 @@ export function LarsMonsenChat() {
                 <div className="relative size-6 shrink-0 overflow-hidden rounded-full border border-flame/30">
                   <Image src="/lars-monsen-kayak.png" alt="" fill className="object-cover object-top" sizes="24px" />
                 </div>
-                <div className="rounded-lg rounded-bl-sm bg-flame-tint border-2 border-flame-pressed px-md py-sm text-sm text-text-primary">
+                <div className="rounded-lg rounded-bl-sm bg-flame-tint border-2 border-flame-pressed px-md py-sm text-base text-text-primary">
                   <span className="inline-flex gap-1">
                     <span className="animate-bounce [animation-delay:0ms]">·</span>
                     <span className="animate-bounce [animation-delay:150ms]">·</span>
@@ -161,7 +161,7 @@ export function LarsMonsenChat() {
 
           <div className="flex gap-sm border-t-2 border-flame-pressed bg-bg p-sm">
             <input
-              className="flex-1 rounded-md border-2 border-flame-pressed bg-bg px-sm py-2 text-sm font-semibold text-text-primary outline-none transition-colors focus:ring-2 focus:ring-flame-primary disabled:opacity-50 placeholder:text-flame-primary/50"
+              className="flex-1 rounded-md border-2 border-flame-pressed bg-bg px-sm py-2 text-base font-semibold text-text-primary outline-none transition-colors focus:ring-2 focus:ring-flame-primary disabled:opacity-50 placeholder:text-flame-primary/50"
               placeholder="Spør Lars om turer..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -172,7 +172,7 @@ export function LarsMonsenChat() {
             <button
               onClick={send}
               disabled={loading || !input.trim()}
-              className="rounded-md bg-flame-primary px-md py-2 text-sm font-bold text-white shadow-[2px_2px_0_var(--brand-flame-pressed)] hover:bg-flame-hover hover:translate-y-[1px] hover:shadow-[1px_1px_0_var(--brand-flame-pressed)] transition-all disabled:opacity-40"
+              className="rounded-md bg-flame-primary px-md py-2 text-base font-bold text-white shadow-[2px_2px_0_var(--brand-flame-pressed)] hover:bg-flame-hover hover:translate-y-[1px] hover:shadow-[1px_1px_0_var(--brand-flame-pressed)] transition-all disabled:opacity-40"
             >
               Send
             </button>
