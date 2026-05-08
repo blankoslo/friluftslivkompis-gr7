@@ -137,6 +137,16 @@ export interface IPackingSnapshot {
   generatedAt?: Date;
 }
 
+export interface IEtaShare {
+  token: string;
+  enabled: boolean;
+  contactName: string;
+  contactPhone?: string;
+  expectedReturnAt: Date;
+  createdAt: Date;
+  completedAt?: Date;
+}
+
 export interface ITrip {
   _id: mongoose.Types.ObjectId;
   title: string;
@@ -160,6 +170,7 @@ export interface ITrip {
   reminders: IReminder[];
   emergencyContacts: IEmergencyContact[];
   expenses: IExpense[];
+  etaShare?: IEtaShare;
   createdBy: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
@@ -305,6 +316,19 @@ const packingSnapshotSchema = new Schema<IPackingSnapshot>(
   { _id: false },
 );
 
+const etaShareSchema = new Schema<IEtaShare>(
+  {
+    token: { type: String, required: true },
+    enabled: { type: Boolean, default: true },
+    contactName: { type: String, required: true },
+    contactPhone: String,
+    expectedReturnAt: { type: Date, required: true },
+    createdAt: { type: Date, default: Date.now },
+    completedAt: Date,
+  },
+  { _id: false },
+);
+
 const expenseSchema = new Schema<IExpense>(
   {
     description: { type: String, required: true },
@@ -343,6 +367,7 @@ const tripSchema = new Schema<ITrip>(
     reminders: [reminderSchema],
     emergencyContacts: [emergencyContactSchema],
     expenses: [expenseSchema],
+    etaShare: { type: etaShareSchema, default: undefined },
     createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
   },
   { timestamps: true },

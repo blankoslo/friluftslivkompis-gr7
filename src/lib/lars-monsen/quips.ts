@@ -44,7 +44,8 @@ export type QuipCategory =
   | "logTitle"
   | "newTripIntro"
   | "inviteHero"
-  | "inviteShare";
+  | "inviteShare"
+  | "etaShare";
 
 const QUIPS: Record<QuipCategory, string[]> = {
   tripSelect: [
@@ -344,6 +345,16 @@ const QUIPS: Record<QuipCategory, string[]> = {
     "Spre invitasjonen. Vidda har plass til flere.",
     "Send til en kompis. Bjørnene foretrekker grupper.",
     "Del den. Ingen fortjener å gå glipp av dette.",
+  ],
+  etaShare: [
+    "Send lenka til kontakten. Sofaen sover ikke uroligere enn nødvendig.",
+    "Smart. Noen hjemme bør vite når kaffen skal stå klar.",
+    "Lenke sendt. Sjekk inn når du er trygt under tak.",
+    "Fin øvelse. Selv jeg ringer mor før Yukon-tur.",
+    "Klokka er satt. Kommer du sent, får kontakten beskjed.",
+    "Bra valgt. Solotur uten plan er bare fjas i bushen.",
+    "Ferdig. Send et bilde av utsikten når du er fremme.",
+    "Bra. En forsinkelse uten varsling er bare drama.",
   ],
 };
 
