@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import { SourceBadge } from "@/components/ui/ai-disclosure";
 
 type Message = { role: "user" | "assistant"; content: string };
 
@@ -91,10 +92,11 @@ export function LarsMonsenChat() {
                 Lars Monsen
               </div>
               <div
-                className="text-[10px] uppercase tracking-label text-white/80 mt-1"
+                className="flex items-center gap-xs text-[10px] uppercase tracking-label text-white/80 mt-1"
                 style={{ fontFamily: "var(--font-stamp)" }}
               >
-                VILLMARKSPIONER
+                <span>VILLMARKSPIONER</span>
+                <SourceBadge tone="ai" label="AI" />
               </div>
             </div>
             <button
@@ -105,6 +107,10 @@ export function LarsMonsenChat() {
               ✕
             </button>
           </div>
+
+          <p className="border-b border-flame-pressed/20 bg-midnight-sun-tint px-md py-xs text-[10px] text-text-primary">
+            ✨ AI-svar fra Claude. Sjekk fakta selv før du booker.
+          </p>
 
           {/* Messages */}
           <div className="flex-1 space-y-3 overflow-y-auto p-4">

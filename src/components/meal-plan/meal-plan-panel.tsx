@@ -187,6 +187,12 @@ export function MealPlanPanel({
 
       {tab === "matplan" && hasPlan && (
         <div className="flex flex-col gap-md">
+          <div className="flex items-center gap-sm">
+            <SourceBadge tone="ai" label="AI-generert" />
+            <span className="text-xs text-text-muted">
+              Måltider og mengder foreslått av Claude. Juster selv før innkjøp.
+            </span>
+          </div>
           {mealPlan.map((day) => (
             <DayCard key={day.dayNumber} day={day} />
           ))}
@@ -194,19 +200,39 @@ export function MealPlanPanel({
       )}
 
       {tab === "handle" && (
-        <ShoppingTable
-          items={shopping}
-          participants={participants}
-          onPatch={patchShopping}
-        />
+        <div className="flex flex-col gap-sm">
+          {shopping.length > 0 && (
+            <div className="flex items-center gap-sm">
+              <SourceBadge tone="ai" label="AI-generert" />
+              <span className="text-xs text-text-muted">
+                Handleliste utledet fra matplanen. Verifiser mengder før butikk.
+              </span>
+            </div>
+          )}
+          <ShoppingTable
+            items={shopping}
+            participants={participants}
+            onPatch={patchShopping}
+          />
+        </div>
       )}
 
       {tab === "forbruk" && (
-        <ConsumablesTable
-          items={consumables}
-          participants={participants}
-          onPatch={patchConsumable}
-        />
+        <div className="flex flex-col gap-sm">
+          {consumables.length > 0 && (
+            <div className="flex items-center gap-sm">
+              <SourceBadge tone="ai" label="AI-generert" />
+              <span className="text-xs text-text-muted">
+                Anslag på forbruksvarer fra Claude. Tilpass etter erfaring.
+              </span>
+            </div>
+          )}
+          <ConsumablesTable
+            items={consumables}
+            participants={participants}
+            onPatch={patchConsumable}
+          />
+        </div>
       )}
     </div>
   );
