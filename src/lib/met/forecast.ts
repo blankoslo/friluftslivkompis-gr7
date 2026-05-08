@@ -1,4 +1,4 @@
-const USER_AGENT = "Friluftskompis/1.0 (lag7@blank.no)";
+const USER_AGENT = "PaTurMedMonsen/1.0 (lag7@blank.no)";
 
 interface MetResponse {
   properties: {

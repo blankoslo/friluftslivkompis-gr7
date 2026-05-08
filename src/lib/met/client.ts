@@ -2,7 +2,7 @@ import { recordApiError } from "@/lib/api-monitor";
 
 const FORECAST_URL =
   "https://api.met.no/weatherapi/locationforecast/2.0/complete";
-const USER_AGENT = "Friluftskompis/1.0 (lag7@blank.no)";
+const USER_AGENT = "PaTurMedMonsen/1.0 (lag7@blank.no)";
 
 export type MetTimeseriesEntry = {
   time: string;

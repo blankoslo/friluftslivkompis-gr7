@@ -14,7 +14,7 @@ export function SiteHeader() {
           href="/"
           className="font-heading font-bold text-xl text-flame-pressed tracking-tight transition-colors hover:text-flame-primary"
         >
-          Friluftskompis
+          På tur med Monsen
         </Link>
         <div className="flex gap-lg text-sm font-semibold text-text-muted">
           {[

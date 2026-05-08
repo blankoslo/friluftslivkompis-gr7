@@ -1,6 +1,6 @@
 const UT_GRAPHQL_URL =
   "https://ut-backend-api-2-41145913385.europe-north1.run.app/internal/graphql";
-const USER_AGENT = "Friluftskompis/1.0 (lag7@blank.no)";
+const USER_AGENT = "PaTurMedMonsen/1.0 (lag7@blank.no)";
 
 export type UtFetchOptions = {
   signal?: AbortSignal;

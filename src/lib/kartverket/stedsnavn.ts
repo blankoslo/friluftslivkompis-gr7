@@ -1,5 +1,5 @@
 const STEDSNAVN_URL = "https://ws.geonorge.no/stedsnavn/v1/sted";
-const USER_AGENT = "Friluftskompis/1.0 (lag7@blank.no)";
+const USER_AGENT = "PaTurMedMonsen/1.0 (lag7@blank.no)";
 
 export type PlaceHit = {
   name: string;

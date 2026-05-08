@@ -32,7 +32,7 @@ const specialElite = Special_Elite({
 });
 
 export const metadata: Metadata = {
-  title: "Friluftskompis",
+  title: "På tur med Monsen",
   description: "Planlegg fjellturen på ett sted",
 };
 
