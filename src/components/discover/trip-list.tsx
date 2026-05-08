@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 import type { TripNearItem, TripActivityType, TripGrading } from "@/lib/ut";
 import {
@@ -108,11 +109,19 @@ export function TripList({
                 )}
               </div>
               {ageWarning && (
-                <div className="mt-1 text-xs text-amber-700 dark:text-amber-400">
+                <div className="mt-1 text-xs text-warning">
                   ⚠ {ageWarning}
                 </div>
               )}
             </button>
+            {isActive && (
+              <Link
+                href={`/offline/tur/${t.id}`}
+                className="mt-1 inline-block px-3 text-xs text-fjord hover:underline"
+              >
+                Bruk offline →
+              </Link>
+            )}
           </li>
         );
       })}
@@ -132,8 +141,8 @@ function AgeBadge({
       className={cn(
         "shrink-0 rounded-sm px-1.5 py-0.5 text-[10px] font-medium",
         tone === "ok"
-          ? "bg-emerald-100 text-emerald-900 dark:bg-emerald-900/40 dark:text-emerald-100"
-          : "bg-amber-100 text-amber-900 dark:bg-amber-900/40 dark:text-amber-100",
+          ? "bg-forest-tint text-forest"
+          : "bg-warning-bg text-warning",
       )}
     >
       {children}

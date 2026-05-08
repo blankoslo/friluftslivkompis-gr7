@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Playfair_Display, Source_Sans_3 } from "next/font/google";
 import Link from "next/link";
 import { LarsMonsenChat } from "@/components/lars-monsen/lars-monsen-chat";
+import { ServiceWorkerRegister } from "@/components/sw-register";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -55,6 +56,7 @@ export default function RootLayout({
         </header>
         <div className="flex-1">{children}</div>
         <LarsMonsenChat />
+        <ServiceWorkerRegister />
       </body>
     </html>
   );
