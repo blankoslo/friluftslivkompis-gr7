@@ -20,7 +20,7 @@ export function SiteHeader() {
           {[
             { href: "/discover", label: "Discover" },
             { href: "/tur/ny", label: "Ny tur" },
-            { href: "/logg", label: "Logg" },
+            { href: "/turer", label: "Turer" },
           ].map(({ href, label }) => {
             const isActive = pathname.startsWith(href);
             return (
