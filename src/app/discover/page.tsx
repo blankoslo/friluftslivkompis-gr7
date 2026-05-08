@@ -64,6 +64,7 @@ function DiscoverPageInner() {
   const [selected, setSelected] = useState<SearchResult | null>(null);
   const [activeCabinId, setActiveCabinId] = useState<number | null>(null);
   const [activeTripId, setActiveTripId] = useState<number | null>(null);
+  const [tripDiscoveryEnabled, setTripDiscoveryEnabled] = useState(false);
   const [trips, setTrips] = useState<TripNearItem[]>([]);
   const [tripsLoading, setTripsLoading] = useState(false);
   const [activeFilters, setActiveFilters] = useState<Set<TripCategory>>(
@@ -86,23 +87,29 @@ function DiscoverPageInner() {
   }, []);
 
   const handleSelect = useCallback((r: SearchResult) => {
+    const enableTripDiscovery =
+      !addingMode && (r.kind === "area" || r.kind === "place" || r.kind === "poi");
     setSelected(r);
     setActiveTripId(null);
+    setTripDiscoveryEnabled(enableTripDiscovery);
+    if (!enableTripDiscovery) setTrips([]);
     if (r.kind === "cabin" && r.source === "ut") {
       setActiveCabinId(r.id.startsWith("ut:cabin:") ? Number(r.id.slice(9)) : null);
     } else {
       setActiveCabinId(null);
     }
-  }, []);
+  }, [addingMode]);
 
   const handleCabinClick = useCallback((id: number) => {
     setActiveCabinId(id);
     setActiveTripId(null);
+    setTripDiscoveryEnabled(false);
+    setTrips([]);
     setMonsenQuip({ id: Date.now(), text: randomQuip("cabinSelect") });
   }, []);
 
   const fetchTrips = useCallback((v: Viewport) => {
-    if (addingMode) {
+    if (addingMode || !tripDiscoveryEnabled) {
       setTrips([]);
       setTripsLoading(false);
       return;
@@ -130,7 +137,7 @@ function DiscoverPageInner() {
       .finally(() => {
         if (!controller.signal.aborted) setTripsLoading(false);
       });
-  }, [addingMode]);
+  }, [addingMode, tripDiscoveryEnabled]);
 
   const debounceRef = useRef<number | null>(null);
   const handleViewportChange = useCallback(
@@ -184,6 +191,7 @@ function DiscoverPageInner() {
   const handleTripSelect = useCallback((t: TripNearItem) => {
     setActiveTripId(t.id);
     setActiveCabinId(null);
+    setTripDiscoveryEnabled(true);
     setMonsenQuip({ id: Date.now(), text: randomQuip("tripSelect") });
     setSelected({
       source: "ut",
@@ -282,8 +290,10 @@ function DiscoverPageInner() {
   }, [removalSuggestion]);
 
   const showCabinPanel = activeCabinId !== null;
-  const hasFilters = activeFilters.size > 0 || minAge !== null;
-  const showTripList = !addingMode && (trips.length > 0 || hasFilters);
+  const hasFilters =
+    tripDiscoveryEnabled && (activeFilters.size > 0 || minAge !== null);
+  const showTripList =
+    tripDiscoveryEnabled && !addingMode && (trips.length > 0 || hasFilters);
   const showEmptyHint =
     filteredTrips.length === 0 && ageFilteredTrips.length > 0;
 
@@ -343,7 +353,7 @@ function DiscoverPageInner() {
               }
             />
 
-            {!addingMode && (
+            {tripDiscoveryEnabled && !addingMode && (
               <FilterPanel
                 active={activeFilters}
                 counts={counts}
@@ -431,7 +441,7 @@ function DiscoverPageInner() {
           <div className="order-1 h-[50vh] min-h-[320px] overflow-hidden rounded-lg border-4 border-flame-pressed shadow-[6px_6px_0_var(--brand-flame-pressed)] lg:order-2 lg:h-[70vh] lg:min-h-[420px]">
             <Map
               selected={selected}
-              trips={addingMode ? [] : filteredTrips}
+              trips={tripDiscoveryEnabled && !addingMode ? filteredTrips : []}
               activeTripId={activeTripId}
               initialBounds={initialBounds}
               onCabinClick={handleCabinClick}
