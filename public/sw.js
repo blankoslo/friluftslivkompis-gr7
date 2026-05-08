@@ -104,8 +104,11 @@ async function navigationHandler(req) {
     if (res.ok) cache.put(req, res.clone());
     return res;
   } catch (e) {
-    const cached = await cache.match(req);
+    const cached = await cache.match(req, { ignoreSearch: true });
     if (cached) return cached;
+    const dataCache = await caches.open(DATA_CACHE);
+    const dataHit = await dataCache.match(req, { ignoreSearch: true });
+    if (dataHit) return dataHit;
     const fallback = await cache.match("/");
     if (fallback) return fallback;
     return new Response("Offline – ingen lagret versjon.", {

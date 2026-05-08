@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import maplibregl, { Map as MlMap, Marker } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { rasterSource, KARTVERKET_ATTRIBUTION } from "@/lib/kartverket";
-import { TILE_CACHE } from "@/lib/offline/cache";
+import { APP_CACHE, DATA_CACHE, TILE_CACHE } from "@/lib/offline/cache";
 import {
   bboxFromCoords,
   planPrecache,
@@ -322,12 +322,17 @@ export function OfflineMap({ trip, cabins }: Props) {
       await Promise.all(workers);
 
       try {
-        const dataCache = await caches.open("friluft-data-v1");
+        const dataCache = await caches.open(DATA_CACHE);
         await dataCache.add(`/api/ut-trips/${trip.id}`);
         await dataCache.add("/api/cabins");
-        await dataCache.add(`/offline/tur/${trip.id}`);
       } catch (e) {
         console.warn("[offline] data precache failed", e);
+      }
+      try {
+        const appCache = await caches.open(APP_CACHE);
+        await appCache.add(`/offline/tur/${trip.id}`);
+      } catch (e) {
+        console.warn("[offline] page precache failed", e);
       }
 
       setDownload({
