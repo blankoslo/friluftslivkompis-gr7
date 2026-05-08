@@ -76,10 +76,10 @@ export function LarsMonsenChat() {
           <div className="flex items-center gap-sm bg-flame-pressed px-md py-sm">
             <div className="relative size-9 shrink-0 overflow-hidden rounded-full border-2 border-bg shadow">
               <Image
-                src="/lars-monsen.jpg"
+                src="/lars-monsen-kayak.png"
                 alt="Lars Monsen"
                 fill
-                className="object-cover object-[center_20%]"
+                className="object-cover object-top"
                 sizes="36px"
               />
             </div>
@@ -116,10 +116,10 @@ export function LarsMonsenChat() {
                 {m.role === "assistant" && (
                   <div className="relative size-6 shrink-0 overflow-hidden rounded-full border border-flame/30">
                     <Image
-                      src="/lars-monsen.jpg"
+                      src="/lars-monsen-kayak.png"
                       alt="Lars Monsen"
                       fill
-                      className="object-cover object-[center_20%]"
+                      className="object-cover object-top"
                       sizes="24px"
                     />
                   </div>
@@ -139,7 +139,7 @@ export function LarsMonsenChat() {
             {loading && (
               <div className="flex items-end gap-2">
                 <div className="relative size-6 shrink-0 overflow-hidden rounded-full border border-flame/30">
-                  <Image src="/lars-monsen.jpg" alt="" fill className="object-cover object-[center_20%]" sizes="24px" />
+                  <Image src="/lars-monsen-kayak.png" alt="" fill className="object-cover object-top" sizes="24px" />
                 </div>
                 <div className="rounded-lg rounded-bl-sm bg-flame-tint border-2 border-flame-pressed px-md py-sm text-sm text-text-primary">
                   <span className="inline-flex gap-1">
@@ -184,10 +184,10 @@ export function LarsMonsenChat() {
           <span className="text-base font-bold text-white">✕</span>
         ) : (
           <Image
-            src="/lars-monsen.jpg"
+            src="/lars-monsen-kayak.png"
             alt="Lars Monsen"
             fill
-            className="object-cover object-[center_20%]"
+            className="object-cover object-top"
             sizes="56px"
           />
         )}
