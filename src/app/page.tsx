@@ -112,7 +112,7 @@ export default async function HomePage() {
   const badge = trip
     ? tripStatusBadge(trip.participants)
     : { label: "Demo", tone: "wait" as const };
-  const [wisdomTop, wisdomBottom, footerQuote] = pickQuips("homeWisdom", 3);
+  const [wisdomTop, footerQuote] = pickQuips("homeWisdom", 2);
 
   return (
     <main className="bg-flame-primary text-white relative overflow-hidden">
@@ -159,17 +159,6 @@ export default async function HomePage() {
             />
           </span>
         </h1>
-
-        <p
-          className="text-2xl mb-lg opacity-95"
-          style={{
-            fontFamily: "var(--font-handwriting)",
-            fontWeight: 700,
-            transform: "rotate(-1deg)",
-          }}
-        >
-          ...så finner vi ut av resten sammen ↓
-        </p>
 
         <form
           action="/discover"
@@ -315,8 +304,6 @@ export default async function HomePage() {
             />
           </div>
         </Link>
-
-        <WisdomQuote quote={wisdomBottom} tilt={-1.5} />
 
         <footer className="mt-2xl text-center pb-xl">
           <p
