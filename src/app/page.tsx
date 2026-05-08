@@ -73,7 +73,7 @@ export default async function HomePage() {
       <div className="relative max-w-[42rem] mx-auto px-md sm:px-lg">
 
         {/* Hero — quote + title + search centered vertically */}
-        <div className="flex flex-col items-center text-center min-h-[75vh] justify-center">
+        <div className="flex flex-col items-center text-center pt-[22vh] pb-xl">
           <h1
             className="font-heading font-bold leading-[0.95] mb-lg"
             style={{ fontSize: "clamp(40px, 9vw, 64px)" }}
