@@ -310,19 +310,19 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
 
         <div className="grid gap-lg">
           {!trip.isDemo && (
-            <Section label="Inviter deltakere" badge="G1" accent="forest">
+            <Section label="Inviter deltakere" badge="G1">
               <InviteLink token={trip.inviteToken} />
             </Section>
           )}
 
           {!trip.isDemo && trip.cabins.length >= 2 && (
-            <Section label="Inviter til én dag" badge="G9" accent="forest">
+            <Section label="Inviter til én dag" badge="G9">
               <DayInviteLinks inviteToken={trip.inviteToken} cabins={trip.cabins} />
             </Section>
           )}
 
           {!trip.isDemo && (
-            <Section label="Deltakere" badge="G1, G4" accent="forest">
+            <Section label="Deltakere" badge="G1, G4">
               <ParticipantsLive
                 tripIdOrToken={trip.inviteToken}
                 initialParticipants={trip.participants}
@@ -331,7 +331,7 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
             </Section>
           )}
 
-          <Section label="Hytter og etapper" badge="B3" accent="fjord">
+          <Section label="Hytter og etapper" badge="B3">
             <CabinRouteEditor
               initialCabins={trip.cabins}
               tripId={trip._id}
@@ -340,7 +340,7 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
           </Section>
 
           {!trip.isDemo && (
-            <Section label="Hyttetilgjengelighet" badge="B2" accent="forest">
+            <Section label="Hyttetilgjengelighet" badge="B2">
               <CabinAvailability
                 cabins={trip.cabins}
                 persons={Math.max(1, trip.participants.length || 1)}
@@ -350,7 +350,7 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
             </Section>
           )}
 
-          <Section label="Tidslinje og vær" badge="B1 / B6" accent="fjord">
+          <Section label="Tidslinje og vær" badge="B1 / B6">
             {trip.cabins.length < 2 ? (
               <p
                 className="text-text-primary text-lg leading-snug"
@@ -379,7 +379,7 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
           </Section>
 
           {!trip.isDemo && (
-            <Section label="Pakkeliste" badge="P1, P2, P3" accent="midnight-sun">
+            <Section label="Pakkeliste" badge="P1, P2, P3">
               <PackingList
                 tripId={trip._id}
                 initialItems={trip.packingList}
@@ -389,7 +389,7 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
             </Section>
           )}
           {!trip.isDemo && (
-            <Section label="Matplan og handle" badge="P5, P5b, P7" accent="forest">
+            <Section label="Matplan og handle" badge="P5, P5b, P7">
               <MealPlanPanel
                 tripId={trip._id}
                 participants={packingParticipants}
@@ -400,7 +400,7 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
             </Section>
           )}
           {!trip.isDemo && (
-            <Section label="Bærevekt per person" badge="P6" accent="fjord">
+            <Section label="Bærevekt per person" badge="P6">
               <WeightSummary
                 participants={packingParticipants}
                 packingList={trip.packingList}
@@ -412,7 +412,7 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
             </Section>
           )}
           {!trip.isDemo && (
-            <Section label="Påminnelser" badge="P4" accent="midnight-sun">
+            <Section label="Påminnelser" badge="P4">
               <RemindersPanel
                 tripId={trip._id}
                 startDate={trip.startDate}
@@ -421,7 +421,7 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
             </Section>
           )}
           {!trip.isDemo && (
-            <Section label="Utgifter" badge="R1" accent="flame">
+            <Section label="Utgifter" badge="R1">
               <ExpensesPanel
                 tripId={trip._id}
                 initialParticipants={trip.participants.map<ExpensesPanelParticipant>(
@@ -450,41 +450,23 @@ function formatDateRange(start?: string, end?: string) {
   return `${fmt(start)} - ${fmt(end)}`;
 }
 
-type Accent = "flame" | "forest" | "fjord" | "midnight-sun";
-
-const accentHeading: Record<Accent, string> = {
-  flame: "text-flame-primary",
-  forest: "text-forest",
-  fjord: "text-fjord",
-  "midnight-sun": "text-midnight-sun",
-};
-
-const accentBadge: Record<Accent, string> = {
-  flame: "bg-flame-primary text-white",
-  forest: "bg-forest text-white",
-  fjord: "bg-fjord text-white",
-  "midnight-sun": "bg-midnight-sun text-text-primary",
-};
-
 function Section({
   label,
   badge,
-  accent,
   children,
 }: {
   label: string;
   badge: string;
-  accent: Accent;
   children: React.ReactNode;
 }) {
   return (
     <section className="bg-bg border-4 border-flame-pressed rounded-lg shadow-[6px_6px_0_var(--brand-flame-pressed)] p-lg relative">
       <div className="flex items-center gap-sm mb-md flex-wrap">
-        <h2 className={`font-heading font-bold text-h2 ${accentHeading[accent]}`}>
+        <h2 className="font-heading font-bold text-h2 text-forest">
           {label}
         </h2>
         <span
-          className={`text-xs font-bold px-sm py-1 rounded-pill uppercase tracking-label ${accentBadge[accent]}`}
+          className="text-xs font-bold px-sm py-1 rounded-pill uppercase tracking-label bg-forest text-white"
           style={{ fontFamily: "var(--font-stamp)" }}
         >
           {badge}
