@@ -1,0 +1,2794 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Friluftskompis — Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800;900&family=Source+Sans+3:wght@400;500;600;700&family=Caveat:wght@500;600;700&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     LARS MONSEN DESIGN TOKENS
+     ============================================================ */
+  :root {
+    /* Brand */
+    --flame-primary: #C8602A;
+    --flame-hover: #A04A1E;
+    --flame-pressed: #7A3515;
+    --flame-tint: #FAEADE;
+
+    /* Neutral */
+    --bg: #FAF7F2;
+    --surface: #F0EBE0;
+    --border: #D6CCBF;
+    --text-primary: #2A211A;
+    --text-muted: #7A6F63;
+    --text-disabled: #D6CCBF;
+
+    /* Accent */
+    --forest: #3D5E35;
+    --forest-tint: #E8F0E6;
+    --fjord: #3D6475;
+    --fjord-tint: #E0ECF0;
+    --midnight-sun: #B8891E;
+    --midnight-sun-tint: #FBF3DC;
+
+    /* Semantic */
+    --success: var(--forest);
+    --info: var(--fjord);
+    --warning: #A04A1E;
+    --warning-bg: #FAEADE;
+    --warning-border: #E8702F;
+
+    /* Typography */
+    --font-heading: 'Playfair Display', Georgia, serif;
+    --font-body: 'Source Sans 3', 'Source Sans Pro', Inter, sans-serif;
+    --font-mono: 'Courier New', monospace;
+    --font-hand: 'Caveat', 'Marker Felt', cursive;
+    --font-stamp: 'Special Elite', 'Courier New', monospace;
+
+    /* Spacing */
+    --xs: 4px;
+    --sm: 8px;
+    --md: 16px;
+    --lg: 24px;
+    --xl: 32px;
+    --2xl: 48px;
+
+    /* Radius */
+    --r-sm: 3px;
+    --r-md: 5px;
+    --r-lg: 10px;
+    --r-pill: 12px;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px rgba(42, 33, 26, 0.06);
+    --shadow-md: 0 4px 12px rgba(42, 33, 26, 0.08);
+    --shadow-lg: 0 12px 32px rgba(42, 33, 26, 0.12);
+  }
+
+  /* ============================================================
+     RESET & BASE
+     ============================================================ */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--text-primary);
+    background: #2A211A;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  body {
+    min-height: 100vh;
+    background:
+      radial-gradient(circle at 20% 0%, rgba(200,96,42,0.08), transparent 50%),
+      radial-gradient(circle at 80% 100%, rgba(61,100,117,0.08), transparent 50%),
+      #1A1612;
+    padding: var(--lg);
+  }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+  input, textarea { font-family: inherit; font-size: inherit; color: inherit; }
+
+  /* ============================================================
+     PAGE LAYOUT — workshop preview
+     ============================================================ */
+  .workshop {
+    max-width: 1280px;
+    margin: 0 auto;
+    color: var(--bg);
+  }
+  .workshop-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: var(--xl);
+    flex-wrap: wrap;
+    gap: var(--md);
+  }
+  .workshop-title {
+    font-family: var(--font-heading);
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: #FAF7F2;
+  }
+  .workshop-title small {
+    display: block;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgba(250,247,242,0.5);
+    margin-bottom: 4px;
+  }
+  .workshop-meta {
+    font-size: 13px;
+    color: rgba(250,247,242,0.55);
+    line-height: 1.6;
+    text-align: right;
+  }
+  .workshop-meta strong { color: var(--flame-primary); font-weight: 600; }
+
+  /* Screen picker tabs */
+  .screen-picker {
+    display: flex;
+    gap: 6px;
+    margin-bottom: var(--lg);
+    flex-wrap: wrap;
+    padding: 6px;
+    background: rgba(250,247,242,0.04);
+    border: 1px solid rgba(250,247,242,0.08);
+    border-radius: var(--r-lg);
+  }
+  .screen-picker button {
+    padding: 8px 14px;
+    border-radius: var(--r-md);
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(250,247,242,0.6);
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .screen-picker button .tag {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(250,247,242,0.4);
+    font-weight: 600;
+  }
+  .screen-picker button:hover {
+    background: rgba(250,247,242,0.06);
+    color: rgba(250,247,242,0.85);
+  }
+  .screen-picker button.active {
+    background: var(--flame-primary);
+    color: #fff;
+  }
+  .screen-picker button.active .tag { color: rgba(255,255,255,0.7); }
+
+  /* Phone frame */
+  .stage {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: var(--xl);
+    align-items: start;
+  }
+  @media (max-width: 900px) {
+    .stage { grid-template-columns: 1fr; }
+    .panel { order: -1; }
+  }
+
+  .phone-wrap {
+    display: flex;
+    justify-content: center;
+  }
+  .phone {
+    width: 380px;
+    height: 780px;
+    background: var(--bg);
+    border-radius: 44px;
+    border: 8px solid #2A211A;
+    box-shadow: var(--shadow-lg), 0 0 0 1px rgba(0,0,0,0.4);
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  .phone-notch {
+    position: absolute;
+    top: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 110px;
+    height: 28px;
+    background: #2A211A;
+    border-radius: 14px;
+    z-index: 100;
+  }
+
+  /* Status bar */
+  .status-bar {
+    flex-shrink: 0;
+    height: 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: 0 30px 6px 30px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  .status-bar .right { display: flex; gap: 6px; align-items: center; }
+
+  /* Screen container */
+  .screen-area {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: relative;
+    -webkit-overflow-scrolling: touch;
+  }
+  .screen-area::-webkit-scrollbar { width: 0; }
+  .screen {
+    display: none;
+    min-height: 100%;
+    padding-bottom: 80px;
+  }
+  .screen.active { display: block; }
+
+  /* Bottom navigation */
+  .bottom-nav {
+    flex-shrink: 0;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 72px;
+    background: rgba(250,247,242,0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    display: flex;
+    z-index: 50;
+    padding: 6px 4px 12px;
+  }
+  .bottom-nav button {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    transition: color 0.15s;
+  }
+  .bottom-nav button.active { color: var(--flame-primary); }
+  .bottom-nav button svg { width: 22px; height: 22px; }
+
+  /* ============================================================
+     COMMON COMPONENTS
+     ============================================================ */
+  .h1 { font-family: var(--font-heading); font-size: 32px; font-weight: 600; line-height: 1.1; letter-spacing: -0.01em; color: var(--text-primary); }
+  .h2 { font-family: var(--font-heading); font-size: 24px; font-weight: 600; line-height: 1.15; letter-spacing: -0.005em; color: var(--text-primary); }
+  .h3 { font-family: var(--font-heading); font-size: 20px; font-weight: 600; line-height: 1.2; color: var(--text-primary); }
+  .body { font-size: 16px; line-height: 1.5; color: var(--text-primary); }
+  .small { font-size: 12px; line-height: 1.4; color: var(--text-muted); }
+  .muted { color: var(--text-muted); }
+
+  .label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: var(--r-pill);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: var(--surface);
+    color: var(--text-muted);
+  }
+  .tag.flame { background: var(--flame-tint); color: var(--flame-pressed); }
+  .tag.forest { background: var(--forest-tint); color: var(--forest); }
+  .tag.fjord { background: var(--fjord-tint); color: var(--fjord); }
+  .tag.sun { background: var(--midnight-sun-tint); color: #8A6612; }
+  .tag.ai { background: #2A211A; color: var(--flame-tint); padding: 3px 7px; border-radius: 4px; font-size: 9px; }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 20px;
+    border-radius: var(--r-md);
+    font-size: 15px;
+    font-weight: 600;
+    transition: all 0.15s;
+    width: 100%;
+    min-height: 48px;
+  }
+  .btn-primary {
+    background: var(--flame-primary);
+    color: #fff;
+  }
+  .btn-primary:hover { background: var(--flame-hover); }
+  .btn-primary:active { background: var(--flame-pressed); }
+  .btn-secondary {
+    background: transparent;
+    color: var(--flame-primary);
+    border: 1.5px solid var(--flame-primary);
+  }
+  .btn-secondary:hover { background: var(--flame-tint); }
+  .btn-ghost {
+    background: transparent;
+    color: var(--text-muted);
+    border: 1.5px solid var(--border);
+  }
+  .btn-ghost:hover { background: var(--surface); }
+  .btn-sm { padding: 8px 14px; font-size: 13px; min-height: 36px; }
+
+  .card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    padding: var(--md);
+  }
+  .card-surface {
+    background: var(--surface);
+    border-radius: var(--r-lg);
+    padding: var(--md);
+  }
+
+  .divider { height: 1px; background: var(--border); margin: var(--md) 0; }
+
+  /* AI badge inline */
+  .ai-mark {
+    display: inline-block;
+    background: var(--text-primary);
+    color: var(--flame-tint);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    padding: 2px 6px;
+    border-radius: 3px;
+    vertical-align: middle;
+    margin-left: 6px;
+  }
+
+  /* ============================================================
+     SCREEN: HJEM / UTFORSK
+     ============================================================ */
+  .hjem-header {
+    padding: var(--lg) var(--lg) var(--md);
+  }
+  .hjem-greeting {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--lg);
+  }
+  .hjem-greeting .who {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .hjem-greeting .who strong { color: var(--text-primary); font-weight: 600; }
+  .avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--flame-tint);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: var(--flame-pressed);
+    font-size: 14px;
+  }
+  .hjem-question {
+    font-family: var(--font-heading);
+    font-size: 30px;
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    margin-bottom: var(--md);
+  }
+
+  .search-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 12px var(--md);
+    margin-bottom: var(--md);
+    transition: border-color 0.15s;
+  }
+  .search-box:focus-within { border-color: var(--flame-primary); }
+  .search-box input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: none;
+    font-size: 15px;
+  }
+  .search-box input::placeholder { color: var(--text-muted); }
+  .search-box .ai-pill {
+    background: var(--text-primary);
+    color: var(--flame-tint);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    padding: 3px 6px;
+    border-radius: 3px;
+  }
+
+  .ai-suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: var(--md);
+  }
+  .ai-suggestions button {
+    padding: 7px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-pill);
+    font-size: 12px;
+    color: var(--text-primary);
+    transition: all 0.15s;
+  }
+  .ai-suggestions button:hover {
+    background: var(--flame-tint);
+    border-color: var(--flame-primary);
+    color: var(--flame-pressed);
+  }
+
+  /* Map preview */
+  .map-preview {
+    position: relative;
+    height: 220px;
+    margin: 0 var(--lg) var(--md);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    background: linear-gradient(135deg, #E8F0E6 0%, #D4DFC8 30%, #C8D8B8 60%, #B5CDA0 100%);
+    border: 1px solid var(--border);
+  }
+  .map-preview svg { width: 100%; height: 100%; display: block; }
+  .map-overlay-bottom {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+  .map-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(250,247,242,0.95);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--border);
+    border-radius: var(--r-pill);
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  .map-chip .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .map-chip .dot.dnt { background: var(--flame-primary); }
+  .map-chip .dot.komm { background: var(--fjord); }
+
+  /* Section in screen */
+  .section {
+    padding: var(--md) var(--lg) 0;
+  }
+  .section-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: var(--md);
+  }
+  .section-head .title {
+    font-family: var(--font-heading);
+    font-size: 18px;
+    font-weight: 600;
+  }
+  .section-head .more {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--flame-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  /* Horizontal scroll cards */
+  .h-scroll {
+    display: flex;
+    gap: var(--md);
+    overflow-x: auto;
+    padding: 0 var(--lg) var(--md);
+    margin: 0 calc(var(--lg) * -1);
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+  .h-scroll::-webkit-scrollbar { display: none; }
+  .h-scroll-card {
+    flex-shrink: 0;
+    width: 220px;
+    border-radius: var(--r-lg);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    scroll-snap-align: start;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .h-scroll-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+  .h-scroll-card .img {
+    height: 110px;
+    background: linear-gradient(135deg, #4A6741 0%, #2C3F26 100%);
+    position: relative;
+  }
+  .h-scroll-card .img.r2 { background: linear-gradient(135deg, #5A7A8A 0%, #2A3F4A 100%); }
+  .h-scroll-card .img.r3 { background: linear-gradient(135deg, #B8891E 0%, #7A5A12 100%); }
+  .h-scroll-card .img.r4 { background: linear-gradient(135deg, #C8602A 0%, #7A3515 100%); }
+  .h-scroll-card .img-tag {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: rgba(42,33,26,0.7);
+    color: var(--bg);
+    backdrop-filter: blur(8px);
+    padding: 3px 8px;
+    border-radius: var(--r-sm);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .h-scroll-card .body-x {
+    padding: 10px var(--md) var(--md);
+  }
+  .h-scroll-card h4 {
+    font-family: var(--font-heading);
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .h-scroll-card .meta {
+    font-size: 11px;
+    color: var(--text-muted);
+    display: flex;
+    gap: 10px;
+  }
+
+  /* My trip card */
+  .my-trip-card {
+    margin: 0 var(--lg) var(--md);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    cursor: pointer;
+    transition: box-shadow 0.15s;
+  }
+  .my-trip-card:hover { box-shadow: var(--shadow-md); }
+  .my-trip-card .hero {
+    height: 130px;
+    background:
+      linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.5) 100%),
+      linear-gradient(135deg, #3D5E35 0%, #2A211A 100%);
+    position: relative;
+    padding: var(--md);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .my-trip-card .hero-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  .my-trip-card .hero-tag {
+    background: rgba(250,247,242,0.95);
+    color: var(--flame-pressed);
+    padding: 4px 10px;
+    border-radius: var(--r-pill);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .my-trip-card .hero-bottom {
+    color: #fff;
+    font-family: var(--font-heading);
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 1.1;
+  }
+  .my-trip-card .hero-bottom small {
+    display: block;
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    opacity: 0.8;
+    margin-bottom: 4px;
+  }
+  .my-trip-card .summary {
+    padding: var(--md);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--md);
+  }
+  .my-trip-card .summary-left {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 12px;
+  }
+  .my-trip-card .stack-avatars {
+    display: flex;
+    margin-left: 4px;
+  }
+  .my-trip-card .stack-avatars .a {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid var(--bg);
+    margin-left: -8px;
+    background: var(--flame-tint);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--flame-pressed);
+  }
+  .my-trip-card .stack-avatars .a:nth-child(2) { background: var(--fjord-tint); color: var(--fjord); }
+  .my-trip-card .stack-avatars .a:nth-child(3) { background: var(--forest-tint); color: var(--forest); }
+
+  /* ============================================================
+     SCREEN: TURDETALJ
+     ============================================================ */
+  .top-bar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--bg);
+    padding: var(--md) var(--lg);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.15s;
+  }
+  .top-bar .icon-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface);
+    color: var(--text-primary);
+  }
+  .top-bar .ttl {
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .top-bar-actions { display: flex; gap: 8px; }
+
+  .trip-hero {
+    height: 200px;
+    margin: 0 var(--lg);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    background:
+      linear-gradient(180deg, transparent 30%, rgba(26,22,18,0.7) 100%),
+      linear-gradient(135deg, #3D5E35 0%, #1F3018 100%);
+    position: relative;
+    padding: var(--md);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+  .trip-hero svg.bg-svg {
+    position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0.4;
+  }
+  .trip-hero .meta-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+    position: relative;
+  }
+  .trip-hero h2 {
+    font-family: var(--font-heading);
+    font-size: 26px;
+    font-weight: 600;
+    color: #FAF7F2;
+    line-height: 1.1;
+    position: relative;
+  }
+  .trip-hero .hero-sub {
+    color: rgba(250,247,242,0.85);
+    font-size: 13px;
+    margin-top: 4px;
+    position: relative;
+  }
+
+  .trip-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    margin: var(--md) var(--lg);
+    background: var(--surface);
+    border-radius: var(--r-lg);
+    padding: var(--md) 0;
+  }
+  .trip-stats .stat {
+    text-align: center;
+    padding: 0 4px;
+    border-right: 1px solid var(--border);
+  }
+  .trip-stats .stat:last-child { border-right: none; }
+  .trip-stats .num {
+    font-family: var(--font-heading);
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1;
+  }
+  .trip-stats .lab {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-top: 4px;
+  }
+
+  /* AI replan banner */
+  .ai-banner {
+    margin: 0 var(--lg) var(--md);
+    background: var(--midnight-sun-tint);
+    border: 1px solid #E5C580;
+    border-left: 3px solid var(--midnight-sun);
+    border-radius: var(--r-md);
+    padding: var(--md);
+  }
+  .ai-banner-head {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .ai-banner-head .icon {
+    width: 28px; height: 28px;
+    background: var(--midnight-sun);
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .ai-banner h4 { font-family: var(--font-body); font-size: 14px; font-weight: 700; color: #6A4D10; flex: 1; }
+  .ai-banner p { font-size: 13px; color: #5A4310; margin-bottom: 12px; }
+  .ai-banner .ai-actions { display: flex; gap: 8px; }
+  .ai-banner .ai-actions .btn { padding: 8px 14px; font-size: 13px; min-height: 36px; }
+  .ai-banner .btn-primary { background: var(--midnight-sun); color: #fff; }
+  .ai-banner .btn-primary:hover { background: #8A6612; }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    padding: 0 var(--lg);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: var(--md);
+  }
+  .tab {
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.15s;
+  }
+  .tab.active {
+    color: var(--flame-primary);
+    border-bottom-color: var(--flame-primary);
+  }
+
+  /* Timeline */
+  .timeline {
+    padding: 0 var(--lg);
+  }
+  .day-card {
+    position: relative;
+    padding-left: 28px;
+    padding-bottom: var(--lg);
+  }
+  .day-card:last-child { padding-bottom: 0; }
+  .day-card::before {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 18px;
+    bottom: 0;
+    width: 2px;
+    background: var(--border);
+  }
+  .day-card:last-child::before { display: none; }
+  .day-card .dot {
+    position: absolute;
+    left: 0;
+    top: 6px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 3px solid var(--flame-primary);
+    z-index: 2;
+  }
+  .day-card .day-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 6px;
+  }
+  .day-card .day-num {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-muted);
+    font-weight: 700;
+  }
+  .day-card h4 {
+    font-family: var(--font-heading);
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .day-card .stage-label {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+  .day-card .day-body {
+    background: var(--surface);
+    border-radius: var(--r-md);
+    padding: 12px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .day-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+  }
+  .day-row .ico {
+    width: 18px;
+    height: 18px;
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+  .day-row strong {
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  .day-row.weather strong { color: var(--fjord); }
+  .day-row.weather-warn strong { color: var(--warning); }
+
+  /* Route map mini */
+  .route-map {
+    margin: 0 var(--lg) var(--md);
+    height: 180px;
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: linear-gradient(135deg, #E8F0E6 0%, #D4DFC8 50%, #B5CDA0 100%);
+    position: relative;
+  }
+
+  /* ============================================================
+     SCREEN: PAKKELISTE
+     ============================================================ */
+  .pack-header {
+    padding: var(--lg) var(--lg) 0;
+  }
+  .pack-progress {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: var(--md) var(--lg);
+    padding: 12px var(--md);
+    background: var(--surface);
+    border-radius: var(--r-md);
+  }
+  .pack-progress-bar {
+    flex: 1;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .pack-progress-bar .fill {
+    height: 100%;
+    background: var(--forest);
+    border-radius: 3px;
+    transition: width 0.3s;
+  }
+
+  .pack-section {
+    margin: 0 var(--lg) var(--md);
+  }
+  .pack-section h4 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 4px;
+  }
+  .pack-section h4 .count {
+    background: var(--surface);
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 10px;
+  }
+  .pack-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 4px;
+    border-bottom: 1px solid var(--surface);
+    cursor: pointer;
+  }
+  .pack-item:last-child { border-bottom: none; }
+  .check {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    border: 1.5px solid var(--border);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+  .pack-item.checked .check {
+    background: var(--forest);
+    border-color: var(--forest);
+    color: #fff;
+  }
+  .pack-item.checked .label-text {
+    text-decoration: line-through;
+    color: var(--text-muted);
+  }
+  .pack-item .label-text {
+    flex: 1;
+    font-size: 14px;
+  }
+  .pack-item .who {
+    font-size: 10px;
+    color: var(--text-muted);
+    background: var(--surface);
+    padding: 3px 7px;
+    border-radius: var(--r-pill);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+  }
+
+  .ai-info-box {
+    margin: 0 var(--lg) var(--md);
+    padding: 12px;
+    background: var(--flame-tint);
+    border-radius: var(--r-md);
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 12px;
+    color: var(--flame-pressed);
+  }
+  .ai-info-box .ico {
+    width: 16px; height: 16px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  /* ============================================================
+     SCREEN: GJENGEN
+     ============================================================ */
+  .invite-card {
+    margin: var(--md) var(--lg);
+    padding: var(--md);
+    background: var(--flame-tint);
+    border: 1px dashed var(--flame-primary);
+    border-radius: var(--r-lg);
+    text-align: center;
+  }
+  .invite-card .label {
+    color: var(--flame-pressed);
+    margin-bottom: 6px;
+  }
+  .invite-link {
+    background: var(--bg);
+    border-radius: var(--r-md);
+    padding: 10px 14px;
+    margin: 10px 0;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .invite-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .participants {
+    margin: 0 var(--lg);
+  }
+  .participant {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--surface);
+  }
+  .participant:last-child { border-bottom: none; }
+  .participant .avatar { width: 44px; height: 44px; font-size: 16px; }
+  .participant .info { flex: 1; }
+  .participant .name { font-weight: 600; font-size: 15px; }
+  .participant .role { font-size: 12px; color: var(--text-muted); }
+  .participant .status { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: var(--r-pill); text-transform: uppercase; letter-spacing: 0.06em; }
+  .status-yes { background: var(--forest-tint); color: var(--forest); }
+  .status-pending { background: var(--midnight-sun-tint); color: #8A6612; }
+  .status-no { background: var(--flame-tint); color: var(--flame-pressed); }
+
+  .comments {
+    margin: var(--md) var(--lg) 0;
+  }
+  .comment {
+    display: flex;
+    gap: 10px;
+    margin-bottom: var(--md);
+  }
+  .comment .avatar { width: 32px; height: 32px; font-size: 12px; flex-shrink: 0; }
+  .comment .bubble {
+    background: var(--surface);
+    border-radius: var(--r-md);
+    padding: 10px 12px;
+    flex: 1;
+  }
+  .comment .head {
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+    margin-bottom: 4px;
+  }
+  .comment .head .name { font-size: 12px; font-weight: 600; }
+  .comment .head .time { font-size: 10px; color: var(--text-muted); }
+  .comment .text { font-size: 13px; line-height: 1.4; }
+
+  .comment-input {
+    position: sticky;
+    bottom: 80px;
+    margin: var(--md) var(--lg) 0;
+    display: flex;
+    gap: 8px;
+    background: var(--bg);
+    padding: 8px;
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+  }
+  .comment-input input {
+    flex: 1;
+    padding: 8px 10px;
+    border: none;
+    outline: none;
+    font-size: 14px;
+  }
+  .comment-input button {
+    width: 36px;
+    height: 36px;
+    background: var(--flame-primary);
+    color: #fff;
+    border-radius: var(--r-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ============================================================
+     SCREEN: PÅ TUR (offline-kart)
+     ============================================================ */
+  .ontrip-screen {
+    background: linear-gradient(180deg, #B5CDA0 0%, #93B583 100%);
+    min-height: 100%;
+    position: relative;
+    padding-bottom: 80px;
+  }
+  .offline-pill {
+    position: absolute;
+    top: var(--md);
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(42,33,26,0.9);
+    color: var(--bg);
+    backdrop-filter: blur(8px);
+    padding: 6px 12px;
+    border-radius: var(--r-pill);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    z-index: 10;
+  }
+  .offline-pill .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--forest); }
+
+  .ontrip-map {
+    height: 480px;
+    position: relative;
+  }
+  .ontrip-map svg { width: 100%; height: 100%; }
+
+  .ontrip-card {
+    position: absolute;
+    bottom: 90px;
+    left: var(--md);
+    right: var(--md);
+    background: var(--bg);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-lg);
+    padding: var(--md);
+    z-index: 5;
+  }
+  .ontrip-card h4 {
+    font-family: var(--font-heading);
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .ontrip-card .sub {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+  }
+  .ontrip-card .progress-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    font-size: 12px;
+  }
+  .ontrip-card .progress-row strong { color: var(--text-primary); font-weight: 600; }
+  .ontrip-card .progress-bar {
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+  .ontrip-card .progress-bar .fill {
+    height: 100%;
+    background: var(--flame-primary);
+    border-radius: 3px;
+  }
+  .ontrip-card .actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .ontrip-card .actions .btn { padding: 10px; min-height: 40px; font-size: 13px; }
+
+  .compass-fab {
+    position: absolute;
+    bottom: 290px;
+    right: var(--md);
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: var(--bg);
+    box-shadow: var(--shadow-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--flame-primary);
+    z-index: 5;
+  }
+
+  /* ============================================================
+     SCREEN: SPLITT
+     ============================================================ */
+  .splitt-header {
+    padding: var(--lg) var(--lg) var(--md);
+  }
+  .splitt-total {
+    background: var(--surface);
+    margin: 0 var(--lg) var(--md);
+    border-radius: var(--r-lg);
+    padding: var(--md);
+    text-align: center;
+  }
+  .splitt-total .lab {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .splitt-total .amount {
+    font-family: var(--font-heading);
+    font-size: 36px;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1;
+  }
+  .splitt-total .per {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 6px;
+  }
+
+  .expense-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--surface);
+  }
+  .expense-row:last-child { border-bottom: none; }
+  .expense-icon {
+    width: 36px;
+    height: 36px;
+    background: var(--surface);
+    border-radius: var(--r-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+  .expense-row .info { flex: 1; }
+  .expense-row .info .name { font-weight: 600; font-size: 14px; }
+  .expense-row .info .meta { font-size: 11px; color: var(--text-muted); }
+  .expense-row .amt { font-family: var(--font-mono); font-weight: 600; font-size: 14px; }
+
+  .settle-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 12px;
+    background: var(--surface);
+    border-radius: var(--r-md);
+    margin-bottom: 8px;
+  }
+  .settle-row .arrow {
+    color: var(--text-muted);
+  }
+  .settle-row .from, .settle-row .to {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .settle-row .from .name, .settle-row .to .name {
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .settle-row .amt-pill {
+    margin-left: auto;
+    background: var(--flame-tint);
+    color: var(--flame-pressed);
+    padding: 4px 10px;
+    border-radius: var(--r-pill);
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 13px;
+  }
+  .settle-row .vipps-btn {
+    margin-left: 8px;
+    padding: 6px 12px;
+    background: #FF5B24;
+    color: #fff;
+    border-radius: var(--r-sm);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+
+  /* ============================================================
+     UTILITIES
+     ============================================================ */
+  .stack { display: flex; flex-direction: column; gap: var(--md); }
+  .row { display: flex; gap: var(--md); align-items: center; }
+  .row.between { justify-content: space-between; }
+  .grow { flex: 1; }
+  .mb-md { margin-bottom: var(--md); }
+  .mb-lg { margin-bottom: var(--lg); }
+  .mt-md { margin-top: var(--md); }
+
+  /* Right panel — context info */
+  .panel {
+    background: rgba(250,247,242,0.04);
+    border: 1px solid rgba(250,247,242,0.08);
+    border-radius: var(--r-lg);
+    padding: var(--lg);
+    color: rgba(250,247,242,0.85);
+    font-size: 13px;
+    line-height: 1.6;
+    position: sticky;
+    top: var(--lg);
+  }
+  .panel h3 {
+    font-family: var(--font-heading);
+    font-size: 18px;
+    color: #FAF7F2;
+    margin-bottom: 8px;
+  }
+  .panel .panel-tag {
+    display: inline-block;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 700;
+    color: var(--flame-primary);
+    margin-bottom: 6px;
+  }
+  .panel p { margin-bottom: var(--md); color: rgba(250,247,242,0.7); }
+  .panel .stories {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: var(--md);
+  }
+  .panel .story-pill {
+    background: rgba(200,96,42,0.15);
+    color: var(--flame-tint);
+    border: 1px solid rgba(200,96,42,0.3);
+    padding: 4px 9px;
+    border-radius: var(--r-pill);
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .panel .design-note {
+    background: rgba(0,0,0,0.2);
+    border-radius: var(--r-md);
+    padding: 12px;
+    font-size: 12px;
+    color: rgba(250,247,242,0.6);
+    border-left: 2px solid var(--flame-primary);
+  }
+  .panel .design-note strong { color: rgba(250,247,242,0.9); display: block; margin-bottom: 4px; }
+
+  /* ============================================================
+     RÅ MONSEN-STIL — paper, stamps, tape, scribbles
+     ============================================================ */
+
+  /* Paper texture body */
+  body {
+    background:
+      radial-gradient(circle at 20% 0%, rgba(200,96,42,0.10), transparent 50%),
+      radial-gradient(circle at 80% 100%, rgba(61,100,117,0.10), transparent 50%),
+      #1A1612;
+  }
+
+  /* Paper texture overlay for the whole phone screen area */
+  .phone {
+    background:
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' seed='3'/><feColorMatrix values='0 0 0 0 0.45  0 0 0 0 0.38  0 0 0 0 0.28  0 0 0 0.06 0'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>"),
+      linear-gradient(180deg, #FAF7F2 0%, #F4EFE6 100%);
+  }
+
+  /* Headlines: punchier with hand-drawn underline */
+  .h1, .hjem-question, .h2 {
+    font-family: var(--font-heading);
+    font-weight: 800;
+  }
+
+  /* Handwritten accent text */
+  .hand {
+    font-family: var(--font-hand);
+    font-weight: 600;
+    font-size: 22px;
+    color: var(--flame-pressed);
+    line-height: 1;
+    transform: rotate(-2deg);
+    display: inline-block;
+  }
+  .hand-blue { color: var(--fjord); }
+  .hand-green { color: var(--forest); }
+  .hand-marker {
+    font-family: var(--font-hand);
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  /* "Stempel" approval seal */
+  .stempel {
+    display: inline-block;
+    font-family: var(--font-stamp);
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--flame-pressed);
+    border: 2.5px solid var(--flame-pressed);
+    padding: 5px 10px 4px;
+    border-radius: 4px;
+    transform: rotate(-6deg);
+    background: rgba(250,247,242,0.4);
+    box-shadow: inset 0 0 0 1px rgba(122,53,21,0.2);
+    text-shadow: 0.5px 0.5px 0 rgba(122,53,21,0.1);
+    position: relative;
+  }
+  .stempel.green { color: var(--forest); border-color: var(--forest); }
+  .stempel.dark { color: var(--text-primary); border-color: var(--text-primary); }
+  .stempel.tilt-r { transform: rotate(5deg); }
+  .stempel.tilt-rr { transform: rotate(8deg); }
+
+  /* Duct tape strip */
+  .tape {
+    display: inline-block;
+    background: rgba(200,170,120,0.55);
+    border-left: 1px dashed rgba(122,90,40,0.3);
+    border-right: 1px dashed rgba(122,90,40,0.3);
+    padding: 4px 14px;
+    font-family: var(--font-stamp);
+    font-size: 11px;
+    color: rgba(60,40,20,0.85);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transform: rotate(-1.5deg);
+    position: relative;
+    box-shadow:
+      0 1px 2px rgba(0,0,0,0.08),
+      inset 0 0 16px rgba(122,90,40,0.06);
+  }
+
+  /* Hand-drawn marker underline */
+  .underline-marker {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 8' preserveAspectRatio='none'><path d='M2 5 Q40 1 80 4 T160 3 Q180 4 198 5' stroke='%23C8602A' stroke-width='3' fill='none' stroke-linecap='round'/></svg>");
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    background-size: 100% 8px;
+    padding-bottom: 6px;
+  }
+  .underline-marker.green {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 8' preserveAspectRatio='none'><path d='M2 5 Q40 1 80 4 T160 3 Q180 4 198 5' stroke='%233D5E35' stroke-width='3' fill='none' stroke-linecap='round'/></svg>");
+  }
+
+  /* Highlighter swipe behind text */
+  .highlight {
+    background: linear-gradient(180deg, transparent 50%, rgba(184,137,30,0.4) 50%, rgba(184,137,30,0.4) 90%, transparent 90%);
+    padding: 0 4px;
+  }
+
+  /* Polaroid-ish framed image */
+  .polaroid {
+    background: #FAF7F2;
+    padding: 10px 10px 36px;
+    box-shadow:
+      0 2px 4px rgba(0,0,0,0.08),
+      0 8px 24px rgba(0,0,0,0.10);
+    border-radius: 2px;
+    display: inline-block;
+    transform: rotate(-2deg);
+    position: relative;
+  }
+  .polaroid .caption {
+    position: absolute;
+    bottom: 8px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-family: var(--font-hand);
+    font-size: 18px;
+    color: var(--text-primary);
+    transform: rotate(-1deg);
+  }
+
+  /* Scotch-tape corner */
+  .taped {
+    position: relative;
+  }
+  .taped::before, .taped::after {
+    content: '';
+    position: absolute;
+    width: 60px;
+    height: 18px;
+    background: rgba(220,200,150,0.55);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    z-index: 2;
+  }
+  .taped::before {
+    top: -8px;
+    left: -10px;
+    transform: rotate(-32deg);
+  }
+  .taped::after {
+    top: -8px;
+    right: -10px;
+    transform: rotate(28deg);
+  }
+
+  /* Handwritten margin scribble (decorative) */
+  .scribble-arrow {
+    position: absolute;
+    font-family: var(--font-hand);
+    font-size: 18px;
+    color: var(--flame-pressed);
+    pointer-events: none;
+    z-index: 4;
+    transform: rotate(-8deg);
+    line-height: 1.1;
+    text-align: center;
+  }
+
+  /* Mascot — generic friluftsmann */
+  .mascot {
+    display: inline-block;
+    line-height: 0;
+  }
+
+  /* Monsen-style quote block */
+  .wisdom {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: var(--md) var(--md) var(--md) 56px;
+    margin: var(--md) var(--lg);
+    position: relative;
+    font-family: var(--font-hand);
+    font-size: 19px;
+    line-height: 1.25;
+    color: var(--text-primary);
+  }
+  .wisdom::before {
+    content: '"';
+    position: absolute;
+    left: 14px;
+    top: 6px;
+    font-family: var(--font-heading);
+    font-size: 60px;
+    line-height: 1;
+    font-weight: 800;
+    color: var(--flame-primary);
+  }
+  .wisdom .by {
+    display: block;
+    font-family: var(--font-body);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-muted);
+    margin-top: 8px;
+    font-weight: 600;
+  }
+
+  /* Make CTAs feel more rugged */
+  .btn-primary {
+    box-shadow:
+      0 2px 0 var(--flame-pressed),
+      0 4px 8px rgba(122,53,21,0.2);
+    transform: translateY(0);
+    transition: transform 0.08s, box-shadow 0.08s;
+  }
+  .btn-primary:active {
+    transform: translateY(2px);
+    box-shadow: 0 0 0 var(--flame-pressed);
+  }
+
+  /* Tag style override — looks more like a stitched patch */
+  .patch {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--flame-tint);
+    color: var(--flame-pressed);
+    border: 2px dashed var(--flame-primary);
+    padding: 4px 10px;
+    border-radius: var(--r-pill);
+    font-family: var(--font-stamp);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 400;
+  }
+  .patch.green {
+    background: var(--forest-tint);
+    color: var(--forest);
+    border-color: var(--forest);
+  }
+  .patch.fjord {
+    background: var(--fjord-tint);
+    color: var(--fjord);
+    border-color: var(--fjord);
+  }
+
+  /* Hjem screen mascot row */
+  .mascot-banner {
+    margin: 0 var(--lg) var(--md);
+    padding: var(--md) var(--md) var(--md) 110px;
+    background: var(--surface);
+    border-radius: var(--r-lg);
+    border: 1px solid var(--border);
+    position: relative;
+    min-height: 100px;
+  }
+  .mascot-banner .mascot {
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%) rotate(-4deg);
+    width: 92px;
+    height: 92px;
+  }
+  .mascot-banner .greet-headline {
+    font-family: var(--font-hand);
+    font-weight: 700;
+    font-size: 20px;
+    color: var(--text-primary);
+    line-height: 1.15;
+    margin-bottom: 4px;
+  }
+  .mascot-banner .greet-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .mascot-banner .stempel {
+    position: absolute;
+    top: -10px;
+    right: 14px;
+    font-size: 10px;
+  }
+
+  /* Floating mascot decoration */
+  .mascot-deco {
+    position: absolute;
+    width: 56px;
+    height: 56px;
+    pointer-events: none;
+    z-index: 6;
+  }
+</style>
+</head>
+<body>
+
+<div class="workshop">
+  <div class="workshop-header">
+    <div class="workshop-title">
+      <small>Hackathon 2026 · Mobil-prototype</small>
+      Friluftskompis
+    </div>
+    <div class="workshop-meta">
+      Designsystem: <strong>Lars Monsen</strong><br>
+      MVP-flyt: 9 brukerhistorier · Vennegjengen-til-Rondane
+    </div>
+  </div>
+
+  <div class="screen-picker" id="picker">
+    <button data-screen="hjem" class="active"><span>Utforsk</span><span class="tag">D1·D2</span></button>
+    <button data-screen="tur"><span>Turdetalj</span><span class="tag">B1·B3·B6</span></button>
+    <button data-screen="pakk"><span>Pakkeliste</span><span class="tag">P1</span></button>
+    <button data-screen="gjeng"><span>Gjengen</span><span class="tag">G1</span></button>
+    <button data-screen="paatur"><span>På tur</span><span class="tag">T1</span></button>
+    <button data-screen="splitt"><span>Splitt</span><span class="tag">R1</span></button>
+  </div>
+
+  <div class="stage">
+    <div class="phone-wrap">
+      <div class="phone">
+        <div class="phone-notch"></div>
+        <div class="status-bar">
+          <span>09:24</span>
+          <span class="right">
+            <svg width="16" height="11" viewBox="0 0 16 11" fill="currentColor"><rect x="0" y="6" width="3" height="5" rx="1"/><rect x="4" y="4" width="3" height="7" rx="1"/><rect x="8" y="2" width="3" height="9" rx="1"/><rect x="12" y="0" width="3" height="11" rx="1"/></svg>
+            <svg width="16" height="11" viewBox="0 0 16 11" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M1 4 Q8 -1 15 4"/><path d="M3.5 6 Q8 2.5 12.5 6"/><path d="M6 8 Q8 6.5 10 8"/><circle cx="8" cy="9.5" r="1" fill="currentColor"/></svg>
+            <svg width="22" height="10" viewBox="0 0 22 10" fill="none"><rect x="0.5" y="0.5" width="18" height="9" rx="2" stroke="currentColor"/><rect x="2" y="2" width="14" height="6" rx="1" fill="currentColor"/><rect x="19.5" y="3" width="2" height="4" rx="0.5" fill="currentColor"/></svg>
+          </span>
+        </div>
+
+        <div class="screen-area">
+
+          <!-- ============================================== -->
+          <!-- HJEM / UTFORSK                                  -->
+          <!-- ============================================== -->
+          <div class="screen active" id="screen-hjem">
+            <div class="hjem-header">
+              <div class="hjem-greeting">
+                <div class="who">
+                  God morgen, <strong>Une</strong><br>
+                  <span style="font-size:11px; color:var(--text-muted);">Sol i Oslo · 12° · vind 3 m/s</span>
+                </div>
+                <div class="avatar">U</div>
+              </div>
+
+              <h1 class="hjem-question">Hvor vil du <span class="underline-marker">på tur?</span></h1>
+              <div class="hand" style="margin-top: 8px; margin-bottom: 14px;">…så finner vi ut av resten sammen ↓</div>
+
+              <div class="search-box">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-muted)">
+                  <circle cx="11" cy="11" r="7"/><path d="M21 21l-5-5"/>
+                </svg>
+                <input type="text" placeholder="Hyttetur i mars, Rondane, eller Galdhøpiggen…">
+                <span class="ai-pill">AI</span>
+              </div>
+
+              <div class="ai-suggestions">
+                <button>Helgetur i mars</button>
+                <button>Familietur, lavt nivå</button>
+                <button>Hytte-til-hytte i sommer</button>
+                <button>Dagstur i dag</button>
+              </div>
+            </div>
+
+            <!-- Mascot banner — Friluftskompisen sier hei -->
+            <div class="mascot-banner">
+              <span class="stempel green tilt-rr">VILLMARK&nbsp;GODKJENT</span>
+              <div class="mascot">
+                <!-- Generisk friluftsmann: rund ansikt, lue, skjegg, smil. Ikke et portrett. -->
+                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                  <!-- background sun ray -->
+                  <g opacity="0.5">
+                    <circle cx="50" cy="50" r="46" fill="#FBF3DC"/>
+                    <g stroke="#B8891E" stroke-width="1.5" stroke-linecap="round" opacity="0.6">
+                      <line x1="50" y1="2" x2="50" y2="10"/>
+                      <line x1="50" y1="90" x2="50" y2="98"/>
+                      <line x1="2" y1="50" x2="10" y2="50"/>
+                      <line x1="90" y1="50" x2="98" y2="50"/>
+                      <line x1="16" y1="16" x2="22" y2="22"/>
+                      <line x1="78" y1="78" x2="84" y2="84"/>
+                      <line x1="78" y1="22" x2="84" y2="16"/>
+                      <line x1="16" y1="84" x2="22" y2="78"/>
+                    </g>
+                  </g>
+                  <!-- neck/jacket collar -->
+                  <path d="M30 86 L30 78 Q50 72 70 78 L70 86 Z" fill="#3D5E35"/>
+                  <path d="M30 86 L30 78 Q50 72 70 78 L70 86" stroke="#1F3018" stroke-width="1.2" fill="none"/>
+                  <!-- head/skin -->
+                  <ellipse cx="50" cy="48" rx="22" ry="24" fill="#E8C8A0"/>
+                  <!-- beanie/lue -->
+                  <path d="M28 38 Q28 22 50 22 Q72 22 72 38 L72 44 Q60 40 50 40 Q40 40 28 44 Z" fill="#C8602A"/>
+                  <!-- beanie cuff -->
+                  <rect x="28" y="40" width="44" height="6" fill="#A04A1E"/>
+                  <line x1="32" y1="40" x2="32" y2="46" stroke="#7A3515" stroke-width="0.8"/>
+                  <line x1="40" y1="40" x2="40" y2="46" stroke="#7A3515" stroke-width="0.8"/>
+                  <line x1="48" y1="40" x2="48" y2="46" stroke="#7A3515" stroke-width="0.8"/>
+                  <line x1="56" y1="40" x2="56" y2="46" stroke="#7A3515" stroke-width="0.8"/>
+                  <line x1="64" y1="40" x2="64" y2="46" stroke="#7A3515" stroke-width="0.8"/>
+                  <!-- pom pom -->
+                  <circle cx="50" cy="22" r="4" fill="#FAEADE"/>
+                  <!-- eyes -->
+                  <circle cx="42" cy="52" r="1.6" fill="#2A211A"/>
+                  <circle cx="58" cy="52" r="1.6" fill="#2A211A"/>
+                  <!-- rosy cheek -->
+                  <circle cx="38" cy="60" r="3" fill="#E8702F" opacity="0.35"/>
+                  <circle cx="62" cy="60" r="3" fill="#E8702F" opacity="0.35"/>
+                  <!-- nose -->
+                  <path d="M50 56 Q48 60 50 62 Q52 60 50 56" fill="#D4A87A"/>
+                  <!-- big beard, covers lower face -->
+                  <path d="M30 58 Q30 70 36 80 Q44 88 50 88 Q56 88 64 80 Q70 70 70 58 Q60 64 50 64 Q40 64 30 58 Z" fill="#3A2410"/>
+                  <!-- beard texture -->
+                  <g stroke="#1A1208" stroke-width="0.6" fill="none" opacity="0.6">
+                    <path d="M36 66 Q38 72 36 78"/>
+                    <path d="M44 68 Q44 76 42 82"/>
+                    <path d="M50 70 Q50 80 50 86"/>
+                    <path d="M58 68 Q58 76 60 82"/>
+                    <path d="M64 66 Q62 72 64 78"/>
+                  </g>
+                  <!-- mustache -->
+                  <path d="M40 58 Q44 62 50 60 Q56 62 60 58 Q56 56 50 57 Q44 56 40 58" fill="#3A2410"/>
+                  <!-- smile (visible above beard) -->
+                  <path d="M46 62 Q50 64 54 62" stroke="#2A211A" stroke-width="1" fill="none" stroke-linecap="round"/>
+                  <!-- beanie shadow on forehead -->
+                  <path d="M30 44 Q50 46 70 44 Q70 48 50 48 Q30 48 30 44" fill="#000" opacity="0.08"/>
+                </svg>
+              </div>
+              <div class="greet-headline">Heisann, turkamerat!</div>
+              <div class="greet-sub">Tre helger framover ser fine ut.<br>Vi har plukka noen som passer dere.</div>
+            </div>
+
+            <!-- Map preview with DNT cabins (D2) -->
+            <div class="map-preview">
+              <svg viewBox="0 0 360 220" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+                <!-- Topographic contour lines suggestion -->
+                <g stroke="rgba(45,80,40,0.15)" fill="none" stroke-width="0.8">
+                  <path d="M-20 60 Q60 40 130 70 T280 50 L380 70"/>
+                  <path d="M-20 90 Q60 70 140 95 T290 80 L380 100"/>
+                  <path d="M-20 130 Q70 110 160 140 T300 130 L380 150"/>
+                  <path d="M-20 170 Q60 160 140 175 T290 170 L380 180"/>
+                  <path d="M-20 200 Q80 195 160 200 T300 200 L380 210"/>
+                </g>
+                <!-- Mountain peaks -->
+                <g fill="rgba(120,140,100,0.4)">
+                  <path d="M40 130 L80 50 L120 130 Z"/>
+                  <path d="M180 140 L220 60 L260 140 Z"/>
+                  <path d="M280 150 L310 90 L340 150 Z"/>
+                </g>
+                <g fill="rgba(245,245,240,0.6)">
+                  <path d="M70 70 L80 50 L90 70 Z"/>
+                  <path d="M210 80 L220 60 L230 80 Z"/>
+                </g>
+                <!-- Lake -->
+                <ellipse cx="170" cy="180" rx="60" ry="14" fill="rgba(90,122,138,0.3)"/>
+                <!-- Trail -->
+                <path d="M30 200 Q90 150 150 160 T280 110 L340 80" fill="none" stroke="#C8602A" stroke-width="2.5" stroke-dasharray="4 3" opacity="0.85"/>
+                <!-- DNT cabin pins -->
+                <g>
+                  <circle cx="95" cy="155" r="9" fill="#C8602A" stroke="#fff" stroke-width="2"/>
+                  <text x="95" y="159" text-anchor="middle" fill="#fff" font-size="10" font-weight="700">H</text>
+                </g>
+                <g>
+                  <circle cx="200" cy="135" r="9" fill="#C8602A" stroke="#fff" stroke-width="2"/>
+                  <text x="200" y="139" text-anchor="middle" fill="#fff" font-size="10" font-weight="700">H</text>
+                </g>
+                <g>
+                  <circle cx="290" cy="115" r="9" fill="#C8602A" stroke="#fff" stroke-width="2"/>
+                  <text x="290" y="119" text-anchor="middle" fill="#fff" font-size="10" font-weight="700">H</text>
+                </g>
+                <!-- Commercial cabin -->
+                <g>
+                  <circle cx="145" cy="190" r="7" fill="#3D6475" stroke="#fff" stroke-width="2"/>
+                </g>
+                <g>
+                  <circle cx="245" cy="155" r="7" fill="#3D6475" stroke="#fff" stroke-width="2"/>
+                </g>
+              </svg>
+              <div class="map-overlay-bottom">
+                <span class="map-chip"><span class="dot dnt"></span>DNT-hytter</span>
+                <span class="map-chip"><span class="dot komm"></span>iNatur · AirBnB</span>
+              </div>
+            </div>
+
+            <!-- Min tur — pågående -->
+            <div class="section">
+              <div class="section-head">
+                <span class="title">Mine turer</span>
+                <span class="more">Se alle</span>
+              </div>
+            </div>
+            <div class="my-trip-card" onclick="showScreen('tur')">
+              <div class="hero">
+                <div class="hero-top">
+                  <span class="hero-tag">Bekreftet</span>
+                  <span class="hero-tag" style="background:var(--midnight-sun-tint); color:#8A6612;">⚠ Vær endret</span>
+                </div>
+                <div class="hero-bottom">
+                  <small>14 — 16 mars · Rondane</small>
+                  Fjols til Fjells
+                </div>
+              </div>
+              <div class="summary">
+                <div class="summary-left">
+                  <span style="font-weight:600;">3 av 3 har sagt ja</span>
+                  <span class="muted" style="font-size:11px;">Rondvassbu · Bjørnhollia · 2 etapper</span>
+                </div>
+                <div class="stack-avatars">
+                  <span class="a">U</span>
+                  <span class="a">O</span>
+                  <span class="a">M</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Klassiske ruter (D4) -->
+            <div class="section">
+              <div class="section-head">
+                <span class="title">Klassiske hytteruter</span>
+                <span class="more">Vis alle</span>
+              </div>
+            </div>
+            <div class="h-scroll">
+              <div class="h-scroll-card">
+                <div class="img"><span class="img-tag">3 dager · Medium</span></div>
+                <div class="body-x">
+                  <h4>Jotunheim-runden</h4>
+                  <div class="meta"><span>42 km</span><span>2400 hm</span></div>
+                </div>
+              </div>
+              <div class="h-scroll-card">
+                <div class="img r2"><span class="img-tag">5 dager · Krevende</span></div>
+                <div class="body-x">
+                  <h4>Hardangervidda</h4>
+                  <div class="meta"><span>78 km</span><span>1800 hm</span></div>
+                </div>
+              </div>
+              <div class="h-scroll-card">
+                <div class="img r3"><span class="img-tag">2 dager · Lett</span></div>
+                <div class="body-x">
+                  <h4>Rondane-kryssing</h4>
+                  <div class="meta"><span>28 km</span><span>900 hm</span></div>
+                </div>
+              </div>
+              <div class="h-scroll-card">
+                <div class="img r4"><span class="img-tag">4 dager · Medium</span></div>
+                <div class="body-x">
+                  <h4>Femundsmarka</h4>
+                  <div class="meta"><span>54 km</span><span>1100 hm</span></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Inspirasjon -->
+            <div class="section">
+              <div class="section-head">
+                <span class="title">Inspirert av ditt nivå</span>
+                <span class="more">Mer</span>
+              </div>
+              <div style="display:flex; gap:12px; padding-bottom:var(--md);">
+                <div class="card" style="flex:1; padding:12px;">
+                  <span class="tag forest">Familievennlig</span>
+                  <h4 style="font-family:var(--font-heading); font-size:15px; margin-top:8px;">Preikestolen</h4>
+                  <p class="small" style="margin-top:4px;">8 km · 4 t · barnevennlig</p>
+                </div>
+                <div class="card" style="flex:1; padding:12px;">
+                  <span class="tag fjord">Padling</span>
+                  <h4 style="font-family:var(--font-heading); font-size:15px; margin-top:8px;">Femundselva</h4>
+                  <p class="small" style="margin-top:4px;">2 dager · klasse II</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ============================================== -->
+          <!-- TURDETALJ                                       -->
+          <!-- ============================================== -->
+          <div class="screen" id="screen-tur">
+            <div class="top-bar">
+              <button class="icon-btn" onclick="showScreen('hjem')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+              </button>
+              <span class="ttl">Fjols til Fjells</span>
+              <div class="top-bar-actions">
+                <button class="icon-btn">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div style="padding: 0 0 var(--md);">
+              <div class="trip-hero">
+                <svg class="bg-svg" viewBox="0 0 360 200" preserveAspectRatio="xMidYMid slice">
+                  <g fill="rgba(80,100,70,0.7)">
+                    <path d="M0 200 L0 130 L60 80 L120 110 L180 60 L240 100 L300 70 L360 110 L360 200 Z"/>
+                  </g>
+                  <g fill="rgba(60,80,55,0.6)">
+                    <path d="M0 200 L0 160 L40 130 L100 150 L160 120 L220 145 L280 125 L360 150 L360 200 Z"/>
+                  </g>
+                  <circle cx="290" cy="40" r="22" fill="rgba(255,235,200,0.4)"/>
+                </svg>
+                <div class="meta-row">
+                  <span class="tag flame">Hyttetur</span>
+                  <span class="tag" style="background:rgba(250,247,242,0.2); color:#FAF7F2;">14 — 16 mars</span>
+                </div>
+                <h2>Rondane<br>til Bjørnhollia</h2>
+                <div class="hero-sub">2 etapper · 3 deltakere · medium nivå</div>
+              </div>
+
+              <div class="trip-stats">
+                <div class="stat"><div class="num">28</div><div class="lab">km</div></div>
+                <div class="stat"><div class="num">920</div><div class="lab">hm</div></div>
+                <div class="stat"><div class="num">2</div><div class="lab">netter</div></div>
+                <div class="stat"><div class="num">3</div><div class="lab">personer</div></div>
+              </div>
+
+              <!-- AI replan banner (B10) -->
+              <div class="ai-banner" style="position: relative;">
+                <span class="stempel" style="position: absolute; top: -14px; right: 12px; background: var(--bg);">VÆR&nbsp;ENDRET</span>
+                <div class="ai-banner-head">
+                  <div class="icon">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                  </div>
+                  <h4>Værvarselet endret seg <span class="ai-mark">AI</span></h4>
+                </div>
+                <p>Det meldes regn lørdag og sol søndag. Forslag: bytt rekkefølge på etappene — dagsturen tar du søndag, hyttekos lørdag. Marie får kortere dag, alle får bedre vær.</p>
+                <div class="ai-actions">
+                  <button class="btn btn-primary">Bytt rekkefølge</button>
+                  <button class="btn btn-ghost">Behold plan</button>
+                </div>
+              </div>
+
+              <!-- Monsen-style wisdom (generic friluftsmann, ikke et sitat) -->
+              <div class="wisdom">
+                Ut på tur, aldri sur.<br>
+                Værmeldinga er en venn, ikke en sjef.
+                <span class="by">— Friluftskompisen</span>
+              </div>
+
+              <!-- Tabs -->
+              <div class="tabs">
+                <button class="tab active">Oversikt</button>
+                <button class="tab" onclick="showScreen('pakk')">Pakkeliste</button>
+                <button class="tab" onclick="showScreen('gjeng')">Gjengen</button>
+              </div>
+
+              <!-- Route map (B3) -->
+              <div class="route-map">
+                <svg viewBox="0 0 360 180" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+                  <!-- terrain -->
+                  <g stroke="rgba(45,80,40,0.18)" fill="none" stroke-width="0.6">
+                    <path d="M-20 50 Q90 30 180 55 T380 60"/>
+                    <path d="M-20 90 Q80 75 170 95 T380 100"/>
+                    <path d="M-20 130 Q90 120 170 130 T380 140"/>
+                  </g>
+                  <g fill="rgba(120,140,100,0.4)">
+                    <path d="M50 130 L100 40 L150 130 Z"/>
+                    <path d="M210 140 L260 60 L310 140 Z"/>
+                  </g>
+                  <g fill="rgba(245,245,240,0.7)">
+                    <path d="M85 60 L100 40 L115 60 Z"/>
+                    <path d="M245 80 L260 60 L275 80 Z"/>
+                  </g>
+                  <ellipse cx="180" cy="155" rx="50" ry="10" fill="rgba(90,122,138,0.3)"/>
+                  <!-- route line -->
+                  <path d="M40 140 L100 110 L170 90 L250 70 L320 55" stroke="#C8602A" stroke-width="3" fill="none" stroke-linecap="round"/>
+                  <!-- start/end + cabins -->
+                  <g>
+                    <circle cx="40" cy="140" r="8" fill="#3D5E35" stroke="#fff" stroke-width="2"/>
+                    <text x="40" y="158" text-anchor="middle" font-size="8" fill="#2A211A" font-weight="700">START</text>
+                  </g>
+                  <g>
+                    <circle cx="170" cy="90" r="9" fill="#C8602A" stroke="#fff" stroke-width="2"/>
+                    <text x="170" y="76" text-anchor="middle" font-size="9" fill="#2A211A" font-weight="600">Rondvassbu</text>
+                  </g>
+                  <g>
+                    <circle cx="320" cy="55" r="9" fill="#C8602A" stroke="#fff" stroke-width="2"/>
+                    <text x="320" y="42" text-anchor="middle" font-size="9" fill="#2A211A" font-weight="600">Bjørnhollia</text>
+                  </g>
+                </svg>
+              </div>
+
+              <!-- Section title -->
+              <div class="section" style="padding-bottom: var(--md);">
+                <div class="section-head">
+                  <span class="title">Dag for dag</span>
+                  <span class="label">B6 · Tidslinje</span>
+                </div>
+              </div>
+
+              <!-- Timeline (B6) with weather (B1) -->
+              <div class="timeline">
+
+                <div class="day-card">
+                  <div class="dot"></div>
+                  <div class="day-head">
+                    <span class="day-num">Fredag · 14 mars</span>
+                  </div>
+                  <h4>Innkomstdag · Rondvassbu</h4>
+                  <div class="stage-label">Otta → Mysusæter (buss) → Rondvassbu (4 km)</div>
+                  <div class="day-body">
+                    <div class="day-row weather">
+                      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+                      <span><strong>-2°</strong> · sol</span>
+                    </div>
+                    <div class="day-row">
+                      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L4 7v10l8 5 8-5V7l-8-5z"/></svg>
+                      <span><strong>4 km</strong> · 1.5 t</span>
+                    </div>
+                    <div class="day-row">
+                      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 8-8"/><path d="M17 7h4v4"/></svg>
+                      <span><strong>+120</strong> hm</span>
+                    </div>
+                    <div class="day-row">
+                      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21V11l9-7 9 7v10"/><path d="M9 21V12h6v9"/></svg>
+                      <span><strong>Rondvassbu</strong></span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="day-card">
+                  <div class="dot"></div>
+                  <div class="day-head">
+                    <span class="day-num">Lørdag · 15 mars</span>
+                    <span class="tag" style="background:var(--midnight-sun-tint); color:#8A6612;">Vær snur</span>
+                  </div>
+                  <h4>Etappe over Rondvatnet</h4>
+                  <div class="stage-label">Rondvassbu → Bjørnhollia via Langholet</div>
+                  <div class="day-body">
+                    <div class="day-row weather-warn">
+                      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 14a4 4 0 0 0-8 0M4 14h16"/><path d="M8 18l-1 3M12 18l-1 3M16 18l-1 3"/></svg>
+                      <span><strong>4°</strong> · regn 6mm</span>
+                    </div>
+                    <div class="day-row">
+                      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L4 7v10l8 5 8-5V7l-8-5z"/></svg>
+                      <span><strong>14 km</strong> · 6 t</span>
+                    </div>
+                    <div class="day-row">
+                      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 8-8"/><path d="M17 7h4v4"/></svg>
+                      <span><strong>+540</strong> hm</span>
+                    </div>
+                    <div class="day-row">
+                      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21V11l9-7 9 7v10"/><path d="M9 21V12h6v9"/></svg>
+                      <span><strong>Bjørnhollia</strong></span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="day-card">
+                  <div class="dot"></div>
+                  <div class="day-head">
+                    <span class="day-num">Søndag · 16 mars</span>
+                  </div>
+                  <h4>Hjem via Atndalen</h4>
+                  <div class="stage-label">Bjørnhollia → Straumbu (transport hjem)</div>
+                  <div class="day-body">
+                    <div class="day-row weather">
+                      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+                      <span><strong>2°</strong> · sol</span>
+                    </div>
+                    <div class="day-row">
+                      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L4 7v10l8 5 8-5V7l-8-5z"/></svg>
+                      <span><strong>10 km</strong> · 4 t</span>
+                    </div>
+                    <div class="day-row">
+                      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 8-8"/><path d="M17 7h4v4"/></svg>
+                      <span><strong>+260</strong> hm</span>
+                    </div>
+                    <div class="day-row">
+                      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                      <span><strong>14:30</strong> hjem</span>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              <div class="section" style="padding-top: var(--md);">
+                <button class="btn btn-secondary" onclick="showScreen('paatur')">Last ned for offline bruk</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ============================================== -->
+          <!-- PAKKELISTE                                      -->
+          <!-- ============================================== -->
+          <div class="screen" id="screen-pakk">
+            <div class="top-bar">
+              <button class="icon-btn" onclick="showScreen('tur')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+              </button>
+              <span class="ttl">Pakkeliste</span>
+              <div class="top-bar-actions">
+                <button class="icon-btn">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="pack-header">
+              <h2 class="h2">Til Rondane</h2>
+              <p class="small mt-md">Tilpasset 2 dager, regn lørdag, 3 personer.</p>
+            </div>
+
+            <div class="ai-info-box">
+              <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4"/></svg>
+              <div>
+                <strong style="display:block; margin-bottom:2px;">Foreslått av AI <span class="ai-mark">AI</span></strong>
+                Listen er generert ut fra værvarsel, varighet og gruppestørrelse. Du kan trygt redigere — endringene dine bevares.
+              </div>
+            </div>
+
+            <div class="pack-progress">
+              <div class="pack-progress-bar">
+                <div class="fill" id="pack-fill" style="width: 35%;"></div>
+              </div>
+              <span style="font-size:12px; font-weight:600; color:var(--text-muted);"><span id="pack-done">7</span> av <span id="pack-total">20</span></span>
+            </div>
+
+            <!-- KLÆR -->
+            <div class="pack-section">
+              <h4>Klær <span class="count">5</span></h4>
+              <div class="pack-item checked" onclick="togglePack(this)">
+                <span class="check">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg>
+                </span>
+                <span class="label-text">Ullundertøy <span class="ai-mark">AI</span></span>
+                <span class="who">Personlig</span>
+              </div>
+              <div class="pack-item checked" onclick="togglePack(this)">
+                <span class="check">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg>
+                </span>
+                <span class="label-text">Skalljakke <span class="ai-mark">AI</span></span>
+                <span class="who">Personlig</span>
+              </div>
+              <div class="pack-item" onclick="togglePack(this)">
+                <span class="check"></span>
+                <span class="label-text">Regnbukse <span class="ai-mark">AI</span></span>
+                <span class="who">Personlig</span>
+              </div>
+              <div class="pack-item" onclick="togglePack(this)">
+                <span class="check"></span>
+                <span class="label-text">Varm fleecejakke <span class="ai-mark">AI</span></span>
+                <span class="who">Personlig</span>
+              </div>
+              <div class="pack-item" onclick="togglePack(this)">
+                <span class="check"></span>
+                <span class="label-text">Lue og votter</span>
+                <span class="who">Personlig</span>
+              </div>
+            </div>
+
+            <!-- SOVE -->
+            <div class="pack-section">
+              <h4>Soveutstyr <span class="count">3</span></h4>
+              <div class="pack-item checked" onclick="togglePack(this)">
+                <span class="check">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg>
+                </span>
+                <span class="label-text">Lakenpose</span>
+                <span class="who">Personlig</span>
+              </div>
+              <div class="pack-item" onclick="togglePack(this)">
+                <span class="check"></span>
+                <span class="label-text">Sovepose komfort -5° <span class="ai-mark">AI</span></span>
+                <span class="who">Personlig</span>
+              </div>
+              <div class="pack-item" onclick="togglePack(this)">
+                <span class="check"></span>
+                <span class="label-text">Hodelykt</span>
+                <span class="who">Personlig</span>
+              </div>
+            </div>
+
+            <!-- FELLES -->
+            <div class="pack-section">
+              <h4>Fellesutstyr <span class="count">5</span></h4>
+              <div class="pack-item checked" onclick="togglePack(this)">
+                <span class="check">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg>
+                </span>
+                <span class="label-text">Gassbrenner</span>
+                <span class="who" style="background:var(--fjord-tint); color:var(--fjord);">Ola</span>
+              </div>
+              <div class="pack-item checked" onclick="togglePack(this)">
+                <span class="check">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg>
+                </span>
+                <span class="label-text">Gassboks 230g <span class="ai-mark">AI</span></span>
+                <span class="who" style="background:var(--fjord-tint); color:var(--fjord);">Ola</span>
+              </div>
+              <div class="pack-item checked" onclick="togglePack(this)">
+                <span class="check">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg>
+                </span>
+                <span class="label-text">Førstehjelpspakke</span>
+                <span class="who" style="background:var(--forest-tint); color:var(--forest);">Marie</span>
+              </div>
+              <div class="pack-item" onclick="togglePack(this)">
+                <span class="check"></span>
+                <span class="label-text">Kompass og papirkart</span>
+                <span class="who" style="background:var(--flame-tint); color:var(--flame-pressed);">Une</span>
+              </div>
+              <div class="pack-item" onclick="togglePack(this)">
+                <span class="check"></span>
+                <span class="label-text">Reservebatteri</span>
+                <span class="who" style="background:var(--flame-tint); color:var(--flame-pressed);">Une</span>
+              </div>
+            </div>
+
+            <!-- MAT -->
+            <div class="pack-section">
+              <h4>Mat for 2 dager <span class="count">4</span></h4>
+              <div class="pack-item checked" onclick="togglePack(this)">
+                <span class="check">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg>
+                </span>
+                <span class="label-text">Frokost: havregrøt × 6 <span class="ai-mark">AI</span></span>
+                <span class="who" style="background:var(--forest-tint); color:var(--forest);">Marie</span>
+              </div>
+              <div class="pack-item" onclick="togglePack(this)">
+                <span class="check"></span>
+                <span class="label-text">Lunsj: knekkebrød + ost <span class="ai-mark">AI</span></span>
+                <span class="who" style="background:var(--forest-tint); color:var(--forest);">Marie</span>
+              </div>
+              <div class="pack-item" onclick="togglePack(this)">
+                <span class="check"></span>
+                <span class="label-text">Middag: turmat × 6 <span class="ai-mark">AI</span></span>
+                <span class="who" style="background:var(--fjord-tint); color:var(--fjord);">Ola</span>
+              </div>
+              <div class="pack-item" onclick="togglePack(this)">
+                <span class="check"></span>
+                <span class="label-text">Sjokolade og turmix</span>
+                <span class="who">Personlig</span>
+              </div>
+            </div>
+
+            <!-- ANNET -->
+            <div class="pack-section">
+              <h4>Annet <span class="count">3</span></h4>
+              <div class="pack-item" onclick="togglePack(this)">
+                <span class="check"></span>
+                <span class="label-text">DNT-medlemskort / nøkkel</span>
+                <span class="who">Personlig</span>
+              </div>
+              <div class="pack-item" onclick="togglePack(this)">
+                <span class="check"></span>
+                <span class="label-text">Kontanter til hytta</span>
+                <span class="who">Personlig</span>
+              </div>
+              <div class="pack-item" onclick="togglePack(this)">
+                <span class="check"></span>
+                <span class="label-text">Solbriller</span>
+                <span class="who">Personlig</span>
+              </div>
+            </div>
+
+            <div style="padding: 0 var(--lg) var(--md);">
+              <button class="btn btn-secondary">+ Legg til egen ting</button>
+            </div>
+          </div>
+
+          <!-- ============================================== -->
+          <!-- GJENGEN                                         -->
+          <!-- ============================================== -->
+          <div class="screen" id="screen-gjeng">
+            <div class="top-bar">
+              <button class="icon-btn" onclick="showScreen('tur')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+              </button>
+              <span class="ttl">Gjengen</span>
+              <div class="top-bar-actions"></div>
+            </div>
+
+            <div style="padding: 0 var(--lg) var(--md);">
+              <h2 class="h2">Fjols til Fjells</h2>
+              <p class="small mt-md">3 av 3 har sagt ja · 2 ventende kommentarer</p>
+            </div>
+
+            <!-- Invite card -->
+            <div class="invite-card">
+              <div class="label">Del turen</div>
+              <p style="font-size:13px; color:var(--flame-pressed); margin: 6px 0;">Inviter via lenke — ingen nedlasting kreves.</p>
+              <div class="invite-link">friluftskompis.no/t/rondane-2026-fjols</div>
+              <div class="invite-actions">
+                <button class="btn btn-primary btn-sm">Kopier lenke</button>
+                <button class="btn btn-secondary btn-sm">Del...</button>
+              </div>
+            </div>
+
+            <!-- Participants -->
+            <div class="section">
+              <div class="section-head">
+                <span class="title">Deltakere</span>
+                <span class="label">G1 · G4</span>
+              </div>
+            </div>
+            <div class="participants">
+              <div class="participant">
+                <div class="avatar">U</div>
+                <div class="info">
+                  <div class="name">Une Krog</div>
+                  <div class="role">Turplanlegger · medium nivå</div>
+                </div>
+                <span class="status status-yes">Vert</span>
+              </div>
+              <div class="participant">
+                <div class="avatar" style="background:var(--fjord-tint); color:var(--fjord);">O</div>
+                <div class="info">
+                  <div class="name">Ola Nordmann</div>
+                  <div class="role">Akseptert · 2 t siden</div>
+                </div>
+                <span class="status status-yes">Med</span>
+              </div>
+              <div class="participant">
+                <div class="avatar" style="background:var(--forest-tint); color:var(--forest);">M</div>
+                <div class="info">
+                  <div class="name">Marie Hansen</div>
+                  <div class="role">Akseptert · foretrekker korte dager</div>
+                </div>
+                <span class="status status-yes">Med</span>
+              </div>
+              <div class="participant">
+                <div class="avatar" style="background:var(--midnight-sun-tint); color:#8A6612;">H</div>
+                <div class="info">
+                  <div class="name">Hilde (tante)</div>
+                  <div class="role">Invitert til lørdag · venter</div>
+                </div>
+                <span class="status status-pending">Venter</span>
+              </div>
+            </div>
+
+            <!-- Comments -->
+            <div class="section">
+              <div class="section-head">
+                <span class="title">Kommentarer</span>
+                <span class="label">G5</span>
+              </div>
+            </div>
+            <div class="comments">
+              <div class="comment">
+                <div class="avatar" style="background:var(--fjord-tint); color:var(--fjord);">O</div>
+                <div class="bubble">
+                  <div class="head"><span class="name">Ola</span><span class="time">i går 21:14</span></div>
+                  <div class="text">Tar med gassbrenner og en boks gass. Holder det med 230g for to dager?</div>
+                </div>
+              </div>
+              <div class="comment">
+                <div class="avatar">U</div>
+                <div class="bubble">
+                  <div class="head"><span class="name">Une</span><span class="time">i går 21:30</span></div>
+                  <div class="text">AI sier 230g er nok for to dager med fire personer i mars. Vi har slack.</div>
+                </div>
+              </div>
+              <div class="comment">
+                <div class="avatar" style="background:var(--forest-tint); color:var(--forest);">M</div>
+                <div class="bubble">
+                  <div class="head"><span class="name">Marie</span><span class="time">i dag 08:02</span></div>
+                  <div class="text">Søndag passer meg veldig fint hvis dere bytter rekkefølge 🙌</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="comment-input">
+              <input type="text" placeholder="Skriv en kommentar...">
+              <button>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- ============================================== -->
+          <!-- PÅ TUR (offline)                                -->
+          <!-- ============================================== -->
+          <div class="screen" id="screen-paatur">
+            <div class="ontrip-screen">
+              <div class="offline-pill"><span class="dot"></span>Offline · GPS aktiv</div>
+
+              <div class="ontrip-map">
+                <svg viewBox="0 0 360 480" preserveAspectRatio="xMidYMid slice">
+                  <!-- Background terrain -->
+                  <rect width="360" height="480" fill="#B5CDA0"/>
+                  <!-- Contour lines -->
+                  <g stroke="rgba(45,80,40,0.25)" fill="none" stroke-width="0.7">
+                    <path d="M-20 80 Q90 60 180 90 T380 80"/>
+                    <path d="M-20 130 Q60 110 150 135 T380 130"/>
+                    <path d="M-20 180 Q90 170 200 175 T380 180"/>
+                    <path d="M-20 230 Q80 220 190 230 T380 235"/>
+                    <path d="M-20 280 Q90 270 200 280 T380 290"/>
+                    <path d="M-20 330 Q80 325 200 330 T380 340"/>
+                    <path d="M-20 390 Q90 380 200 385 T380 395"/>
+                  </g>
+                  <!-- Mountains -->
+                  <g fill="rgba(120,140,100,0.5)">
+                    <path d="M40 250 L120 100 L200 250 Z"/>
+                    <path d="M180 320 L260 180 L340 320 Z"/>
+                    <path d="M0 380 L60 280 L120 380 Z"/>
+                  </g>
+                  <g fill="rgba(245,245,240,0.7)">
+                    <path d="M105 130 L120 100 L135 130 Z"/>
+                    <path d="M245 210 L260 180 L275 210 Z"/>
+                  </g>
+                  <!-- Lake -->
+                  <ellipse cx="180" cy="420" rx="80" ry="18" fill="rgba(90,122,138,0.4)"/>
+                  <text x="180" y="425" text-anchor="middle" fill="rgba(42,33,26,0.5)" font-size="10" font-style="italic">Rondvatnet</text>
+                  <!-- Trail (route) -->
+                  <path d="M60 460 Q120 400 160 380 Q220 350 240 280 Q260 220 280 160 L300 100" stroke="#C8602A" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-dasharray="0"/>
+                  <path d="M60 460 Q120 400 160 380 Q220 350 240 280" stroke="#7A3515" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+                  <!-- Start -->
+                  <g>
+                    <circle cx="60" cy="460" r="8" fill="#3D5E35" stroke="#fff" stroke-width="2.5"/>
+                  </g>
+                  <!-- Current position -->
+                  <g>
+                    <circle cx="240" cy="280" r="14" fill="rgba(200,96,42,0.25)"/>
+                    <circle cx="240" cy="280" r="8" fill="#C8602A" stroke="#fff" stroke-width="3"/>
+                  </g>
+                  <text x="240" y="263" text-anchor="middle" font-size="9" font-weight="700" fill="#2A211A">Du er her</text>
+                  <!-- Next waypoint -->
+                  <g>
+                    <circle cx="300" cy="100" r="11" fill="#fff" stroke="#C8602A" stroke-width="3"/>
+                    <text x="300" y="104" text-anchor="middle" font-size="11" font-weight="700" fill="#C8602A">B</text>
+                  </g>
+                  <text x="300" y="86" text-anchor="middle" font-size="9" font-weight="600" fill="#2A211A">Bjørnhollia</text>
+                </svg>
+              </div>
+
+              <button class="compass-fab" title="Kompass">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" fill="currentColor"/></svg>
+              </button>
+
+              <div class="ontrip-card">
+                <div class="row between">
+                  <div>
+                    <h4>Mot Bjørnhollia</h4>
+                    <div class="sub">Etappe 1 · 14 km</div>
+                  </div>
+                  <span class="tag forest">På sporet</span>
+                </div>
+                <div class="progress-row">
+                  <span><strong>8.2 km</strong> tilbakelagt</span>
+                  <span><strong>5.8 km</strong> igjen · ~ 2t 15min</span>
+                </div>
+                <div class="progress-bar"><div class="fill" style="width:58%;"></div></div>
+                <div class="actions">
+                  <button class="btn btn-primary">Sjekk inn</button>
+                  <button class="btn btn-ghost">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    Nødinfo
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ============================================== -->
+          <!-- SPLITT (R1)                                     -->
+          <!-- ============================================== -->
+          <div class="screen" id="screen-splitt">
+            <div class="top-bar">
+              <button class="icon-btn" onclick="showScreen('tur')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+              </button>
+              <span class="ttl">Kostnadssplitt</span>
+              <div class="top-bar-actions"></div>
+            </div>
+
+            <div class="splitt-header">
+              <span class="tag flame">Etter turen</span>
+              <h2 class="h2 mt-md">Fjols til Fjells</h2>
+              <p class="small mt-md">14 — 16 mars · 3 deltakere</p>
+            </div>
+
+            <div class="splitt-total">
+              <div class="lab">Total turkost</div>
+              <div class="amount">3 240<span style="font-size:18px; color:var(--text-muted); font-weight:400; margin-left:4px;">kr</span></div>
+              <div class="per">1 080 kr per person</div>
+            </div>
+
+            <!-- Expenses -->
+            <div class="section">
+              <div class="section-head">
+                <span class="title">Utgifter</span>
+                <span class="more">+ Ny</span>
+              </div>
+              <div class="expense-row">
+                <div class="expense-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21V11l9-7 9 7v10"/><path d="M9 21V12h6v9"/></svg>
+                </div>
+                <div class="info">
+                  <div class="name">Hytteovernatting × 2</div>
+                  <div class="meta">Une la ut · DNT</div>
+                </div>
+                <div class="amt">1 800 kr</div>
+              </div>
+              <div class="expense-row">
+                <div class="expense-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/><path d="M5 17H3v-6l2-5h11l4 5h1v6h-2"/></svg>
+                </div>
+                <div class="info">
+                  <div class="name">Drivstoff</div>
+                  <div class="meta">Une la ut · 240 km</div>
+                </div>
+                <div class="amt">540 kr</div>
+              </div>
+              <div class="expense-row">
+                <div class="expense-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                </div>
+                <div class="info">
+                  <div class="name">Mat og snacks</div>
+                  <div class="meta">Marie la ut · Kiwi</div>
+                </div>
+                <div class="amt">680 kr</div>
+              </div>
+              <div class="expense-row">
+                <div class="expense-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 21V5a2 2 0 0 1 2-2h7l5 5v13a2 2 0 0 1-2 2H7"/></svg>
+                </div>
+                <div class="info">
+                  <div class="name">Bompenger</div>
+                  <div class="meta">Ola la ut</div>
+                </div>
+                <div class="amt">220 kr</div>
+              </div>
+            </div>
+
+            <!-- Settle -->
+            <div class="section">
+              <div class="section-head">
+                <span class="title">Hvem skylder hvem</span>
+                <span class="label">2 oppgjør</span>
+              </div>
+              <p class="small mb-md">Beregnet med færrest mulige overføringer.</p>
+
+              <div class="settle-row">
+                <div class="from">
+                  <span class="avatar" style="background:var(--fjord-tint); color:var(--fjord); width:30px; height:30px; font-size:12px;">O</span>
+                  <span class="name">Ola</span>
+                </div>
+                <span class="arrow">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </span>
+                <div class="to">
+                  <span class="avatar" style="width:30px; height:30px; font-size:12px;">U</span>
+                  <span class="name">Une</span>
+                </div>
+                <span class="amt-pill">860 kr</span>
+              </div>
+
+              <div class="settle-row">
+                <div class="from">
+                  <span class="avatar" style="background:var(--forest-tint); color:var(--forest); width:30px; height:30px; font-size:12px;">M</span>
+                  <span class="name">Marie</span>
+                </div>
+                <span class="arrow">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </span>
+                <div class="to">
+                  <span class="avatar" style="width:30px; height:30px; font-size:12px;">U</span>
+                  <span class="name">Une</span>
+                </div>
+                <span class="amt-pill">400 kr</span>
+              </div>
+
+              <button class="btn" style="background:#FF5B24; color:#fff; margin-top: var(--md);">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm4 11h-3v3h-2v-3H8v-2h3V8h2v3h3v2z"/></svg>
+                Send Vipps-forespørsel
+              </button>
+            </div>
+
+            <div class="section">
+              <div class="card-surface" style="display:flex; gap:12px; align-items:center;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--flame-primary)" stroke-width="2" style="flex-shrink:0;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <div style="font-size:13px;">
+                  <strong>Gjenta turen til neste år?</strong><br>
+                  <span class="muted" style="font-size:12px;">Vi husker ruten, hyttene og gjengen.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /screen-area -->
+
+        <!-- Bottom nav -->
+        <div class="bottom-nav">
+          <button data-screen="hjem" class="active" onclick="showScreen('hjem')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            Utforsk
+          </button>
+          <button data-screen="tur" onclick="showScreen('tur')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 22l10-20 10 20H2z"/><path d="M9 14l3-3 3 3"/></svg>
+            Mine turer
+          </button>
+          <button data-screen="pakk" onclick="showScreen('pakk')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+            Pakk
+          </button>
+          <button data-screen="paatur" onclick="showScreen('paatur')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" fill="currentColor"/></svg>
+            På tur
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right context panel -->
+    <aside class="panel" id="context-panel">
+      <span class="panel-tag" id="panel-tag">D1 · D2 · Discover</span>
+      <h3 id="panel-title">Utforsk og oppdag</h3>
+      <p id="panel-text">Brukeren starter med en intensjon ("hyttetur i mars?"), ikke et søk. AI-søket oversetter til ferdige forslag. Kartet aggregerer DNT- og kommersielle hytter på én flate, slik at brukeren slipper å hoppe mellom UT.no, DNT.no og iNatur.</p>
+      <div class="stories" id="panel-stories">
+        <span class="story-pill">D1 · AI-søk</span>
+        <span class="story-pill">D2 · DNT-hytter på kart</span>
+      </div>
+      <div class="design-note">
+        <strong>Designprinsipp</strong>
+        Aldri lenker ut når vi kan integrere. Alltid presenter data i kontekst av turen.
+      </div>
+    </aside>
+
+  </div>
+</div>
+
+<script>
+  // ==========================================================
+  // SCREEN ROUTER
+  // ==========================================================
+  const SCREENS = {
+    hjem:   { tag: 'D1 · D2 · Discover',          title: 'Utforsk og oppdag', text: 'Brukeren starter med en intensjon ("hyttetur i mars?"), ikke et søk. AI-søket oversetter til ferdige forslag. Kartet aggregerer DNT- og kommersielle hytter på én flate, slik at brukeren slipper å hoppe mellom UT.no, DNT.no og iNatur.', stories: ['D1 · AI-søk', 'D2 · DNT-hytter på kart', 'D4 · Klassiske ruter'] },
+    tur:    { tag: 'B1 · B3 · B6 · Decide',       title: 'Bestem turen', text: 'Hele turen som én tidslinje, ikke en uoversiktlig liste. Vær per dag (B1), rute mellom hytter (B3) og dag-for-dag-visning (B6). Når været snur, foreslår appen et konkret omplanleggingsforslag (B10) — gruppen tar valget med ett trykk.', stories: ['B1 · Værvarsel', 'B3 · Rute mellom hytter', 'B6 · Dag-for-dag', 'B10 · Omplanlegging'] },
+    pakk:   { tag: 'P1 · Prepare',                title: 'Pakk og forbered', text: 'AI-generert pakkeliste tilpasset vær, varighet og gruppestørrelse. AI-foreslåtte elementer er visuelt skilt fra brukerens egne tillegg (S3). Fellesutstyr fordeles og kvitteres ut per person, så ingen tar med to gassbrennere.', stories: ['P1 · AI-pakkeliste', 'P2 · Fordeling med avkvittering', 'S3 · AI vs. faktisk data'] },
+    gjeng:  { tag: 'G1 · Gather',                 title: 'Samle gjengen', text: 'Inviter via lenke uten å tvinge installering — alle ser samme bilde. Statusoversikt for hvem som har sagt ja. Kommentartråd som lever sammen med planen, ikke spredt i Messenger.', stories: ['G1 · Inviter via lenke', 'G4 · Statusoversikt', 'G5 · Kommentartråd'] },
+    paatur: { tag: 'T1 · Go',                     title: 'På tur — offline', text: 'Kart, rute og hytteinformasjon er nedlastet og fungerer uten dekning. GPS viser posisjon, kompass peker mot neste waypoint. Nødinfo er ett trykk unna.', stories: ['T1 · Offline-kart', 'T6 · Nødinfo offline', 'T8 · Kompass og rute-follow'] },
+    splitt: { tag: 'R1 · Return',                 title: 'Avslutt og gjør opp', text: 'Splitten beregnes med færrest mulige overføringer. Hver overføring er ett trykk via Vipps. Turen lagres i historikken og foreslås på nytt neste år.', stories: ['R1 · Splitt-beregning', 'R1b · Vipps-oppgjør', 'R3 · Gjenta turen'] }
+  };
+
+  function showScreen(name) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-' + name).classList.add('active');
+
+    document.querySelectorAll('#picker button').forEach(b => {
+      b.classList.toggle('active', b.dataset.screen === name);
+    });
+    document.querySelectorAll('.bottom-nav button').forEach(b => {
+      const ds = b.dataset.screen;
+      const isActive = ds === name || (name === 'pakk' && ds === 'pakk') || (name === 'gjeng' && ds === 'tur') || (name === 'splitt' && ds === 'tur');
+      b.classList.toggle('active', isActive);
+    });
+
+    // Update context panel
+    const meta = SCREENS[name];
+    if (meta) {
+      document.getElementById('panel-tag').textContent = meta.tag;
+      document.getElementById('panel-title').textContent = meta.title;
+      document.getElementById('panel-text').textContent = meta.text;
+      document.getElementById('panel-stories').innerHTML = meta.stories.map(s => `<span class="story-pill">${s}</span>`).join('');
+    }
+
+    // Scroll screen-area to top
+    document.querySelector('.screen-area').scrollTop = 0;
+  }
+
+  document.querySelectorAll('#picker button').forEach(btn => {
+    btn.addEventListener('click', () => showScreen(btn.dataset.screen));
+  });
+
+  // ==========================================================
+  // PACKING LIST INTERACTION
+  // ==========================================================
+  function togglePack(el) {
+    el.classList.toggle('checked');
+    const check = el.querySelector('.check');
+    if (el.classList.contains('checked')) {
+      check.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg>';
+    } else {
+      check.innerHTML = '';
+    }
+    updatePackProgress();
+  }
+  function updatePackProgress() {
+    const items = document.querySelectorAll('#screen-pakk .pack-item');
+    const done = document.querySelectorAll('#screen-pakk .pack-item.checked').length;
+    const total = items.length;
+    document.getElementById('pack-done').textContent = done;
+    document.getElementById('pack-total').textContent = total;
+    document.getElementById('pack-fill').style.width = (total > 0 ? (done / total * 100) : 0) + '%';
+  }
+  updatePackProgress();
+</script>
+</body>
+</html>
