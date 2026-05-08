@@ -16,6 +16,7 @@ import {
 import { buildTimeline } from "@/lib/timeline";
 import { TripTimelineView } from "@/components/timeline/timeline";
 import type { CabinPoint } from "@/lib/route";
+import { randomQuip } from "@/lib/lars-monsen/quips";
 
 const DEMO_CABINS: CabinPoint[] = [
   { name: "Gjendesheim", lat: 61.4945, lon: 8.8108 },
@@ -188,7 +189,7 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
                 className="text-text-primary text-lg leading-snug"
                 style={{ fontFamily: "var(--font-handwriting)" }}
               >
-                Legg til minst to hytter, så regner Lars ut etapper, høydemeter og henter værvarsel for deg.
+                {randomQuip("timelineEmpty")}
               </p>
             ) : (
               <Suspense
@@ -221,7 +222,7 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
                 className="text-text-primary text-lg leading-snug"
                 style={{ fontFamily: "var(--font-handwriting)" }}
               >
-                Kostnadsregistrering og splitt kommer her. Regn med at det blir litt enklere enn å regne sjøl rundt bålet.
+                {randomQuip("expenses")}
               </p>
             </Section>
           )}
@@ -242,7 +243,7 @@ function ParticipantList({
         className="text-text-primary text-lg leading-snug"
         style={{ fontFamily: "var(--font-handwriting)" }}
       >
-        Ingen deltakere ennå. Del invitasjonslenken ovenfor.
+        {randomQuip("noParticipants")} Del invitasjonslenken ovenfor.
       </p>
     );
   }

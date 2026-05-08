@@ -8,6 +8,7 @@ import {
   type Cabin,
 } from "@/lib/ut";
 import { cn } from "@/lib/utils";
+import { randomQuip } from "@/lib/lars-monsen/quips";
 
 type Props = {
   cabinId: number;
@@ -21,6 +22,7 @@ type State =
 
 export function CabinPanel({ cabinId, onClose }: Props) {
   const [state, setState] = useState<State>({ status: "loading" });
+  const [quip] = useState(() => randomQuip("cabinSelect"));
 
   useEffect(() => {
     const controller = new AbortController();
@@ -70,6 +72,15 @@ export function CabinPanel({ cabinId, onClose }: Props) {
       )}
 
       {state.status === "ready" && <CabinBody cabin={state.cabin} />}
+
+      {state.status === "ready" && (
+        <p
+          className="mt-md border-t-2 border-flame-pressed/20 pt-sm text-base text-text-primary leading-snug"
+          style={{ fontFamily: "var(--font-handwriting)", fontWeight: 600 }}
+        >
+          - Lars: {quip}
+        </p>
+      )}
     </aside>
   );
 }

@@ -3,6 +3,7 @@ import type { RouteLeg } from "@/lib/route";
 import type { DailyWeather } from "@/lib/met";
 import { WeatherSymbol, weatherLabel } from "./weather-symbol";
 import { cn } from "@/lib/utils";
+import { randomQuip } from "@/lib/lars-monsen/quips";
 
 const DIFFICULTY_LABEL: Record<RouteLeg["difficulty"], string> = {
   easy: "Lett",
@@ -184,7 +185,7 @@ export function TripTimelineView({ timeline }: { timeline: TripTimeline }) {
         className="rounded-lg border-2 border-flame-pressed bg-bg p-md text-text-primary text-lg shadow-[4px_4px_0_var(--brand-flame-pressed)]"
         style={{ fontFamily: "var(--font-handwriting)" }}
       >
-        Legg til minst to hytter for å bygge tidslinje.
+        {randomQuip("timelineEmpty")}
       </div>
     );
   }

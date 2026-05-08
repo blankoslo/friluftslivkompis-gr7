@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 import type { TripNearItem, TripActivityType, TripGrading } from "@/lib/ut";
 import {
@@ -10,6 +11,7 @@ import {
   unsuitabilityReason,
   type AgeFilter,
 } from "@/lib/discover/age";
+import { randomQuip } from "@/lib/lars-monsen/quips";
 
 const ACTIVITY_LABEL: Record<TripActivityType, string> = {
   HIKING: "Fottur",
@@ -46,25 +48,7 @@ export function TripList({
   onClearSuggestion,
 }: Props) {
   if (trips.length === 0) {
-    return (
-      <div className="rounded-md border border-border bg-surface p-4 text-sm">
-        <div className="mb-1 font-heading font-semibold text-foreground">
-          Ingen treff
-        </div>
-        <p className="text-xs text-muted-foreground">
-          Filtrene gir null treff i kartområdet.
-        </p>
-        {emptySuggestion && onClearSuggestion && (
-          <button
-            type="button"
-            onClick={onClearSuggestion}
-            className="mt-2 rounded-md border border-border bg-background px-3 py-1.5 text-xs font-medium hover:bg-muted"
-          >
-            Fjern «{emptySuggestion}» for å se flere
-          </button>
-        )}
-      </div>
-    );
+    return <EmptyTripList emptySuggestion={emptySuggestion} onClearSuggestion={onClearSuggestion} />;
   }
 
   return (
@@ -126,6 +110,41 @@ export function TripList({
         );
       })}
     </ul>
+  );
+}
+
+function EmptyTripList({
+  emptySuggestion,
+  onClearSuggestion,
+}: {
+  emptySuggestion?: string | null;
+  onClearSuggestion?: () => void;
+}) {
+  const [quip] = useState(() => randomQuip("filterEmpty"));
+  return (
+    <div className="rounded-md border-2 border-flame-pressed bg-bg p-md text-sm shadow-[3px_3px_0_var(--brand-flame-pressed)]">
+      <div className="mb-1 font-heading font-semibold text-text-primary">
+        Ingen treff
+      </div>
+      <p
+        className="text-base text-text-primary leading-snug"
+        style={{ fontFamily: "var(--font-handwriting)", fontWeight: 600 }}
+      >
+        {quip}
+      </p>
+      <p className="mt-xs text-xs text-text-muted">
+        Filtrene gir null treff i kartområdet.
+      </p>
+      {emptySuggestion && onClearSuggestion && (
+        <button
+          type="button"
+          onClick={onClearSuggestion}
+          className="mt-sm rounded-md border-2 border-flame-pressed bg-bg px-3 py-1.5 text-xs font-bold hover:bg-flame-tint"
+        >
+          Fjern «{emptySuggestion}» for å se flere
+        </button>
+      )}
+    </div>
   );
 }
 

@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
+import { randomQuip } from "@/lib/lars-monsen/quips";
 
 export interface PackingItem {
   name: string;
@@ -21,6 +22,8 @@ export function PackingList({ tripId, initialItems }: Props) {
   const [newItemName, setNewItemName] = useState("");
   const [isGenerating, startGenerating] = useTransition();
   const [isSaving, startSaving] = useTransition();
+  const [fallbackIntro] = useState(() => randomQuip("packingIntro"));
+  const [loadingQuip] = useState(() => randomQuip("loading"));
 
   const aiItems = items.filter((i) => i.isAiSuggested);
   const userItems = items.filter((i) => !i.isAiSuggested);
@@ -88,9 +91,9 @@ export function PackingList({ tripId, initialItems }: Props) {
 
   return (
     <div className="flex flex-col gap-md">
-      {intro && (
+      {(intro || items.length === 0) && (
         <p className="rounded-md bg-midnight-sun-tint p-md text-sm italic text-text-primary">
-          {intro}
+          {intro ?? fallbackIntro}
         </p>
       )}
 
@@ -112,7 +115,7 @@ export function PackingList({ tripId, initialItems }: Props) {
           disabled={isGenerating}
         >
           {isGenerating
-            ? "Lars Monsen tar bare med kniv…"
+            ? loadingQuip
             : aiItems.length > 0
               ? "Generer på nytt"
               : "Generer pakkeliste"}

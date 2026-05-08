@@ -3,6 +3,7 @@ import Link from "next/link";
 import { connectToDatabase } from "@/lib/db/mongoose";
 import { Trip, type ITrip } from "@/models/Trip";
 import { fetchLocationForecast } from "@/lib/met";
+import { pickQuips } from "@/lib/lars-monsen/quips";
 
 const OSLO = { lat: 59.9139, lon: 10.7522 };
 
@@ -111,6 +112,7 @@ export default async function HomePage() {
   const badge = trip
     ? tripStatusBadge(trip.participants)
     : { label: "Demo", tone: "wait" as const };
+  const [wisdomTop, wisdomBottom, footerQuote] = pickQuips("homeWisdom", 3);
 
   return (
     <main className="bg-flame-primary text-white relative overflow-hidden">
@@ -257,10 +259,7 @@ export default async function HomePage() {
           </p>
         </section>
 
-        <WisdomQuote
-          quote="Det er bare å begynne å gå. Det er det som er trikset."
-          tilt={1}
-        />
+        <WisdomQuote quote={wisdomTop} tilt={1} />
 
         <div className="flex justify-between items-baseline mb-md">
           <h2 className="font-heading font-bold text-2xl">Mine turer</h2>
@@ -317,10 +316,7 @@ export default async function HomePage() {
           </div>
         </Link>
 
-        <WisdomQuote
-          quote="Ut på tur, aldri sur. Værmeldinga er en venn, ikke en sjef."
-          tilt={-1.5}
-        />
+        <WisdomQuote quote={wisdomBottom} tilt={-1.5} />
 
         <footer className="mt-2xl text-center pb-xl">
           <p
@@ -330,7 +326,7 @@ export default async function HomePage() {
               fontWeight: 700,
             }}
           >
-            &ldquo;Naturen er den beste læreren&rdquo;
+            &ldquo;{footerQuote}&rdquo;
           </p>
           <p className="text-sm opacity-75">- Lars Monsen</p>
         </footer>

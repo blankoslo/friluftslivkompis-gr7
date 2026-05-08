@@ -6,6 +6,8 @@ import { SearchBox } from "@/components/discover/search-box";
 import { CabinPanel } from "@/components/discover/cabin-panel";
 import { FilterPanel } from "@/components/discover/filter-panel";
 import { TripList } from "@/components/discover/trip-list";
+import { MonsenToast } from "@/components/lars-monsen/monsen-toast";
+import { randomQuip } from "@/lib/lars-monsen/quips";
 import type { SearchResult } from "@/lib/search/types";
 import type { TripNearItem } from "@/lib/ut";
 import {
@@ -48,6 +50,8 @@ export default function DiscoverPage() {
     () => new Set(),
   );
   const [minAge, setMinAge] = useState<AgeFilter>(null);
+  const [monsenQuip, setMonsenQuip] = useState<{ id: number; text: string } | null>(null);
+  const [heroQuip] = useState(() => randomQuip("discoverHero"));
   const viewportRef = useRef<Viewport | null>(null);
   const fetchAbortRef = useRef<AbortController | null>(null);
 
@@ -64,6 +68,7 @@ export default function DiscoverPage() {
   const handleCabinClick = useCallback((id: number) => {
     setActiveCabinId(id);
     setActiveTripId(null);
+    setMonsenQuip({ id: Date.now(), text: randomQuip("cabinSelect") });
   }, []);
 
   const fetchTrips = useCallback((v: Viewport) => {
@@ -143,6 +148,7 @@ export default function DiscoverPage() {
   const handleTripSelect = useCallback((t: TripNearItem) => {
     setActiveTripId(t.id);
     setActiveCabinId(null);
+    setMonsenQuip({ id: Date.now(), text: randomQuip("tripSelect") });
     setSelected({
       source: "ut",
       kind: "trip",
@@ -196,7 +202,7 @@ export default function DiscoverPage() {
               display: "inline-block",
             }}
           >
-            Pan kartet, så finner Lars turene i området ↓
+            {heroQuip} ↓
           </p>
         </header>
 
@@ -258,6 +264,7 @@ export default function DiscoverPage() {
           </div>
         </div>
       </div>
+      <MonsenToast trigger={monsenQuip?.id ?? null} quip={monsenQuip?.text ?? null} />
     </main>
   );
 }
