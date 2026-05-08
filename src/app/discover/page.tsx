@@ -1,3 +1,4 @@
+// TODO: replace placeholder with Kartverket WMTS map + UT.no DNT hut layer (D2)
 export default function DiscoverPage() {
   return (
     <main className="p-8 max-w-4xl mx-auto">

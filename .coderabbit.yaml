@@ -1,4 +1,4 @@
-language: "no"
+language: "en-US"
 
 reviews:
   profile: assertive
@@ -6,7 +6,9 @@ reviews:
   high_level_summary: true
   poem: false
   review_status: true
-  collapse_walkthrough: false
+  auto_review:
+    enabled: true
+    drafts: false
 
   path_filters:
     - "!node_modules/**"
@@ -17,26 +19,25 @@ reviews:
   path_instructions:
     - path: "src/models/**"
       instructions: |
-        Kontroller at Mongoose-skjemaer har riktige indekser for felter som
-        brukes i spørringer. Sjekk at alle relasjoner bruker ObjectId-referanser
-        korrekt og at required-felter er eksplisitt satt.
+        Check that Mongoose schemas have indexes on queried fields. Verify all
+        relations use ObjectId refs correctly and required fields are explicit.
 
     - path: "src/app/api/**"
       instructions: |
-        Valider at alle API-ruter håndterer feil og returnerer korrekte
-        HTTP-statuskoder. Sjekk at brukerinput valideres før den skrives til
-        databasen. Påse at connectToDatabase() kalles før alle DB-operasjoner.
+        Verify all API routes handle errors and return correct HTTP status codes.
+        Check that user input is validated before writing to the database.
+        Ensure connectToDatabase() is called before every DB operation.
 
     - path: "src/lib/db/**"
       instructions: |
-        Sjekk at MongoDB-tilkoblingen bruker singleton-mønsteret korrekt for
-        å unngå connection leaks i Next.js serverless-miljø.
+        Verify the MongoDB connection uses the singleton pattern correctly to
+        avoid connection leaks in the Next.js serverless environment.
 
     - path: "src/**/*.tsx"
       instructions: |
-        Kontroller at komponenter er tilgjengelige (WCAG AA). Påse at
-        lastestatus og feilhåndtering vises for brukeren. Sjekk at
-        norsk tekst brukes konsistent i UI.
+        Check components are accessible (WCAG AA). Ensure loading and error
+        states are surfaced to the user. Norwegian text should be used
+        consistently throughout the UI.
 
 chat:
   auto_reply: true
