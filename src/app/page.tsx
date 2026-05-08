@@ -72,14 +72,15 @@ export default async function HomePage() {
 
       <div className="relative max-w-[42rem] mx-auto px-md sm:px-lg">
 
-        {/* Illustration centered in space above title */}
-        <div className="flex items-center justify-center" style={{ height: "38vh" }}>
+        {/* Illustration left-aligned, half the content width */}
+        <div className="flex items-center justify-start" style={{ height: "38vh" }}>
           <Image
             src="/lars-monsen-illustration.png"
             alt="Lars Monsen"
-            width={320}
-            height={320}
-            className="h-full w-auto object-contain drop-shadow-xl"
+            width={280}
+            height={280}
+            className="object-contain drop-shadow-xl"
+            style={{ width: "50%", height: "100%", objectFit: "contain", objectPosition: "left bottom" }}
             priority
           />
         </div>
