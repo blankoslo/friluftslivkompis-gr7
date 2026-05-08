@@ -1,6 +1,12 @@
 {
   "version": 1,
   "skills": {
+    "caveman-review": {
+      "source": "juliusbrussee/caveman",
+      "sourceType": "github",
+      "skillPath": "skills/caveman-review/SKILL.md",
+      "computedHash": "1dc59e7e896bc9dd449e43116c4c8b2e656b88c3370df91848330c17347af3d0"
+    },
     "grill-me": {
       "source": "mattpocock/skills",
       "sourceType": "github",
