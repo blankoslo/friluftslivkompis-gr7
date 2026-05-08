@@ -38,6 +38,7 @@ export function SearchBox({
   const [stale, setStale] = useState(false);
   const [snapshotAt, setSnapshotAt] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const userHasTyped = useRef(false);
 
   const trimmed = query.trim();
   const hasQuery = trimmed.length >= MIN_CHARS;
@@ -51,7 +52,7 @@ export function SearchBox({
   }, [initialResults]);
 
   useEffect(() => {
-    if (!hasQuery) return;
+    if (!hasQuery || !userHasTyped.current) return;
 
     const controller = new AbortController();
     const timer = window.setTimeout(async () => {
@@ -140,6 +141,7 @@ export function SearchBox({
         type="search"
         value={query}
         onChange={(e) => {
+          userHasTyped.current = true;
           setQuery(e.target.value);
           setOpen(true);
         }}
