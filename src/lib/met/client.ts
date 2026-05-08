@@ -1,3 +1,5 @@
+import { recordApiError } from "@/lib/api-monitor";
+
 const FORECAST_URL =
   "https://api.met.no/weatherapi/locationforecast/2.0/complete";
 const USER_AGENT = "Friluftskompis/1.0 (lag7@blank.no)";
@@ -69,10 +71,14 @@ export async function fetchLocationForecast(
   });
 
   if (!res.ok) {
-    throw new MetApiError(
-      `met.no ${res.status}: ${await res.text()}`,
-      res.status,
-    );
+    const detail = await res.text();
+    void recordApiError({
+      provider: "met",
+      status: res.status,
+      message: detail,
+      endpoint: FORECAST_URL,
+    });
+    throw new MetApiError(`met.no ${res.status}: ${detail}`, res.status);
   }
 
   const json = (await res.json()) as {

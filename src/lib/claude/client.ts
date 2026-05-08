@@ -1,3 +1,5 @@
+import { recordApiError } from "@/lib/api-monitor";
+
 const ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
 
 export type ClaudeModel =
@@ -53,6 +55,11 @@ export async function callClaude(
 ): Promise<MessagesResponse> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
+    void recordApiError({
+      provider: "anthropic",
+      message: "ANTHROPIC_API_KEY is not set",
+      endpoint: ANTHROPIC_URL,
+    });
     throw new ClaudeApiError("ANTHROPIC_API_KEY is not set");
   }
 
@@ -68,10 +75,14 @@ export async function callClaude(
   });
 
   if (!res.ok) {
-    throw new ClaudeApiError(
-      `Anthropic ${res.status}: ${await res.text()}`,
-      res.status,
-    );
+    const detail = await res.text();
+    void recordApiError({
+      provider: "anthropic",
+      status: res.status,
+      message: detail,
+      endpoint: ANTHROPIC_URL,
+    });
+    throw new ClaudeApiError(`Anthropic ${res.status}: ${detail}`, res.status);
   }
 
   return (await res.json()) as MessagesResponse;

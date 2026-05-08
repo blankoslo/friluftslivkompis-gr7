@@ -1,3 +1,5 @@
+import { recordApiError } from "@/lib/api-monitor";
+
 const STEDSNAVN_URL = "https://ws.geonorge.no/stedsnavn/v1/sted";
 const USER_AGENT = "Friluftskompis/1.0 (lag7@blank.no)";
 
@@ -57,7 +59,14 @@ export async function searchPlaces(
   });
 
   if (!res.ok) {
-    throw new Error(`stedsnavn ${res.status}: ${await res.text()}`);
+    const detail = await res.text();
+    void recordApiError({
+      provider: "kartverket",
+      status: res.status,
+      message: detail,
+      endpoint: STEDSNAVN_URL,
+    });
+    throw new Error(`stedsnavn ${res.status}: ${detail}`);
   }
 
   const data = (await res.json()) as RawResponse;

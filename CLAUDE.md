@@ -27,7 +27,7 @@ All UI-kode MÅ følge [THEME.md](THEME.md) (Lars Monsen Design System). Regler:
 ## Project docs
 
 - [docs/Intro_til_Friluftskompis.md](docs/Intro_til_Friluftskompis.md) - case, scenarioer, produktvisjon, brukerreisens 6 faser.
-- [docs/Brukerhistorier.md](docs/Brukerhistorier.md) - alle stories med Gitt/Når/Så-akseptansekriterier og prioritet. MVP er D1, D2, B1, B3, B6, G1, P1, T1, R1.
+- [docs/Brukerhistorier.md](docs/Brukerhistorier.md) - alle stories med Gitt/Når/Så-akseptansekriterier og prioritet.
 
 ## Persona twist - Lars Monsen
 
@@ -105,16 +105,4 @@ Reference list from hackathon hub: https://hackathon.blank.no/apis. Status legen
 ### Apify Airbnb scraper ⬜ (token i 1Password) — D2b
 
 - `https://api.apify.com/v2/acts/NDa1latMI7JHJzSYU/runs`. ~240 hits/query, $1.25/1000 results.
-
-## MVP API mapping
-
-- D1 søk → Kartverket Stedsnavn (✅) + UT.no for hytte/rute-treff + Claude for AI-rangering.
-- D2 hyttelag → UT.no (DNT) + Kartverket basemap.
-- B1 vær → MET Norway locationforecast.
-- B3 rute mellom hytter → UT.no rutedata + evt. egen distanse/elevation-kalk.
-- B6 tidslinje → kombinasjon B1 + B3.
-- G1 invitasjonslenke → eget backend (MongoDB inviteToken finnes alt).
-- P1 pakkeliste → Claude (Sonnet 4.6) basert på MET-vær + turlengde + deltakere.
-- T1 offline kart → cache Kartverket-tiles via Service Worker / PMTiles.
-- R1 kostnadssplit → eget backend.
 
