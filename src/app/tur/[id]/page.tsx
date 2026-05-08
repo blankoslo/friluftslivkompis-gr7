@@ -52,6 +52,19 @@ import {
   EmergencyContactsPanel,
   type EmergencyContact,
 } from "@/components/emergency/emergency-contacts-panel";
+import {
+  TripSideNav,
+  type TripSideNavItem,
+} from "@/components/trips/trip-side-nav";
+import { DuplicateTripButton } from "@/components/trips/duplicate-trip-button";
+import { ElevationProfile } from "@/components/trips/elevation-profile";
+import {
+  computeProfilePoints,
+  computeTripStats,
+  type ProfilePoint,
+  type TripStats,
+} from "@/lib/trips/stats";
+import type { ILeg } from "@/models/Trip";
 
 const DEMO_CABINS: CabinPoint[] = [
   { name: "Gjendesheim", lat: 61.4945, lon: 8.8108 },
@@ -96,6 +109,9 @@ interface TripView {
   emergencyContacts: EmergencyContact[];
   totalDays: number | null;
   isDemo: boolean;
+  isPast: boolean;
+  stats: TripStats;
+  profile: ProfilePoint[];
 }
 
 async function loadTrip(id: string): Promise<TripView | null> {
@@ -119,6 +135,17 @@ async function loadTrip(id: string): Promise<TripView | null> {
       emergencyContacts: [],
       totalDays: DEMO_CABINS.length - 1,
       isDemo: true,
+      isPast: false,
+      stats: {
+        distanceKm: 0,
+        elevationGain: 0,
+        totalHours: 0,
+        legCount: 0,
+        durationDays: DEMO_CABINS.length - 1,
+        cabinCount: DEMO_CABINS.length,
+        source: "empty",
+      },
+      profile: [],
     };
   }
   await connectToDatabase();
@@ -143,6 +170,7 @@ async function loadTrip(id: string): Promise<TripView | null> {
     emergencyContacts?: (IEmergencyContact & {
       _id?: mongoose.Types.ObjectId;
     })[];
+    legs?: ILeg[];
   } | null>();
   if (!doc) return null;
   const cabins = (doc.cabins ?? []).map((c) => ({
@@ -234,7 +262,17 @@ async function loadTrip(id: string): Promise<TripView | null> {
     })),
     totalDays: computeTotalDays(doc.startDate, doc.endDate, cabins.length),
     isDemo: false,
+    isPast: isTripPast(doc.endDate ?? doc.startDate),
+    stats: computeTripStats(doc.legs, doc.cabins, doc.startDate, doc.endDate),
+    profile: computeProfilePoints(doc.legs, doc.cabins),
   };
+}
+
+function isTripPast(date: Date | undefined): boolean {
+  if (!date) return false;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return new Date(date) < today;
 }
 
 function computeTotalDays(
@@ -307,10 +345,36 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
     !!nowcastStart &&
     isWithinTripWindow(startISO, trip.endDate ?? null);
 
+  const sectionLabels: string[] = [
+    !trip.isDemo && "Inviter deltakere",
+    !trip.isDemo && trip.cabins.length >= 2 && "Inviter til én dag",
+    !trip.isDemo && "Deltakere",
+    "Hytter og etapper",
+    "Eksporter til klokke / GPS",
+    !trip.isDemo && "Hyttetilgjengelighet",
+    !trip.isDemo && trip.cabins.length >= 2 && "Sammenlign hytter",
+    showNowcast && nowcastStart && "Sanntidsvær (NowCast)",
+    "Kart, tidslinje og vær",
+    !trip.isDemo && "Pakkeliste",
+    !trip.isDemo && "Matplan og handle",
+    !trip.isDemo && "Bærevekt per person",
+    !trip.isDemo && "Påminnelser",
+    !trip.isDemo && "Nødkontakter (offline)",
+    !trip.isDemo && "Utgifter",
+    !trip.isDemo && trip.profile.length >= 2 && "Høydeprofil",
+    !trip.isDemo && "Etter turen",
+  ].filter((x): x is string => typeof x === "string");
+  const navItems: TripSideNavItem[] = sectionLabels.map((label) => ({
+    id: slugifyLabel(label),
+    label,
+  }));
+
   return (
     <main className="bg-bg min-h-screen">
       <MonsenSessionToast />
-      <div className="max-w-4xl mx-auto px-md py-lg sm:px-lg sm:py-xl">
+      <div className="max-w-6xl mx-auto px-md py-lg sm:px-lg sm:py-xl lg:flex lg:gap-lg lg:items-start">
+        <TripSideNav items={navItems} />
+        <div className="flex-1 min-w-0">
         <header className="bg-flame-pressed text-white rounded-lg border-4 border-flame-pressed shadow-[6px_6px_0_var(--brand-flame-pressed)] mb-xl relative">
           {trip.isDemo && (
             <span
@@ -539,10 +603,79 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
               />
             </Section>
           )}
+
+          {!trip.isDemo && trip.profile.length >= 2 && (
+            <Section label="Høydeprofil">
+              <p className="text-sm text-text-muted mb-sm">
+                {trip.stats.distanceKm.toFixed(1)} km ·{" "}
+                {trip.stats.elevationGain} hm samlet stigning ·{" "}
+                {trip.stats.legCount} etapper
+              </p>
+              <ElevationProfile
+                points={trip.profile}
+                title="Cumulative stigning over avstand"
+              />
+              <div className="mt-md flex flex-wrap items-center gap-sm">
+                <Link
+                  href="/statistikk"
+                  className="inline-flex items-center gap-xs rounded-md border-2 border-fjord bg-bg px-md py-sm text-sm font-bold text-fjord shadow-[3px_3px_0_var(--accent-fjord)] hover:translate-y-[1px] hover:shadow-[2px_2px_0_var(--accent-fjord)] transition-transform"
+                >
+                  <span>📊</span>
+                  Sammenlign med andre turer
+                </Link>
+                <span className="text-xs text-text-muted">
+                  Side om side på samme skala.
+                </span>
+              </div>
+            </Section>
+          )}
+
+          {!trip.isDemo && (
+            <Section label="Etter turen">
+              <p
+                className="text-text-primary text-lg leading-snug mb-md"
+                style={{ fontFamily: "var(--font-handwriting)" }}
+              >
+                {trip.isPast
+                  ? "Turen er i logg. Vil du gjøre den igjen, eller se hvordan den slo seg sammenlignet med andre?"
+                  : "Lyst til å lage en kopi for senere? Eller bygge neste års tur på samme rute?"}
+              </p>
+              <div className="flex flex-wrap items-center gap-md">
+                <DuplicateTripButton
+                  tripId={trip._id}
+                  defaultTitle={trip.title}
+                  defaultStart={trip.startDate?.slice(0, 10)}
+                  defaultEnd={trip.endDate?.slice(0, 10)}
+                  variant="panel"
+                  label="Gjenta denne turen"
+                />
+                <Link
+                  href="/statistikk"
+                  className="inline-flex items-center gap-xs rounded-md border-2 border-fjord bg-bg px-md py-sm text-sm font-bold text-fjord shadow-[3px_3px_0_var(--accent-fjord)] hover:translate-y-[1px] hover:shadow-[2px_2px_0_var(--accent-fjord)] transition-transform"
+                >
+                  <span>📊</span>
+                  Se statistikk og sammenlign
+                </Link>
+              </div>
+            </Section>
+          )}
+        </div>
         </div>
       </div>
     </main>
   );
+}
+
+function slugifyLabel(label: string): string {
+  return label
+    .toLowerCase()
+    .replace(/æ/g, "ae")
+    .replace(/ø/g, "o")
+    .replace(/å/g, "a")
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
 }
 
 function isWithinTripWindow(
@@ -575,7 +708,10 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="bg-bg border-4 border-flame-pressed rounded-lg shadow-[6px_6px_0_var(--brand-flame-pressed)] p-lg relative">
+    <section
+      id={slugifyLabel(label)}
+      className="scroll-mt-xl bg-bg border-4 border-flame-pressed rounded-lg shadow-[6px_6px_0_var(--brand-flame-pressed)] p-lg relative"
+    >
       <div className="flex items-center gap-sm mb-md flex-wrap">
         <h2 className="font-heading font-bold text-h2 text-forest">
           {label}
