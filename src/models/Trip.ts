@@ -115,6 +115,21 @@ export interface IReminder {
   kind: "pakk" | "handle" | "vær" | "annet";
 }
 
+export type EmergencyRole =
+  | "turleder"
+  | "pårørende"
+  | "fastlege"
+  | "forsikring"
+  | "annet";
+
+export interface IEmergencyContact {
+  _id?: mongoose.Types.ObjectId;
+  name: string;
+  phone: string;
+  role: EmergencyRole;
+  note?: string;
+}
+
 export interface IPackingSnapshot {
   weatherKey?: string;
   participantsHash?: string;
@@ -143,6 +158,7 @@ export interface ITrip {
   shoppingList: IShoppingItem[];
   consumables: IConsumable[];
   reminders: IReminder[];
+  emergencyContacts: IEmergencyContact[];
   expenses: IExpense[];
   createdBy: mongoose.Types.ObjectId;
   createdAt: Date;
@@ -264,6 +280,21 @@ const reminderSchema = new Schema<IReminder>({
   },
 });
 
+const EMERGENCY_ROLES = [
+  "turleder",
+  "pårørende",
+  "fastlege",
+  "forsikring",
+  "annet",
+] as const;
+
+const emergencyContactSchema = new Schema<IEmergencyContact>({
+  name: { type: String, required: true },
+  phone: { type: String, required: true },
+  role: { type: String, enum: EMERGENCY_ROLES, default: "annet" },
+  note: String,
+});
+
 const packingSnapshotSchema = new Schema<IPackingSnapshot>(
   {
     weatherKey: String,
@@ -310,6 +341,7 @@ const tripSchema = new Schema<ITrip>(
     shoppingList: [shoppingItemSchema],
     consumables: [consumableSchema],
     reminders: [reminderSchema],
+    emergencyContacts: [emergencyContactSchema],
     expenses: [expenseSchema],
     createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
   },

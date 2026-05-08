@@ -53,7 +53,47 @@ export default async function OfflineTripPage({
         <div className="min-h-0 flex-1 rounded-lg border-4 border-flame-pressed shadow-[6px_6px_0_var(--brand-flame-pressed)] overflow-hidden bg-bg">
           <OfflineMapLoader trip={trip} cabins={cabins} />
         </div>
+        <EmergencyQuickStrip cabins={cabins} />
       </div>
     </main>
+  );
+}
+
+function EmergencyQuickStrip({ cabins }: { cabins: Cabin[] }) {
+  const staffed = cabins.find(
+    (c) => (c.serviceLevel ?? "").toUpperCase() === "STAFFED",
+  );
+  return (
+    <div className="rounded-lg border-4 border-warning bg-warning-bg p-md flex flex-wrap items-center gap-md shadow-[6px_6px_0_var(--accent-warning)]">
+      <span className="font-heading text-h3 font-black text-warning uppercase tracking-label">
+        Nødnumre
+      </span>
+      <a
+        href="tel:113"
+        className="rounded-md border-2 border-warning bg-bg px-md py-sm font-heading text-h3 font-black text-warning"
+      >
+        113
+      </a>
+      <a
+        href="tel:110"
+        className="rounded-md border-2 border-warning bg-bg px-md py-sm font-heading text-h3 font-black text-warning"
+      >
+        110
+      </a>
+      <a
+        href="tel:116117"
+        className="rounded-md border-2 border-forest bg-bg px-md py-sm font-heading text-h3 font-black text-forest"
+      >
+        116117
+      </a>
+      {staffed?.phone && (
+        <a
+          href={`tel:${staffed.phone.replace(/\s+/g, "")}`}
+          className="rounded-md border-2 border-fjord bg-bg px-md py-sm text-sm font-bold text-fjord"
+        >
+          🛖 {staffed.name}: {staffed.phone}
+        </a>
+      )}
+    </div>
   );
 }

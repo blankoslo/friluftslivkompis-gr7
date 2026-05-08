@@ -49,7 +49,8 @@ self.addEventListener("fetch", (event) => {
     if (
       url.pathname === "/api/cabins" ||
       url.pathname.startsWith("/api/cabins/") ||
-      url.pathname.startsWith("/api/ut-trips/")
+      url.pathname.startsWith("/api/ut-trips/") ||
+      url.pathname.startsWith("/api/trips/")
     ) {
       event.respondWith(networkFirst(req, DATA_CACHE));
       return;

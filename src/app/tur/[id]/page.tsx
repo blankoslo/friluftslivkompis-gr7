@@ -6,6 +6,7 @@ import { connectToDatabase } from "@/lib/db/mongoose";
 import {
   Trip,
   type IConsumable,
+  type IEmergencyContact,
   type IExpense,
   type IMealDay,
   type IParticipant,
@@ -46,6 +47,10 @@ import {
   type ExpensesPanelExpense,
   type ExpensesPanelParticipant,
 } from "@/components/expenses/expenses-panel";
+import {
+  EmergencyContactsPanel,
+  type EmergencyContact,
+} from "@/components/emergency/emergency-contacts-panel";
 
 const DEMO_CABINS: CabinPoint[] = [
   { name: "Gjendesheim", lat: 61.4945, lon: 8.8108 },
@@ -87,6 +92,7 @@ interface TripView {
   shoppingList: ShoppingListItem[];
   consumables: ConsumableItem[];
   reminders: Reminder[];
+  emergencyContacts: EmergencyContact[];
   totalDays: number | null;
   isDemo: boolean;
 }
@@ -109,6 +115,7 @@ async function loadTrip(id: string): Promise<TripView | null> {
       shoppingList: [],
       consumables: [],
       reminders: [],
+      emergencyContacts: [],
       totalDays: DEMO_CABINS.length - 1,
       isDemo: true,
     };
@@ -132,6 +139,9 @@ async function loadTrip(id: string): Promise<TripView | null> {
     shoppingList?: (IShoppingItem & { _id?: mongoose.Types.ObjectId })[];
     consumables?: (IConsumable & { _id?: mongoose.Types.ObjectId })[];
     reminders?: (IReminder & { _id?: mongoose.Types.ObjectId })[];
+    emergencyContacts?: (IEmergencyContact & {
+      _id?: mongoose.Types.ObjectId;
+    })[];
   } | null>();
   if (!doc) return null;
   const cabins = (doc.cabins ?? []).map((c) => ({
@@ -213,6 +223,13 @@ async function loadTrip(id: string): Promise<TripView | null> {
       daysBefore: r.daysBefore,
       label: r.label,
       kind: r.kind ?? "annet",
+    })),
+    emergencyContacts: (doc.emergencyContacts ?? []).map((c) => ({
+      _id: c._id?.toString(),
+      name: c.name,
+      phone: c.phone,
+      role: c.role ?? "annet",
+      note: c.note,
     })),
     totalDays: computeTotalDays(doc.startDate, doc.endDate, cabins.length),
     isDemo: false,
@@ -446,6 +463,23 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
                 startDate={trip.startDate}
                 initialReminders={trip.reminders}
               />
+            </Section>
+          )}
+          {!trip.isDemo && (
+            <Section label="Nødkontakter (offline)">
+              <EmergencyContactsPanel
+                tripId={trip._id}
+                initialContacts={trip.emergencyContacts}
+              />
+              <div className="mt-md">
+                <Link
+                  href={`/tur/${trip._id}/nodinfo`}
+                  className="inline-flex items-center gap-xs rounded-md border-2 border-warning bg-warning-bg px-md py-sm text-sm font-bold text-warning shadow-[3px_3px_0_var(--accent-warning)] hover:translate-y-[1px] hover:shadow-[2px_2px_0_var(--accent-warning)] transition-transform"
+                >
+                  <span>🚨</span>
+                  Åpne nødinfo-siden
+                </Link>
+              </div>
             </Section>
           )}
           {!trip.isDemo && (
