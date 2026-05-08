@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import type { TripNearItem, TripActivityType, TripGrading } from "@/lib/ut";
+import { SaveToListButton } from "@/components/social/save-to-list-button";
 import {
   AGE_BAND_LABEL,
   isChildUnfriendly,
@@ -101,7 +102,7 @@ export function TripList({
               )}
             </button>
             {isActive && (
-              <div className="mt-1 flex items-center gap-sm px-3">
+              <div className="mt-1 flex flex-wrap items-center gap-sm px-3">
                 <Link
                   href={`/offline/tur/${t.id}`}
                   className="text-xs text-fjord hover:underline"
@@ -117,6 +118,9 @@ export function TripList({
                     Lag tur →
                   </button>
                 )}
+                <SaveToListButton
+                  item={{ utTripId: t.id, title: t.name }}
+                />
               </div>
             )}
           </li>

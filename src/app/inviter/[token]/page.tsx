@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { connectToDatabase } from "@/lib/db/mongoose";
 import {
@@ -17,12 +18,50 @@ import { haversineKm, type CabinPoint } from "@/lib/route";
 import { randomQuip } from "@/lib/lars-monsen/quips";
 import { InviteMapLoader } from "./invite-map-loader";
 import { ShareButton } from "./share-button";
+import { ReviewsSection } from "@/components/social/reviews-section";
+import { absoluteUrl, getSiteUrl } from "@/lib/site";
 
 interface InvitePageProps {
   params: Promise<{ token: string }>;
 }
 
+export async function generateMetadata({
+  params,
+}: InvitePageProps): Promise<Metadata> {
+  const { token } = await params;
+  const trip = await loadByToken(token);
+  if (!trip) return { title: "Tur ikke funnet" };
+  const dateRange = formatDateRange(trip.startDate, trip.endDate);
+  const description =
+    [trip.area, dateRange, `${trip.cabins.length} hytter`]
+      .filter(Boolean)
+      .join(" · ") || "Du er invitert på fjelltur.";
+  const url = absoluteUrl(`/inviter/${token}`);
+  const ogImage = absoluteUrl(`/api/og/trip/${token}`);
+  return {
+    metadataBase: new URL(getSiteUrl()),
+    title: `${trip.title} - Du er invitert`,
+    description,
+    openGraph: {
+      type: "article",
+      url,
+      siteName: "På tur med Monsen",
+      title: trip.title,
+      description,
+      locale: "nb_NO",
+      images: [{ url: ogImage, width: 1200, height: 630, alt: trip.title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: trip.title,
+      description,
+      images: [ogImage],
+    },
+  };
+}
+
 interface InviteView {
+  _id: string;
   title: string;
   area: string;
   inviteToken: string;
@@ -35,6 +74,7 @@ interface InviteView {
 async function loadByToken(token: string): Promise<InviteView | null> {
   await connectToDatabase();
   const doc = await Trip.findOne({ inviteToken: token }).lean<{
+    _id: { toString(): string };
     title: string;
     area: string;
     inviteToken: string;
@@ -45,6 +85,7 @@ async function loadByToken(token: string): Promise<InviteView | null> {
   } | null>();
   if (!doc) return null;
   return {
+    _id: doc._id.toString(),
     title: doc.title,
     area: doc.area ?? "",
     inviteToken: doc.inviteToken,
@@ -225,7 +266,7 @@ export default async function InvitePage({ params }: InvitePageProps) {
           )}
         </section>
 
-        <section className="bg-bg border-4 border-flame-pressed rounded-lg p-lg shadow-[6px_6px_0_var(--brand-flame-pressed)] text-text-primary">
+        <section className="bg-bg border-4 border-flame-pressed rounded-lg p-lg mb-lg shadow-[6px_6px_0_var(--brand-flame-pressed)] text-text-primary">
           <h2 className="font-heading font-bold text-h3 text-flame-pressed mb-md">
             Deltakere
           </h2>
@@ -235,10 +276,22 @@ export default async function InvitePage({ params }: InvitePageProps) {
             variant="inviter"
           />
         </section>
+
+        <section className="bg-bg border-4 border-flame-pressed rounded-lg p-lg shadow-[6px_6px_0_var(--brand-flame-pressed)] text-text-primary">
+          <h2 className="font-heading font-bold text-h3 text-flame-pressed mb-md">
+            Anmeldelser fra turfolket
+          </h2>
+          <ReviewsSection
+            tripId={trip._id}
+            targetTitle={trip.title}
+            targetArea={trip.area}
+          />
+        </section>
       </div>
     </main>
   );
 }
+
 
 type HeroChip = { label: string; value: string };
 
