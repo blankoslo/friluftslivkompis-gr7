@@ -54,6 +54,7 @@ function DiscoverPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const addingToTripId = searchParams?.get("addTo") ?? null;
+  const addingMode = Boolean(addingToTripId);
   const addingTripTitle = searchParams?.get("title") ?? null;
   const initialQuery = searchParams?.get("q") ?? "";
   const initialBounds = useMemo(
@@ -101,6 +102,12 @@ function DiscoverPageInner() {
   }, []);
 
   const fetchTrips = useCallback((v: Viewport) => {
+    if (addingMode) {
+      setTrips([]);
+      setTripsLoading(false);
+      return;
+    }
+
     fetchAbortRef.current?.abort();
     const controller = new AbortController();
     fetchAbortRef.current = controller;
@@ -123,7 +130,7 @@ function DiscoverPageInner() {
       .finally(() => {
         if (!controller.signal.aborted) setTripsLoading(false);
       });
-  }, []);
+  }, [addingMode]);
 
   const debounceRef = useRef<number | null>(null);
   const handleViewportChange = useCallback(
@@ -276,7 +283,7 @@ function DiscoverPageInner() {
 
   const showCabinPanel = activeCabinId !== null;
   const hasFilters = activeFilters.size > 0 || minAge !== null;
-  const showTripList = trips.length > 0 || hasFilters;
+  const showTripList = !addingMode && (trips.length > 0 || hasFilters);
   const showEmptyHint =
     filteredTrips.length === 0 && ageFilteredTrips.length > 0;
 
@@ -306,7 +313,7 @@ function DiscoverPageInner() {
         )}
         <header className="mb-lg">
           <h1 className="font-heading text-3xl font-bold text-text-primary sm:text-4xl">
-            {addingToTripId ? "Legg til hytter på kart" : "Finn turen"}
+            {addingMode ? "Legg til hytter på kart" : "Finn turen"}
           </h1>
           <p
             className="mt-xs text-flame-pressed"
@@ -317,7 +324,7 @@ function DiscoverPageInner() {
               display: "inline-block",
             }}
           >
-            {addingToTripId
+            {addingMode
               ? "Klikk en hytte i kartet, så får du en knapp for å legge den i ruten."
               : `${heroQuip} ↓`}
           </p>
@@ -325,19 +332,30 @@ function DiscoverPageInner() {
 
         <div className="grid gap-md lg:grid-cols-[360px_1fr]">
           <div className="order-2 space-y-md lg:order-1">
-            <SearchBox selected={selected} onSelect={handleSelect} initialQuery={initialQuery} initialResults={initialResults} />
-
-            <FilterPanel
-              active={activeFilters}
-              counts={counts}
-              onToggle={toggleFilter}
-              onClear={clearFilters}
-              total={ageFilteredTrips.length}
-              filteredTotal={filteredTrips.length}
-              loading={tripsLoading}
-              minAge={minAge}
-              onMinAgeChange={setMinAge}
+            <SearchBox
+              selected={selected}
+              onSelect={handleSelect}
+              initialQuery={initialQuery}
+              initialResults={initialResults}
+              allowedKinds={addingMode ? ["cabin"] : undefined}
+              placeholder={
+                addingMode ? "Søk etter DNT-hytte" : "Søk på område, hytte eller fjelltopp"
+              }
             />
+
+            {!addingMode && (
+              <FilterPanel
+                active={activeFilters}
+                counts={counts}
+                onToggle={toggleFilter}
+                onClear={clearFilters}
+                total={ageFilteredTrips.length}
+                filteredTotal={filteredTrips.length}
+                loading={tripsLoading}
+                minAge={minAge}
+                onMinAgeChange={setMinAge}
+              />
+            )}
 
             {showCabinPanel ? (
               <CabinPanel
@@ -380,7 +398,7 @@ function DiscoverPageInner() {
             ) : selected ? (
               <SelectedDetails
                 selected={selected}
-                addingMode={Boolean(addingToTripId)}
+                addingMode={addingMode}
                 addingTitle={addingTripTitle}
                 onCreateTrip={() => {
                   const utTripId =
@@ -406,18 +424,18 @@ function DiscoverPageInner() {
                 }
               />
             ) : (
-              <Legend />
+              <Legend cabinOnly={addingMode} />
             )}
           </div>
 
           <div className="order-1 h-[50vh] min-h-[320px] overflow-hidden rounded-lg border-4 border-flame-pressed shadow-[6px_6px_0_var(--brand-flame-pressed)] lg:order-2 lg:h-[70vh] lg:min-h-[420px]">
             <Map
               selected={selected}
-              trips={filteredTrips}
+              trips={addingMode ? [] : filteredTrips}
               activeTripId={activeTripId}
               initialBounds={initialBounds}
               onCabinClick={handleCabinClick}
-              onTripClick={handleTripClickFromMap}
+              onTripClick={addingMode ? () => {} : handleTripClickFromMap}
               onViewportChange={handleViewportChange}
             />
           </div>
@@ -499,7 +517,7 @@ function parseBboxParam(
   ];
 }
 
-function Legend() {
+function Legend({ cabinOnly = false }: { cabinOnly?: boolean }) {
   return (
     <div className="rounded-lg border-2 border-flame-pressed bg-bg p-md text-xs text-text-muted shadow-[4px_4px_0_var(--brand-flame-pressed)]">
       <div
@@ -513,13 +531,17 @@ function Legend() {
           <span className="inline-block size-3 rounded-full border-2 border-white bg-flame-primary" />
           <span className="text-text-primary">DNT-hytte (zoom inn for å se)</span>
         </li>
-        <li className="flex items-center gap-sm">
-          <span className="inline-block size-3 rounded-full border-2 border-white bg-forest" />
-          <span className="text-text-primary">Turforslag fra UT.no</span>
-        </li>
-        <li className="pt-xs">
-          Kategorier: {TRIP_CATEGORIES.map((c) => CATEGORY_LABEL[c]).join(", ")}.
-        </li>
+        {!cabinOnly && (
+          <>
+            <li className="flex items-center gap-sm">
+              <span className="inline-block size-3 rounded-full border-2 border-white bg-forest" />
+              <span className="text-text-primary">Turforslag fra UT.no</span>
+            </li>
+            <li className="pt-xs">
+              Kategorier: {TRIP_CATEGORIES.map((c) => CATEGORY_LABEL[c]).join(", ")}.
+            </li>
+          </>
+        )}
       </ul>
     </div>
   );

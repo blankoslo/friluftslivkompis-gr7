@@ -17,9 +17,18 @@ type Props = {
   onSelect: (r: SearchResult) => void;
   initialQuery?: string;
   initialResults?: SearchResult[] | null;
+  allowedKinds?: SearchResult["kind"][];
+  placeholder?: string;
 };
 
-export function SearchBox({ selected, onSelect, initialQuery, initialResults }: Props) {
+export function SearchBox({
+  selected,
+  onSelect,
+  initialQuery,
+  initialResults,
+  allowedKinds,
+  placeholder = "Søk på område, hytte eller fjelltopp",
+}: Props) {
   const [query, setQuery] = useState(initialQuery ?? "");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
@@ -33,14 +42,14 @@ export function SearchBox({ selected, onSelect, initialQuery, initialResults }: 
   const trimmed = query.trim();
   const hasQuery = trimmed.length >= MIN_CHARS;
 
-  // Show initial results passed in from the page when they arrive
   useEffect(() => {
     if (!initialResults) return;
-    setResults(initialResults);
-    setOpen(true);
+    queueMicrotask(() => {
+      setResults(initialResults);
+      setOpen(true);
+    });
   }, [initialResults]);
 
-  // Debounced fetch for user input
   useEffect(() => {
     if (!hasQuery) return;
 
@@ -76,7 +85,11 @@ export function SearchBox({ selected, onSelect, initialQuery, initialResults }: 
     };
   }, [trimmed, hasQuery]);
 
-  const visibleResults = hasQuery ? results : [];
+  const visibleResults = hasQuery
+    ? allowedKinds
+      ? results.filter((r) => allowedKinds.includes(r.kind))
+      : results
+    : [];
   const visibleLoading = hasQuery && loading;
   const visibleError = hasQuery ? error : null;
 
@@ -132,7 +145,7 @@ export function SearchBox({ selected, onSelect, initialQuery, initialResults }: 
         }}
         onFocus={() => setOpen(true)}
         onKeyDown={handleKey}
-        placeholder="Søk på område, hytte eller fjelltopp"
+        placeholder={placeholder}
         className="w-full h-11 rounded-lg border border-border bg-background px-4 text-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:border-ring"
         autoComplete="off"
         aria-autocomplete="list"
@@ -167,7 +180,7 @@ export function SearchBox({ selected, onSelect, initialQuery, initialResults }: 
           )}
           {!visibleLoading && !visibleError && visibleResults.length === 0 && hasQuery && (
             <li className="px-4 py-3 text-sm text-muted-foreground">
-              Ingen treff. Lars Monsen ville sagt: prøv et annet stedsnavn.
+              Ingen treff. Lars Monsen ville sagt: prøv et annet søk.
             </li>
           )}
           {!visibleLoading &&
