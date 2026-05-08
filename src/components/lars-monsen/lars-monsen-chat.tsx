@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
 type Message = { role: "user" | "assistant"; content: string };
@@ -76,8 +77,14 @@ export function LarsMonsenChat() {
         <div className="flex h-[460px] w-80 flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-2xl">
           {/* Header */}
           <div className="flex items-center gap-3 bg-flame px-4 py-3">
-            <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white text-sm font-bold text-flame shadow">
-              LM
+            <div className="relative size-9 shrink-0 overflow-hidden rounded-full border-2 border-white/40 shadow">
+              <Image
+                src="/lars-monsen.jpg"
+                alt="Lars Monsen"
+                fill
+                className="object-cover object-[center_20%]"
+                sizes="36px"
+              />
             </div>
             <div className="flex-1">
               <div className="text-sm font-semibold text-white">Lars Monsen</div>
@@ -100,8 +107,14 @@ export function LarsMonsenChat() {
                 className={`flex items-end gap-2 ${m.role === "user" ? "flex-row-reverse" : "flex-row"}`}
               >
                 {m.role === "assistant" && (
-                  <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-flame text-[10px] font-bold text-white">
-                    LM
+                  <div className="relative size-6 shrink-0 overflow-hidden rounded-full border border-flame/30">
+                    <Image
+                      src="/lars-monsen.jpg"
+                      alt="Lars Monsen"
+                      fill
+                      className="object-cover object-[center_20%]"
+                      sizes="24px"
+                    />
                   </div>
                 )}
                 <div
@@ -118,8 +131,8 @@ export function LarsMonsenChat() {
 
             {loading && (
               <div className="flex items-end gap-2">
-                <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-flame text-[10px] font-bold text-white">
-                  LM
+                <div className="relative size-6 shrink-0 overflow-hidden rounded-full border border-flame/30">
+                  <Image src="/lars-monsen.jpg" alt="" fill className="object-cover object-[center_20%]" sizes="24px" />
                 </div>
                 <div className="rounded-2xl rounded-bl-sm bg-muted px-3 py-2 text-sm text-muted-foreground">
                   <span className="inline-flex gap-1">
@@ -159,9 +172,19 @@ export function LarsMonsenChat() {
       <button
         aria-label={open ? "Lukk Lars Monsen chat" : "Åpne Lars Monsen chat"}
         onClick={() => { setOpen((o) => !o); setBubbleVisible(false); }}
-        className="flex size-14 items-center justify-center rounded-full bg-flame text-2xl shadow-lg transition-colors hover:bg-flame-hover"
+        className="relative flex size-14 items-center justify-center overflow-hidden rounded-full border-2 border-flame bg-flame shadow-lg transition-colors hover:border-flame-hover"
       >
-        {open ? <span className="text-base font-bold text-white">✕</span> : "🏔️"}
+        {open ? (
+          <span className="text-base font-bold text-white">✕</span>
+        ) : (
+          <Image
+            src="/lars-monsen.jpg"
+            alt="Lars Monsen"
+            fill
+            className="object-cover object-[center_20%]"
+            sizes="56px"
+          />
+        )}
       </button>
     </div>
   );
