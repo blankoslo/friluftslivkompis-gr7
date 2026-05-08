@@ -369,6 +369,15 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
             </Section>
           )}
 
+          {!trip.isDemo && trip.cabins.length >= 2 && (
+            <Section label="Sammenlign hytter">
+              <CabinComparePanel
+                tripId={trip._id}
+                cabinCount={trip.cabins.length}
+              />
+            </Section>
+          )}
+
           <Section label="Kart, tidslinje og vær">
             {trip.cabins.length < 2 ? (
               <p
