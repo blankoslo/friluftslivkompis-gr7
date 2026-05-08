@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { connectToDatabase } from "@/lib/db/mongoose";
 import { Trip, type ITrip } from "@/models/Trip";
-import { fetchLocationForecast } from "@/lib/met";
 import { pickQuips } from "@/lib/lars-monsen/quips";
 
 const OSLO = { lat: 59.9139, lon: 10.7522 };
@@ -41,43 +40,6 @@ async function getLatestTrip(): Promise<LatestTrip | null> {
   }
 }
 
-async function getOsloWeather() {
-  try {
-    const f = await fetchLocationForecast(OSLO.lat, OSLO.lon, {
-      revalidate: 1800,
-    });
-    const now = f.timeseries[0]?.data.instant.details;
-    const sym = f.timeseries[0]?.data.next_1_hours?.summary?.symbol_code ?? "";
-    if (!now) return null;
-    return {
-      tempC: Math.round(now.air_temperature ?? 0),
-      windMs: Math.round(now.wind_speed ?? 0),
-      symbol: sym,
-    };
-  } catch {
-    return null;
-  }
-}
-
-function symbolToWord(symbol: string): string {
-  if (!symbol) return "Vær";
-  if (symbol.includes("clearsky")) return "Sol";
-  if (symbol.includes("fair")) return "Lettskyet";
-  if (symbol.includes("cloudy")) return "Skyet";
-  if (symbol.includes("rain")) return "Regn";
-  if (symbol.includes("snow")) return "Snø";
-  if (symbol.includes("fog")) return "Tåke";
-  return "Vær";
-}
-
-function greeting(): string {
-  const h = new Date().getHours();
-  if (h < 6) return "God natt";
-  if (h < 11) return "God morgen";
-  if (h < 17) return "God dag";
-  return "God kveld";
-}
-
 function formatTripDates(start?: Date, end?: Date): string {
   if (!start) return "Snart";
   const fmt = new Intl.DateTimeFormat("nb-NO", {
@@ -101,7 +63,7 @@ const wiggleSvg =
   "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 8' preserveAspectRatio='none'><path d='M2 5 Q40 1 80 4 T160 3 Q180 4 198 5' stroke='white' stroke-width='4' fill='none' stroke-linecap='round'/></svg>\")";
 
 export default async function HomePage() {
-  const [trip, weather] = await Promise.all([getLatestTrip(), getOsloWeather()]);
+  const trip = await getLatestTrip();
   const tripHref = trip ? `/tur/${trip.id}` : "/tur/demo";
   const badge = trip
     ? tripStatusBadge(trip.participants)
@@ -119,23 +81,7 @@ export default async function HomePage() {
       />
 
       <div className="relative max-w-[42rem] mx-auto px-md py-xl sm:px-lg sm:py-2xl">
-        <header className="flex justify-between items-start mb-lg">
-          <div>
-            <p className="text-sm opacity-90">
-              {greeting()}, <strong>turkamerat!</strong>
-            </p>
-            <p className="text-xs opacity-75 mt-1">
-              {weather
-                ? `${symbolToWord(weather.symbol)} i Oslo - ${weather.tempC}° - vind ${weather.windMs} m/s`
-                : "Oslo - friluftsvær venter"}
-            </p>
-          </div>
-          <div className="w-10 h-10 rounded-full bg-bg flex items-center justify-center text-flame-primary font-heading font-bold border-2 border-flame-pressed">
-            LM
-          </div>
-        </header>
-
-        <h1
+<h1
           className="font-heading font-bold leading-[0.95] mb-md"
           style={{ fontSize: "clamp(40px, 9vw, 64px)" }}
         >
