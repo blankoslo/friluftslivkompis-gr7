@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { connectToDatabase } from "@/lib/db/mongoose";
 import { Trip, type ITrip } from "@/models/Trip";
@@ -71,8 +72,20 @@ export default async function HomePage() {
 
       <div className="relative max-w-[42rem] mx-auto px-md sm:px-lg">
 
+        {/* Illustration centered in space above title */}
+        <div className="flex items-center justify-center" style={{ height: "38vh" }}>
+          <Image
+            src="/lars-monsen-illustration.png"
+            alt="Lars Monsen"
+            width={320}
+            height={320}
+            className="h-full w-auto object-contain drop-shadow-xl"
+            priority
+          />
+        </div>
+
         {/* Title + search */}
-        <div className="flex flex-col items-center text-center pt-[38vh] pb-xl">
+        <div className="flex flex-col items-center text-center pb-xl">
           <h1
             className="font-heading font-bold leading-[0.95] mb-lg"
             style={{ fontSize: "clamp(40px, 9vw, 64px)" }}
