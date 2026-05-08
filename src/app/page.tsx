@@ -1,14 +1,9 @@
-import Image from "next/image";
 import Link from "next/link";
 import { connectToDatabase } from "@/lib/db/mongoose";
 import { Trip, type ITrip } from "@/models/Trip";
-import { pickQuips } from "@/lib/lars-monsen/quips";
-
-const OSLO = { lat: 59.9139, lon: 10.7522 };
 
 type LatestTrip = {
   id: string;
-  inviteToken: string;
   title: string;
   area: string;
   start?: Date;
@@ -25,7 +20,6 @@ async function getLatestTrip(): Promise<LatestTrip | null> {
     if (!doc) return null;
     return {
       id: String(doc._id),
-      inviteToken: doc.inviteToken,
       title: doc.title,
       area: doc.area,
       start: doc.startDate,
@@ -42,10 +36,7 @@ async function getLatestTrip(): Promise<LatestTrip | null> {
 
 function formatTripDates(start?: Date, end?: Date): string {
   if (!start) return "Snart";
-  const fmt = new Intl.DateTimeFormat("nb-NO", {
-    day: "numeric",
-    month: "short",
-  });
+  const fmt = new Intl.DateTimeFormat("nb-NO", { day: "numeric", month: "short" });
   const s = fmt.format(new Date(start));
   if (!end) return s;
   return `${s.replace(".", "")} - ${fmt.format(new Date(end)).replace(".", "")}`;
@@ -68,10 +59,9 @@ export default async function HomePage() {
   const badge = trip
     ? tripStatusBadge(trip.participants)
     : { label: "Demo", tone: "wait" as const };
-  const [wisdomTop] = pickQuips("homeWisdom", 1);
 
   return (
-    <main className="bg-flame-primary text-white relative overflow-hidden">
+    <main className="bg-flame-primary text-white relative overflow-hidden min-h-screen">
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
@@ -80,111 +70,76 @@ export default async function HomePage() {
         }}
       />
 
-      <div className="relative max-w-[42rem] mx-auto px-md py-xl sm:px-lg sm:py-2xl">
-<h1
-          className="font-heading font-bold leading-[0.95] mb-md"
-          style={{ fontSize: "clamp(40px, 9vw, 64px)" }}
-        >
-          Hvor vil du{" "}
-          <span className="relative inline-block">
-            <span className="relative z-10">på tur?</span>
-            <span
-              className="absolute bottom-0 left-0 right-0 h-2"
-              style={{
-                backgroundImage: wiggleSvg,
-                backgroundRepeat: "no-repeat",
-                backgroundPosition: "0 100%",
-                backgroundSize: "100% 8px",
-              }}
+      <div className="relative max-w-[42rem] mx-auto px-md sm:px-lg">
+
+        {/* Hero — centered search with generous space above */}
+        <div className="flex flex-col items-center text-center pt-[18vh] pb-2xl">
+          <h1
+            className="font-heading font-bold leading-[0.95] mb-lg"
+            style={{ fontSize: "clamp(40px, 9vw, 64px)" }}
+          >
+            Hvor vil du{" "}
+            <span className="relative inline-block">
+              <span className="relative z-10">på tur?</span>
+              <span
+                className="absolute bottom-0 left-0 right-0 h-2"
+                style={{
+                  backgroundImage: wiggleSvg,
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "0 100%",
+                  backgroundSize: "100% 8px",
+                }}
+              />
+            </span>
+          </h1>
+
+          <form
+            action="/discover"
+            method="get"
+            className="w-full bg-bg border-4 border-flame-pressed rounded-lg p-md flex items-center gap-sm mb-md shadow-[4px_4px_0_var(--brand-flame-pressed)]"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3"
+              className="text-flame-primary shrink-0"
+            >
+              <circle cx="11" cy="11" r="7" />
+              <path d="M21 21l-5-5" />
+            </svg>
+            <input
+              type="text"
+              name="q"
+              placeholder="Hyttetur i mars, Rondane, eller Galdhøpiggen..."
+              className="flex-1 bg-transparent border-none outline-none text-text-primary font-semibold placeholder:text-flame-primary/60 min-w-0"
             />
-          </span>
-        </h1>
+            <button
+              type="submit"
+              className="hidden sm:inline-flex h-9 items-center justify-center rounded-md bg-flame-primary px-md text-sm font-bold text-white hover:bg-flame-hover transition-colors"
+            >
+              Søk
+            </button>
+          </form>
 
-        <form
-          action="/discover"
-          method="get"
-          className="bg-bg border-4 border-flame-pressed rounded-lg p-md flex items-center gap-sm mb-lg shadow-[4px_4px_0_var(--brand-flame-pressed)]"
-        >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="3"
-            className="text-flame-primary shrink-0"
-          >
-            <circle cx="11" cy="11" r="7" />
-            <path d="M21 21l-5-5" />
-          </svg>
-          <input
-            type="text"
-            name="q"
-            placeholder="Hyttetur i mars, Rondane, eller Galdhøpiggen..."
-            className="flex-1 bg-transparent border-none outline-none text-text-primary font-semibold placeholder:text-flame-primary/60 min-w-0"
-          />
-          <button
-            type="submit"
-            className="hidden sm:inline-flex h-9 items-center justify-center rounded-md bg-flame-primary px-md text-sm font-bold text-white hover:bg-flame-hover transition-colors"
-          >
-            Søk
-          </button>
-        </form>
-
-        <div className="flex flex-wrap gap-sm mb-xl pb-sm">
-          <Link
-            href="/lars-foreslar"
-            className="inline-flex items-center justify-center px-md py-sm bg-bg text-flame-pressed border-2 border-flame-pressed rounded-pill font-bold shadow-[2px_2px_0_var(--brand-flame-pressed)] hover:translate-y-[1px] transition-transform"
-            style={{
-              fontFamily: "var(--font-handwriting)",
-              fontSize: "16px",
-            }}
-          >
-            Lars Monsen foreslår
-          </Link>
+          <div className="flex flex-wrap justify-center gap-sm">
+            <Link
+              href="/lars-foreslar"
+              className="inline-flex items-center justify-center px-md py-sm bg-bg text-flame-pressed border-2 border-flame-pressed rounded-pill font-bold shadow-[2px_2px_0_var(--brand-flame-pressed)] hover:translate-y-[1px] transition-transform"
+              style={{ fontFamily: "var(--font-handwriting)", fontSize: "16px" }}
+            >
+              Lars Monsen foreslår
+            </Link>
+          </div>
         </div>
 
-        <section className="bg-bg border-4 border-flame-pressed rounded-lg p-lg pl-[112px] mb-lg relative min-h-[120px] shadow-[6px_6px_0_var(--brand-flame-pressed)]">
-          <span
-            className="absolute -top-3 right-2 bg-forest text-white text-xs font-bold px-sm py-1 rounded border-2 border-forest uppercase tracking-label"
-            style={{
-              fontFamily: "var(--font-stamp)",
-              transform: "rotate(4deg)",
-            }}
-          >
-            LARS MONSEN GODKJENT
-          </span>
-          <div
-            className="absolute left-2 top-1/2 w-24 h-24 -translate-y-1/2"
-            style={{ transform: "translateY(-50%) rotate(-4deg)" }}
-          >
-            <Image
-              src="/lars-monsen-kayak.png"
-              alt="Lars Monsen"
-              width={96}
-              height={96}
-              className="w-full h-full object-cover rounded border-2 border-flame-primary"
-            />
-          </div>
-          <h3
-            className="text-flame-primary font-bold text-2xl mb-1"
-            style={{ fontFamily: "var(--font-handwriting)" }}
-          >
-            Heisann, turkamerat!
-          </h3>
-          <p className="text-text-primary text-sm font-medium leading-snug">
-            Tre helger framover ser fine ut.
-            <br />
-            Jeg har plukka noen som passer dere.
-          </p>
-        </section>
-
-        <WisdomQuote quote={wisdomTop} tilt={1} />
-
+        {/* Latest trip */}
         <div className="flex justify-between items-baseline mb-md">
           <h2 className="font-heading font-bold text-2xl">Mine turer</h2>
           <Link
-            href="/logg"
+            href="/turer"
             className="text-xs font-bold uppercase tracking-label underline underline-offset-4"
           >
             Se alle
@@ -204,9 +159,6 @@ export default async function HomePage() {
             <div className="flex justify-between gap-sm">
               <span className="bg-bg text-flame-primary text-xs font-bold px-sm py-1 rounded-pill">
                 {badge.label}
-              </span>
-              <span className="bg-flame-hover text-white text-xs font-bold px-sm py-1 rounded-pill">
-                ⚠ Vær endret
               </span>
             </div>
             <div>
@@ -238,35 +190,6 @@ export default async function HomePage() {
 
       </div>
     </main>
-  );
-}
-
-function WisdomQuote({ quote, tilt }: { quote: string; tilt: number }) {
-  return (
-    <div
-      className="bg-bg border-4 border-flame-pressed rounded-lg p-lg pl-[64px] mb-lg relative shadow-[6px_6px_0_rgba(0,0,0,0.15)]"
-      style={{ transform: `rotate(${tilt}deg)` }}
-    >
-      <span
-        className="absolute left-md top-1 text-7xl text-flame-primary/40 leading-none"
-        style={{ fontFamily: "var(--font-heading)" }}
-        aria-hidden
-      >
-        &ldquo;
-      </span>
-      <p
-        className="text-text-primary text-xl leading-snug mb-1"
-        style={{ fontFamily: "var(--font-handwriting)", fontWeight: 700 }}
-      >
-        {quote}
-      </p>
-      <p
-        className="text-flame-pressed text-base"
-        style={{ fontFamily: "var(--font-handwriting)" }}
-      >
-        - Lars Monsen
-      </p>
-    </div>
   );
 }
 
