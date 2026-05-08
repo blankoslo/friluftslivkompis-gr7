@@ -1,0 +1,91 @@
+/* Lars Monsen Design System — CSS Custom Properties
+   Source of truth: src/design/tokens.json */
+
+:root {
+  /* Brand — Flame */
+  --brand-flame-primary: #C8602A;
+  --brand-flame-hover: #A04A1E;
+  --brand-flame-pressed: #7A3515;
+  --brand-flame-tint: #FAEADE;
+
+  /* Neutral */
+  --neutral-bg: #FAF7F2;
+  --neutral-surface: #F0EBE0;
+  --neutral-border: #D6CCBF;
+  --neutral-text-primary: #2A211A;
+  --neutral-text-muted: #7A6F63;
+  --neutral-text-disabled: #D6CCBF;
+
+  /* Accent — Forest (Granskog) */
+  --accent-forest: #3D5E35;
+  --accent-forest-tint: #E8F0E6;
+
+  /* Accent — Fjord (Fjordblå) */
+  --accent-fjord: #3D6475;
+  --accent-fjord-tint: #E0ECF0;
+
+  /* Accent — Midnight Sun (Midnattsol) */
+  --accent-midnight-sun: #B8891E;
+  --accent-midnight-sun-tint: #FBF3DC;
+
+  /* Semantic */
+  --semantic-success: #3D5E35;
+  --semantic-info: #3D6475;
+  --semantic-warning: #A04A1E;
+  --semantic-warning-bg: #FAEADE;
+  --semantic-warning-border: #E8702F;
+
+  /* Typography */
+  --font-heading: Georgia, 'Playfair Display', serif;
+  --font-body: 'Source Sans Pro', Inter, sans-serif;
+  --font-mono: 'Courier New', monospace;
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+
+  /* Border radius */
+  --lm-radius-sm: 3px;
+  --lm-radius-md: 5px;
+  --lm-radius-lg: 10px;
+  --lm-radius-pill: 12px;
+}
+
+.dark {
+  /* Brand — Flame */
+  --brand-flame-primary: #E8702F;
+  --brand-flame-hover: #C8602A;
+  --brand-flame-pressed: #A04A1E;
+  --brand-flame-tint: #3A2410;
+
+  /* Neutral */
+  --neutral-bg: #1A1612;
+  --neutral-surface: #2A2118;
+  --neutral-border: #4A3E34;
+  --neutral-text-primary: #F0EBE3;
+  --neutral-text-muted: #7A6F63;
+  --neutral-text-disabled: #4A3E34;
+
+  /* Accent — Forest */
+  --accent-forest: #4A6741;
+  --accent-forest-tint: #1E2E1C;
+
+  /* Accent — Fjord */
+  --accent-fjord: #5A7A8A;
+  --accent-fjord-tint: #1A2830;
+
+  /* Accent — Midnight Sun */
+  --accent-midnight-sun: #D4A853;
+  --accent-midnight-sun-tint: #2E2810;
+
+  /* Semantic */
+  --semantic-success: #4A6741;
+  --semantic-info: #5A7A8A;
+  --semantic-warning: #E8702F;
+  --semantic-warning-bg: #2A1A10;
+  --semantic-warning-border: #A04A1E;
+}
