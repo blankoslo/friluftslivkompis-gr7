@@ -18,7 +18,7 @@ export function SiteHeader() {
         </Link>
         <div className="flex gap-lg text-sm font-semibold text-text-muted">
           {[
-            { href: "/discover", label: "Discover" },
+            { href: "/discover", label: "Utforsk" },
             { href: "/tur/ny", label: "Ny tur" },
             { href: "/turer", label: "Turer" },
           ].map(({ href, label }) => {
