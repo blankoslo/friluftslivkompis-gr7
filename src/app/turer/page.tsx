@@ -2,6 +2,7 @@ import Link from "next/link";
 import { connectToDatabase } from "@/lib/db/mongoose";
 import { Trip, type ITrip } from "@/models/Trip";
 import { MonsenLine } from "@/components/lars-monsen/monsen-line";
+import { DeleteTripButton } from "./delete-trip-button";
 
 type TripCard = {
   id: string;
@@ -102,7 +103,7 @@ export default async function TurerPage() {
             <ul className="grid gap-lg">
               {upcoming.map((t, i) => (
                 <li key={t.id}>
-                  <TripRow trip={t} tilt={i % 2 === 0 ? 0.5 : -0.5} />
+                  <TripRow trip={t} tilt={i % 2 === 0 ? 0.5 : -0.5} deletable />
                 </li>
               ))}
             </ul>
@@ -132,40 +133,54 @@ function TripRow({
   trip,
   tilt,
   muted = false,
+  deletable = false,
 }: {
   trip: TripCard;
   tilt: number;
   muted?: boolean;
+  deletable?: boolean;
 }) {
   return (
-    <Link
-      href={`/tur/${trip.id}`}
-      className="block bg-bg border-4 border-flame-pressed rounded-lg overflow-hidden shadow-[6px_6px_0_var(--brand-flame-pressed)] hover:-translate-y-[2px] transition-transform"
+    <div
+      className="bg-bg border-4 border-flame-pressed rounded-lg overflow-hidden shadow-[6px_6px_0_var(--brand-flame-pressed)]"
       style={{ transform: `rotate(${tilt}deg)` }}
     >
-      <div
-        className={`${muted ? "bg-text-muted" : "bg-flame-pressed"} text-white p-md`}
+      <Link
+        href={`/tur/${trip.id}`}
+        className="block hover:-translate-y-[1px] transition-transform"
       >
-        <p
-          className="text-xs font-bold opacity-90 mb-1 uppercase tracking-label"
-          style={{ fontFamily: "var(--font-stamp)" }}
+        <div
+          className={`${muted ? "bg-text-muted" : "bg-flame-pressed"} text-white p-md`}
         >
-          {formatDateRange(trip.start, trip.end)}
-          {trip.area ? ` · ${trip.area}` : ""}
-        </p>
-        <h3 className="font-heading text-h2 font-black leading-tight">
-          {trip.title}
-        </h3>
-      </div>
+          <p
+            className="text-xs font-bold opacity-90 mb-1 uppercase tracking-label"
+            style={{ fontFamily: "var(--font-stamp)" }}
+          >
+            {formatDateRange(trip.start, trip.end)}
+            {trip.area ? ` · ${trip.area}` : ""}
+          </p>
+          <h3 className="font-heading text-h2 font-black leading-tight">
+            {trip.title}
+          </h3>
+        </div>
+      </Link>
       <div className="p-md flex justify-between items-center">
         <span className="text-flame-primary font-bold text-sm">
           {trip.participantCount > 0
             ? `${trip.participantCount} ${trip.participantCount === 1 ? "deltaker" : "deltakere"}`
             : "Ingen deltakere ennå"}
         </span>
-        <span className="text-flame-pressed text-sm font-bold">Åpne →</span>
+        <div className="flex items-center gap-md">
+          {deletable && <DeleteTripButton tripId={trip.id} />}
+          <Link
+            href={`/tur/${trip.id}`}
+            className="text-flame-pressed text-sm font-bold hover:text-flame-primary transition-colors"
+          >
+            Åpne →
+          </Link>
+        </div>
       </div>
-    </Link>
+    </div>
   );
 }
 
