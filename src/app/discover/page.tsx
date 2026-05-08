@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { SearchBox } from "@/components/discover/search-box";
 import { CabinPanel } from "@/components/discover/cabin-panel";
 import { FilterPanel } from "@/components/discover/filter-panel";
@@ -41,6 +42,7 @@ const MAX_RADIUS_M = 200_000;
 type Viewport = { lon: number; lat: number; radiusMeters: number };
 
 export default function DiscoverPage() {
+  const router = useRouter();
   const [selected, setSelected] = useState<SearchResult | null>(null);
   const [activeCabinId, setActiveCabinId] = useState<number | null>(null);
   const [activeTripId, setActiveTripId] = useState<number | null>(null);
@@ -171,6 +173,20 @@ export default function DiscoverPage() {
     [trips, handleTripSelect],
   );
 
+  const handleCreateTrip = useCallback(
+    async (name: string, area?: string) => {
+      const res = await fetch("/api/trips", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: name, area: area ?? "", phase: "gather" }),
+      });
+      if (!res.ok) return;
+      const trip = await res.json();
+      router.push(`/tur/${trip._id}`);
+    },
+    [router],
+  );
+
   const removeMostRestrictive = useCallback(() => {
     if (!removalSuggestion) return;
     setActiveFilters((prev) => {
@@ -234,6 +250,7 @@ export default function DiscoverPage() {
                 activeId={activeTripId}
                 minAge={minAge}
                 onSelect={handleTripSelect}
+                onCreateTrip={(t) => handleCreateTrip(t.name)}
                 emptySuggestion={
                   showEmptyHint && removalSuggestion
                     ? CATEGORY_LABEL[removalSuggestion]
@@ -246,7 +263,10 @@ export default function DiscoverPage() {
                 }
               />
             ) : selected ? (
-              <SelectedDetails selected={selected} />
+              <SelectedDetails
+                selected={selected}
+                onCreateTrip={() => handleCreateTrip(selected.name, selected.municipality ?? undefined)}
+              />
             ) : (
               <Legend />
             )}
@@ -269,7 +289,13 @@ export default function DiscoverPage() {
   );
 }
 
-function SelectedDetails({ selected }: { selected: SearchResult }) {
+function SelectedDetails({
+  selected,
+  onCreateTrip,
+}: {
+  selected: SearchResult;
+  onCreateTrip: () => void;
+}) {
   return (
     <div className="rounded-lg border-2 border-flame-pressed bg-bg p-md text-sm shadow-[4px_4px_0_var(--brand-flame-pressed)]">
       <div className="mb-xs font-heading text-base font-bold text-text-primary">
@@ -301,6 +327,13 @@ function SelectedDetails({ selected }: { selected: SearchResult }) {
           {selected.source === "ut" ? "UT.no / DNT" : "Kartverket"}
         </dd>
       </dl>
+      <button
+        type="button"
+        onClick={onCreateTrip}
+        className="mt-md w-full rounded-md bg-flame-primary px-md py-sm text-sm font-bold text-white hover:bg-flame-hover active:bg-flame-pressed shadow-[3px_3px_0_var(--brand-flame-pressed)] hover:translate-y-[1px] hover:shadow-[2px_2px_0_var(--brand-flame-pressed)] transition-transform"
+      >
+        Lag tur her →
+      </button>
     </div>
   );
 }

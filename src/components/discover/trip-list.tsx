@@ -35,6 +35,7 @@ type Props = {
   activeId: number | null;
   minAge: AgeFilter;
   onSelect: (trip: TripNearItem) => void;
+  onCreateTrip?: (trip: TripNearItem) => void;
   emptySuggestion?: string | null;
   onClearSuggestion?: () => void;
 };
@@ -44,6 +45,7 @@ export function TripList({
   activeId,
   minAge,
   onSelect,
+  onCreateTrip,
   emptySuggestion,
   onClearSuggestion,
 }: Props) {
@@ -99,12 +101,23 @@ export function TripList({
               )}
             </button>
             {isActive && (
-              <Link
-                href={`/offline/tur/${t.id}`}
-                className="mt-1 inline-block px-3 text-xs text-fjord hover:underline"
-              >
-                Bruk offline →
-              </Link>
+              <div className="mt-1 flex items-center gap-sm px-3">
+                <Link
+                  href={`/offline/tur/${t.id}`}
+                  className="text-xs text-fjord hover:underline"
+                >
+                  Bruk offline →
+                </Link>
+                {onCreateTrip && (
+                  <button
+                    type="button"
+                    onClick={() => onCreateTrip(t)}
+                    className="rounded-md bg-flame-primary px-sm py-0.5 text-xs font-bold text-white hover:bg-flame-hover active:bg-flame-pressed shadow-[2px_2px_0_var(--brand-flame-pressed)]"
+                  >
+                    Lag tur →
+                  </button>
+                )}
+              </div>
             )}
           </li>
         );
