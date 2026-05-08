@@ -75,8 +75,8 @@ export function FilterPanel({
               className={cn(
                 "rounded-full border px-3 py-1 text-xs font-medium transition",
                 isActive
-                  ? "border-foreground bg-foreground text-background"
-                  : "border-border bg-background text-foreground hover:border-foreground/50",
+                  ? "border-flame bg-flame text-white"
+                  : "border-border bg-background text-foreground hover:border-flame/50",
                 disabled && "cursor-not-allowed opacity-40 hover:border-border",
               )}
             >
@@ -85,7 +85,7 @@ export function FilterPanel({
                 className={cn(
                   "ml-1.5 rounded-sm px-1 text-[10px]",
                   isActive
-                    ? "bg-background/20 text-background"
+                    ? "bg-white/20 text-white"
                     : "bg-muted text-muted-foreground",
                 )}
               >
@@ -149,8 +149,8 @@ function AgeChip({
       className={cn(
         "rounded-full border px-3 py-1 text-xs font-medium transition",
         active
-          ? "border-foreground bg-foreground text-background"
-          : "border-border bg-background text-foreground hover:border-foreground/50",
+          ? "border-flame bg-flame text-white"
+          : "border-border bg-background text-foreground hover:border-flame/50",
       )}
     >
       {label}

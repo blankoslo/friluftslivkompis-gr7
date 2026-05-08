@@ -55,14 +55,43 @@
   --lm-radius-pill: 12px;
 }
 
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    --brand-flame-primary: #E8702F;
+    --brand-flame-hover: #C8602A;
+    --brand-flame-pressed: #A04A1E;
+    --brand-flame-tint: #3A2410;
+
+    --neutral-bg: #1A1612;
+    --neutral-surface: #2A2118;
+    --neutral-border: #4A3E34;
+    --neutral-text-primary: #F0EBE3;
+    --neutral-text-muted: #7A6F63;
+    --neutral-text-disabled: #4A3E34;
+
+    --accent-forest: #4A6741;
+    --accent-forest-tint: #1E2E1C;
+
+    --accent-fjord: #5A7A8A;
+    --accent-fjord-tint: #1A2830;
+
+    --accent-midnight-sun: #D4A853;
+    --accent-midnight-sun-tint: #2E2810;
+
+    --semantic-success: #4A6741;
+    --semantic-info: #5A7A8A;
+    --semantic-warning: #E8702F;
+    --semantic-warning-bg: #2A1A10;
+    --semantic-warning-border: #A04A1E;
+  }
+}
+
 .dark {
-  /* Brand — Flame */
   --brand-flame-primary: #E8702F;
   --brand-flame-hover: #C8602A;
   --brand-flame-pressed: #A04A1E;
   --brand-flame-tint: #3A2410;
 
-  /* Neutral */
   --neutral-bg: #1A1612;
   --neutral-surface: #2A2118;
   --neutral-border: #4A3E34;
@@ -70,19 +99,15 @@
   --neutral-text-muted: #7A6F63;
   --neutral-text-disabled: #4A3E34;
 
-  /* Accent — Forest */
   --accent-forest: #4A6741;
   --accent-forest-tint: #1E2E1C;
 
-  /* Accent — Fjord */
   --accent-fjord: #5A7A8A;
   --accent-fjord-tint: #1A2830;
 
-  /* Accent — Midnight Sun */
   --accent-midnight-sun: #D4A853;
   --accent-midnight-sun-tint: #2E2810;
 
-  /* Semantic */
   --semantic-success: #4A6741;
   --semantic-info: #5A7A8A;
   --semantic-warning: #E8702F;

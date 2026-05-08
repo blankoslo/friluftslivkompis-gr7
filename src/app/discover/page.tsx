@@ -290,17 +290,11 @@ function Legend() {
       <div className="mb-2 font-heading font-semibold text-foreground">Tegnforklaring</div>
       <ul className="space-y-1.5">
         <li className="flex items-center gap-2">
-          <span
-            className="inline-block size-3 rounded-full border-2 border-white"
-            style={{ background: "#cc1f2c" }}
-          />
+          <span className="inline-block size-3 rounded-full border-2 border-white bg-flame-primary" />
           DNT-hytte (zoom inn for å se)
         </li>
         <li className="flex items-center gap-2">
-          <span
-            className="inline-block size-3 rounded-full border-2 border-white"
-            style={{ background: "#0f766e" }}
-          />
+          <span className="inline-block size-3 rounded-full border-2 border-white bg-forest" />
           Turforslag fra UT.no
         </li>
         <li>

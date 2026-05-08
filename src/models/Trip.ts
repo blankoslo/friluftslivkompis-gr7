@@ -26,6 +26,13 @@ export interface ILeg {
   weather?: object;
 }
 
+export interface ITripCabin {
+  utId?: number;
+  name: string;
+  lat: number;
+  lon: number;
+}
+
 export interface IPackingItem {
   name: string;
   assignedTo?: mongoose.Types.ObjectId;
@@ -52,6 +59,7 @@ export interface ITrip {
     lat: number;
     lng: number;
   };
+  cabins: ITripCabin[];
   legs: ILeg[];
   participants: IParticipant[];
   packingList: IPackingItem[];
@@ -72,6 +80,16 @@ const participantSchema = new Schema<IParticipant>({
   },
   days: [Number],
 });
+
+const tripCabinSchema = new Schema<ITripCabin>(
+  {
+    utId: Number,
+    name: { type: String, required: true },
+    lat: { type: Number, required: true },
+    lon: { type: Number, required: true },
+  },
+  { _id: false },
+);
 
 const legSchema = new Schema<ILeg>({
   dayNumber: { type: Number, required: true },
@@ -113,6 +131,7 @@ const tripSchema = new Schema<ITrip>(
       lat: Number,
       lng: Number,
     },
+    cabins: [tripCabinSchema],
     legs: [legSchema],
     participants: [participantSchema],
     packingList: [packingItemSchema],
