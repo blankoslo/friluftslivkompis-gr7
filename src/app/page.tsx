@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { connectToDatabase } from "@/lib/db/mongoose";
 import { Trip, type ITrip } from "@/models/Trip";
+import { pickQuips } from "@/lib/lars-monsen/quips";
 
 type LatestTrip = {
   id: string;
@@ -59,6 +60,7 @@ export default async function HomePage() {
   const badge = trip
     ? tripStatusBadge(trip.participants)
     : { label: "Demo", tone: "wait" as const };
+  const [wisdomQuote] = pickQuips("homeWisdom", 1);
 
   return (
     <main className="bg-flame-primary text-white relative overflow-hidden min-h-screen">
@@ -74,6 +76,31 @@ export default async function HomePage() {
 
         {/* Hero — vertically centered in viewport */}
         <div className="flex flex-col items-center text-center min-h-[80vh] justify-center pb-xl">
+          <div
+            className="bg-bg border-4 border-flame-pressed rounded-lg p-lg pl-[64px] mb-lg relative shadow-[6px_6px_0_rgba(0,0,0,0.15)] w-full text-left"
+            style={{ transform: "rotate(-1deg)" }}
+          >
+            <span
+              className="absolute left-md top-1 text-7xl text-flame-primary/40 leading-none"
+              style={{ fontFamily: "var(--font-heading)" }}
+              aria-hidden
+            >
+              &ldquo;
+            </span>
+            <p
+              className="text-text-primary text-xl leading-snug mb-1"
+              style={{ fontFamily: "var(--font-handwriting)", fontWeight: 700 }}
+            >
+              {wisdomQuote}
+            </p>
+            <p
+              className="text-flame-pressed text-base"
+              style={{ fontFamily: "var(--font-handwriting)" }}
+            >
+              — Lars Monsen
+            </p>
+          </div>
+
           <h1
             className="font-heading font-bold leading-[0.95] mb-lg"
             style={{ fontSize: "clamp(40px, 9vw, 64px)" }}
