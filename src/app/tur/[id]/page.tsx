@@ -17,6 +17,7 @@ import {
 import { buildTimeline } from "@/lib/timeline";
 import { TripTimelineView } from "@/components/timeline/timeline";
 import { CabinRouteEditor } from "@/components/route/cabin-route-editor";
+import { CabinAvailability } from "@/components/route/cabin-availability";
 import type { CabinPoint } from "@/lib/route";
 import { randomQuip } from "@/lib/lars-monsen/quips";
 import { ParticipantsLive } from "@/components/trips/participants-live";
@@ -235,6 +236,17 @@ export default async function TripPage({ params, searchParams }: TripPageProps) 
               isDemo={trip.isDemo}
             />
           </Section>
+
+          {!trip.isDemo && (
+            <Section label="Hyttetilgjengelighet" badge="B2" accent="forest">
+              <CabinAvailability
+                cabins={trip.cabins}
+                persons={Math.max(1, trip.participants.length || 1)}
+                startDate={trip.startDate ?? null}
+                endDate={trip.endDate ?? null}
+              />
+            </Section>
+          )}
 
           <Section label="Tidslinje og vær" badge="B1 / B6" accent="fjord">
             {trip.cabins.length < 2 ? (

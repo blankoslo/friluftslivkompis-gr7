@@ -3,6 +3,7 @@ import { fetchElevationProfile, elevationDeltas } from "./elevation";
 
 export type CabinPoint = {
   id?: number;
+  utId?: number;
   name: string;
   lat: number;
   lon: number;

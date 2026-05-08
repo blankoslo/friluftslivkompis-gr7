@@ -33,3 +33,11 @@ export {
   SERVICE_LEVEL_LABEL,
   type CabinAccessibility,
 } from "./labels";
+export {
+  assessAvailability,
+  getCabinAvailability,
+  findAlternatives,
+  type CabinAvailabilityInfo,
+  type CabinAvailabilityResult,
+  type CabinAvailabilityStatus,
+} from "./availability";

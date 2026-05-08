@@ -35,6 +35,13 @@ const DIFFICULTY_STYLES: Record<RouteLeg["difficulty"], string> = {
 const DEBOUNCE_MS = 220;
 const MIN_CHARS = 2;
 
+function parseUtId(searchId: string): number | undefined {
+  const match = /^ut:cabin:(\d+)$/.exec(searchId);
+  if (!match) return undefined;
+  const n = Number(match[1]);
+  return Number.isFinite(n) ? n : undefined;
+}
+
 // ── Cabin search hook ──────────────────────────────────────────────────────
 
 function useCabinSearch() {
@@ -46,7 +53,7 @@ function useCabinSearch() {
 
   useEffect(() => {
     if (trimmed.length < MIN_CHARS) {
-      setResults([]);
+      void Promise.resolve().then(() => setResults([]));
       return;
     }
     const ctrl = new AbortController();
@@ -119,7 +126,7 @@ function useRoute(initialCabins: CabinPoint[]) {
   }, []);
 
   useEffect(() => {
-    fetchRoute(initialCabins);
+    void Promise.resolve().then(() => fetchRoute(initialCabins));
     return () => abortRef.current?.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -167,9 +174,14 @@ export function CabinRouteEditor({
   }
 
   function addCabin(r: SearchResult) {
-    // Prevent duplicates by name+coords
     if (cabins.some((c) => c.name === r.name && Math.abs(c.lat - r.lat) < 0.001)) return;
-    const cabin: CabinPoint = { name: r.name, lat: r.lat, lon: r.lon };
+    const utId = parseUtId(r.id);
+    const cabin: CabinPoint = {
+      name: r.name,
+      lat: r.lat,
+      lon: r.lon,
+      ...(utId != null ? { utId } : {}),
+    };
     const next = [...cabins, cabin];
     setCabins(next);
     fetchRoute(next);
